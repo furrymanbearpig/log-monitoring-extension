@@ -1,50 +1,59 @@
 package com.appdynamics.extensions.logmonitor.config;
 
-import java.util.List;
-
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import java.util.List;
+
 /**
  * @author Florencio Sarmiento
- *
  */
 public class Configuration {
 
-	private String metricPrefix;
+    private String metricPrefix;
 
-	private List<Log> logs;
+    private List<Log> logs;
 
-	private int noOfThreads;
+    private List<MetricCharacterReplacer> metricCharacterReplacer;
 
-	public String getMetricPrefix() {
-		return metricPrefix;
-	}
+    private int noOfThreads;
 
-	public void setMetricPrefix(String metricPrefix) {
-		this.metricPrefix = metricPrefix;
-	}
+    public String getMetricPrefix() {
+        return metricPrefix;
+    }
 
-	public List<Log> getLogs() {
-		return logs;
-	}
+    public void setMetricPrefix(String metricPrefix) {
+        this.metricPrefix = metricPrefix;
+    }
 
-	public void setLogs(List<Log> logs) {
-		this.logs = logs;
-	}
+    public List<Log> getLogs() {
+        return logs;
+    }
 
-	public int getNoOfThreads() {
-		return noOfThreads;
-	}
+    public void setLogs(List<Log> logs) {
+        this.logs = logs;
+    }
 
-	public void setNoOfThreads(int noOfThreads) {
-		this.noOfThreads = noOfThreads;
-	}
+    public List<MetricCharacterReplacer> getMetricCharacterReplacer() {
+        return metricCharacterReplacer;
+    }
 
-	@Override
-	public String toString() {
-		return ReflectionToStringBuilder.toString(this,
-				ToStringStyle.SHORT_PREFIX_STYLE);
-	}
+    public void setMetricCharacterReplacer(List<MetricCharacterReplacer> metricCharacterReplacer) {
+        this.metricCharacterReplacer = metricCharacterReplacer;
+    }
+
+    public int getNoOfThreads() {
+        return noOfThreads;
+    }
+
+    public void setNoOfThreads(int noOfThreads) {
+        this.noOfThreads = noOfThreads;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this,
+                ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 
 }

@@ -22,8 +22,10 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Florencio Sarmiento
@@ -37,9 +39,12 @@ public class LogMonitorTask implements Callable<LogMetrics> {
 
     private Log log;
 
-    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log) {
+    private Map<Pattern, String> replacers;
+
+    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
+        this.replacers = replacers;
     }
 
     public LogMetrics call() throws Exception {
@@ -65,6 +70,12 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             randomAccessFile.seek(curFilePointer);
 
             String currentLine = null;
+
+            if (LOGGER.isDebugEnabled()) {
+                for (SearchPattern searchPattern : searchPatterns) {
+                    LOGGER.debug(String.format("Searching for [%s]", searchPattern.getPattern().pattern()));
+                }
+            }
 
             while ((currentLine = randomAccessFile.readLine()) != null) {
                 incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
@@ -178,30 +189,23 @@ public class LogMonitorTask implements Callable<LogMetrics> {
 
         for (SearchPattern searchPattern : searchPatterns) {
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(String.format("Searching for [%s]", searchPattern.getPattern().pattern()));
-            }
-
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
 
             while (matcher.find()) {
                 String word = matcher.group().trim();
 
+                String replacedWord = applyReplacers(word);
+
                 if (searchPattern.getCaseSensitive()) {
 
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + word);
+                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + replacedWord);
 
                 } else {
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR  + WordUtils.capitalizeFully(word));
+                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
                 }
-
-
             }
-
         }
-
-
     }
 
     private void setNewFilePointer(String dynamicLogPath,
@@ -219,5 +223,22 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                 log.getLogName() : log.getDisplayName();
 
         return displayName + METRIC_PATH_SEPARATOR;
+    }
+
+    private String applyReplacers(String name) {
+
+        if (name == null || name.length() == 0 || replacers == null) {
+            return name;
+        }
+
+        for (Map.Entry<Pattern, String> replacerEntry : replacers.entrySet()) {
+
+            Pattern pattern = replacerEntry.getKey();
+
+            Matcher matcher = pattern.matcher(name);
+            name = matcher.replaceAll(replacerEntry.getValue());
+        }
+
+        return name;
     }
 }

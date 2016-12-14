@@ -21,7 +21,15 @@ logs:
          matchExactString: false
          caseSensitive: false
 
-        
+
+#Replaces characters in metric name with the specified characters.
+# "replace" takes any regular expression
+# "replaceWith" takes the string to replace the matched characters
+metricCharacterReplacer:
+    - replace: ":"
+      replaceWith: ";"
+    - replace: "\\|"
+      replaceWith: "#"
 # Number of concurrent threads
 noOfThreads: 3
 

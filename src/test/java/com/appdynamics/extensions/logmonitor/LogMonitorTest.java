@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -100,7 +101,7 @@ public class LogMonitorTest {
 		
 		classUnderTest.execute(args, null);
 		
-		verifyMetric("Custom Metrics|LogMonitor|TestLog|Search String|Debug", BigInteger.valueOf(7));
+		verifyMetric("Custom Metrics|LogMonitor|TestLog|Search String|Debug", BigInteger.valueOf(8));
 		verifyMetric("Custom Metrics|LogMonitor|TestLog|Search String|Info", BigInteger.valueOf(8));
 		verifyMetric("Custom Metrics|LogMonitor|TestLog|Search String|Error", BigInteger.valueOf(9));
 		verifyMetric("Custom Metrics|LogMonitor|TestLog|File size (Bytes)", BigInteger.valueOf(10));
@@ -108,13 +109,13 @@ public class LogMonitorTest {
 	
 	private void setupTestMetricsAndLogMetricTask() throws Exception {
 		LogMetrics logMetrics = new LogMetrics();
-		logMetrics.add("TestLog|Search String|Debug", BigInteger.valueOf(7));
+		logMetrics.add("TestLog|Search String|Debug", BigInteger.valueOf(8));
 		logMetrics.add("TestLog|Search String|Info", BigInteger.valueOf(8));
 		logMetrics.add("TestLog|Search String|Error", BigInteger.valueOf(9));
 		logMetrics.add("TestLog|File size (Bytes)", BigInteger.valueOf(10));
 		
 		whenNew(LogMonitorTask.class).withArguments(any(FilePointerProcessor.class), 
-				any(Log.class)).thenReturn(mockLogMonitorTask);
+				any(Log.class), any(Map.class)).thenReturn(mockLogMonitorTask);
 		
 		when(mockLogMonitorTask.call()).thenReturn(logMetrics);
 	}

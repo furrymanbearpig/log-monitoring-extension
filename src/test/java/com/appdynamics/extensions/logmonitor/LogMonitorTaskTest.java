@@ -24,7 +24,10 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LogMonitorTaskTest {
@@ -62,11 +65,13 @@ public class LogMonitorTaskTest {
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
@@ -124,11 +129,13 @@ public class LogMonitorTaskTest {
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2, searchString3, searchString4, searchString5));
 
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
@@ -171,11 +178,13 @@ public class LogMonitorTaskTest {
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(12, result.getMetrics().size());
@@ -234,11 +243,13 @@ public class LogMonitorTaskTest {
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + File.separator + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(4, result.getMetrics().size());
@@ -293,11 +304,13 @@ public class LogMonitorTaskTest {
 
         log.setSearchStrings(Lists.newArrayList(searchString));
 
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + File.separator + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(2, result.getMetrics().size());
@@ -361,11 +374,13 @@ public class LogMonitorTaskTest {
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1));
 
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + File.separator + testFilename);
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(2, result.getMetrics().size());

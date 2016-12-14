@@ -24,7 +24,10 @@ logs:
          pattern: "trace"
          matchExactString: true
          caseSensitive: false
-    
+
+metricCharacterReplacer:
+    - replace: ","
+      replaceWith: " "
 # Number of concurrent threads
 noOfThreads: 3
 

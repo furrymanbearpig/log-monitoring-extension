@@ -12,6 +12,7 @@ import static com.appdynamics.extensions.yml.YmlReader.readFromFile;
 
 import com.appdynamics.extensions.logmonitor.config.Configuration;
 import com.appdynamics.extensions.logmonitor.config.Log;
+import com.appdynamics.extensions.logmonitor.config.MetricCharacterReplacer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
@@ -19,10 +20,17 @@ import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionService;
@@ -30,8 +38,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
 /**
  * Monitors the log file and counts the no of occurrences of the search terms provided
@@ -67,12 +77,29 @@ public class LogMonitor extends AManagedMonitor {
                 List<Log> logs = getValidLogConfigs(config);
 
                 if (!logs.isEmpty()) {
+
+                    List<MetricCharacterReplacer> metricCharacterReplacers = config.getMetricCharacterReplacer();
+
+                    Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
+                    if (metricCharacterReplacers != null) {
+                        for (MetricCharacterReplacer metricCharacterReplacer : metricCharacterReplacers) {
+                            String replace = metricCharacterReplacer.getReplace();
+                            String replaceWith = metricCharacterReplacer.getReplaceWith();
+
+                            Pattern pattern = Pattern.compile(replace);
+
+                            replacers.put(pattern, replaceWith);
+                        }
+                    }
+
+
                     int noOfThreads = config.getNoOfThreads() > 0 ?
                             config.getNoOfThreads() : DEFAULT_NO_OF_THREADS;
                     threadPool = Executors.newFixedThreadPool(noOfThreads);
 
                     CompletionService<LogMetrics> logMonitorTasks =
-                            createConcurrentTasks(threadPool, logs);
+                            createConcurrentTasks(threadPool, logs, replacers);
 
                     LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size());
                     uploadMetrics(logMetrics, getMetricPrefix(config));
@@ -96,13 +123,13 @@ public class LogMonitor extends AManagedMonitor {
     }
 
     private CompletionService<LogMetrics> createConcurrentTasks(ExecutorService threadPool,
-                                                                List<Log> logs) {
+                                                                List<Log> logs, Map<Pattern, String> replacers) {
 
         CompletionService<LogMetrics> logMonitorTasks =
                 new ExecutorCompletionService<LogMetrics>(threadPool);
 
         for (Log log : logs) {
-            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log);
+            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers);
             logMonitorTasks.submit(task);
         }
 
@@ -196,6 +223,25 @@ public class LogMonitor extends AManagedMonitor {
 
     public static String getImplementationVersion() {
         return LogMonitor.class.getPackage().getImplementationTitle();
+    }
+
+    public static void main(String[] args) throws TaskExecutionException, IOException {
+
+        ConsoleAppender ca = new ConsoleAppender();
+        ca.setWriter(new OutputStreamWriter(System.out));
+        ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
+        ca.setThreshold(Level.DEBUG);
+        LOGGER.getRootLogger().addAppender(ca);
+
+
+        LogMonitor monitor = new LogMonitor();
+
+
+        Map<String, String> taskArgs = new HashMap<String, String>();
+        taskArgs.put(CONFIG_ARG, "/Users/Muddam/AppDynamics/Code/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
+
+        monitor.execute(taskArgs, null);
+
     }
 
 }
