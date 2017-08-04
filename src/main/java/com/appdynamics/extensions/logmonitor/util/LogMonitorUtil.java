@@ -3,8 +3,10 @@ package com.appdynamics.extensions.logmonitor.util;
 import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.logmonitor.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
+import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
 import java.io.File;
@@ -72,7 +74,6 @@ public class LogMonitorUtil {
             }
 
         }
-
         return searchPatterns;
     }
 
@@ -83,6 +84,23 @@ public class LogMonitorUtil {
             } catch (IOException e) {
             }
         }
+    }
+
+    public static String getNameFromPattern(String pattern) {
+        return pattern.replaceAll(CASE_INSENSITIVE_PATTERN, "").
+                replaceAll(CASE_SENSITIVE_PATTERN, "").
+                replaceAll("[(?<=\\s|^)]", "").
+                replaceAll("[(?=\\s|$)]", "");
+    }
+
+    public static List<String> getNamesFromSearchStrings(List<SearchString> searchStrings) {
+        List<String> names = Lists.newArrayList();
+        for(SearchString searchString : searchStrings) {
+            String name =  searchString.getCaseSensitive() ? searchString.getPattern().trim()
+                    : WordUtils.capitalizeFully(searchString.getPattern().trim());
+            names.add(name);
+        }
+        return names;
     }
 
     public static BigInteger convertValueToZeroIfNullOrNegative(BigInteger value) {

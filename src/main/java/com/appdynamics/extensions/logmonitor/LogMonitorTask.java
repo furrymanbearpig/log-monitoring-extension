@@ -1,19 +1,20 @@
 package com.appdynamics.extensions.logmonitor;
 
-import static com.appdynamics.extensions.logmonitor.Constants.FILESIZE_METRIC_NAME;
-import static com.appdynamics.extensions.logmonitor.Constants.METRIC_PATH_SEPARATOR;
-import static com.appdynamics.extensions.logmonitor.Constants.SEARCH_STRING;
+import static com.appdynamics.extensions.logmonitor.Constants.*;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPattern;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
 
 import com.appdynamics.extensions.logmonitor.config.Log;
+import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.exceptions.FileException;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
+import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
@@ -63,7 +64,6 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             String dynamicLogPath = dirPath + log.getLogName();
             curFilePointer = getCurrentFilePointer(dynamicLogPath, file.getPath(), fileSize);
             List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
-
             LOGGER.info(String.format("Processing log file [%s], starting from [%s]",
                     file.getPath(), curFilePointer));
 
@@ -82,15 +82,11 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                 curFilePointer = randomAccessFile.getFilePointer();
             }
 
-            if (LOGGER.isDebugEnabled() && logMetrics.getMetrics().isEmpty()) {
-                LOGGER.debug("No word metrics to upload, no matches found!");
-            }
-
             logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(fileSize));
 
             setNewFilePointer(dynamicLogPath, file.getPath(), curFilePointer);
 
-            LOGGER.info(String.format("Sucessfully processed log file [%s]",
+            LOGGER.info(String.format("Successfully processed log file [%s]",
                     file.getPath()));
 
         } finally {
@@ -188,21 +184,32 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                                                          String stringToCheck, LogMetrics logMetrics) {
 
         for (SearchPattern searchPattern : searchPatterns) {
-
+            Boolean isPresent = false;
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
 
             while (matcher.find()) {
+                isPresent = true;
                 String word = matcher.group().trim();
 
                 String replacedWord = applyReplacers(word);
 
                 if (searchPattern.getCaseSensitive()) {
-
                     logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + replacedWord);
 
                 } else {
                     logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
+                }
+            }
+            if(!isPresent) {
+                String metricPrefix = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR;
+                List<String> metricNames = LogMonitorUtil.getNamesFromSearchStrings(log.getSearchStrings());
+                String patternName = searchPattern.getCaseSensitive() ? applyReplacers(searchPattern.getPattern().pattern().trim())
+                        : WordUtils.capitalizeFully(applyReplacers(searchPattern.getPattern().pattern().trim()));
+                for(String metricName : metricNames) {
+                    if(StringUtils.containsIgnoreCase(patternName, metricName) && !logMetrics.getMetrics().containsKey(metricPrefix + metricName)) {
+                        logMetrics.add(metricPrefix + metricName, BigInteger.ZERO);
+                    }
                 }
             }
         }
@@ -242,3 +249,6 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         return name;
     }
 }
+
+
+

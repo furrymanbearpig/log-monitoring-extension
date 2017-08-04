@@ -1,3 +1,4 @@
+
 package com.appdynamics.extensions.logmonitor;
 
 import static org.mockito.Matchers.any;

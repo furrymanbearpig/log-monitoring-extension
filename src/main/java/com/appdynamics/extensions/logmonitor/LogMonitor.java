@@ -106,7 +106,7 @@ public class LogMonitor extends AManagedMonitor {
 
                     filePointerProcessor.updateFilePointerFile();
 
-                    return new TaskOutput("Apache Log Monitoring task successfully completed");
+                    return new TaskOutput("Log Monitoring task successfully completed");
                 }
 
             } catch (Exception ex) {
@@ -119,7 +119,7 @@ public class LogMonitor extends AManagedMonitor {
             }
         }
 
-        throw new TaskExecutionException("Log Monitoring task completed with failures.");
+        throw new TaskExecutionException();
     }
 
     private CompletionService<LogMetrics> createConcurrentTasks(ExecutorService threadPool,
@@ -238,7 +238,7 @@ public class LogMonitor extends AManagedMonitor {
 
 
         Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put(CONFIG_ARG, "/Users/Muddam/AppDynamics/Code/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
+        taskArgs.put(CONFIG_ARG, "/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
 
         monitor.execute(taskArgs, null);
 

@@ -22,7 +22,6 @@ public class SearchPattern {
     public String getDisplayName() {
         return displayName;
     }
-
     public Boolean getCaseSensitive() {
         return caseSensitive;
     }

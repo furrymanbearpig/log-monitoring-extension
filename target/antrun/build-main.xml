@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <mkdir dir="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target/LogMonitor"/>
+  <copy todir="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target/LogMonitor">
+    <fileset includes="monitor.xml" dir="src/main/resources/conf"/>
+    <fileset includes="conf/config.yaml" dir="src/main/resources"/>
+  </copy>
+  <copy todir="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target/LogMonitor">
+    <fileset includes="log-monitoring-extension.jar" dir="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target"/>
+  </copy>
+  <zip destfile="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target/LogMonitor-2.0.3.zip">
+    <zipfileset prefix="LogMonitor/" filemode="755" dir="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target/LogMonitor"/>
+  </zip>
+  <delete dir="/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/target/LogMonitor"/>
+</target>
+</project>

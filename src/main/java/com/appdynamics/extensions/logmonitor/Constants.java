@@ -22,5 +22,6 @@ public final class Constants {
 	public static final int DEFAULT_NO_OF_THREADS = 3;
 	
 	public static final int THREAD_TIMEOUT = 60;
-	
+
+	public static final String REGEX = "[^A-Za-z0-9]";
 }

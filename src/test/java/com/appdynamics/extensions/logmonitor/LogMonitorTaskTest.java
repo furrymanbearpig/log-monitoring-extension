@@ -138,7 +138,7 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
+        assertEquals(log.getSearchStrings().size() + 3, result.getMetrics().size());
 
         assertEquals(5, result.getMetrics().get("TestLog|Search String|Pattern <|<").intValue());
         assertEquals(6, result.getMetrics().get("TestLog|Search String|Pattern >|>").intValue());
@@ -187,7 +187,7 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(12, result.getMetrics().size());
+        assertEquals(15, result.getMetrics().size());
 
         // matches (\\s|^)m\\w+(\\s|$)
         assertEquals(7, result.getMetrics().get("TestLog|Search String|Pattern start with M|Memorymetricgenerator").intValue());
@@ -206,6 +206,8 @@ public class LogMonitorTaskTest {
         // matches \\[JMX.*\\]
         assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with [JMX|[jmxservice]").intValue());
 
+        //"TestLog|Search String|Pattern start with <|<\w*>" -> "0"
+        //"TestLog|Search String|Pattern start with M|(\s|^)m\w+(\s|$)" -> "0"
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
     }
@@ -277,8 +279,8 @@ public class LogMonitorTaskTest {
         updateLogFile(testFilepath, logsToAdd, true);
 
         result = classUnderTest.call();
-        assertEquals(3, result.getMetrics().size());
-
+        assertEquals(4, result.getMetrics().size());
+        assertEquals(0, result.getMetrics().get("TestLog|Search String|Error|Error").intValue());
         assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Debug").intValue());
         assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Info").intValue());
     }
@@ -383,10 +385,10 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(2, result.getMetrics().size());
+        assertEquals(3, result.getMetrics().size());
 
         assertEquals(3, result.getMetrics().get("active-dynamic-*|Search String|Debug|Debug").intValue());
-
+        assertEquals(0, result.getMetrics().get("active-dynamic-*|Search String|Error|Error").intValue());
         long filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
 
@@ -404,9 +406,10 @@ public class LogMonitorTaskTest {
         copyFile(dynamicLog2, testFilepath);
 
         result = classUnderTest.call();
-        assertEquals(2, result.getMetrics().size());
+        assertEquals(3, result.getMetrics().size());
 
         assertEquals(7, result.getMetrics().get("active-dynamic-*|Search String|Error|Error").intValue());
+        assertEquals(0, result.getMetrics().get("active-dynamic-*|Search String|Debug|Debug").intValue());
 
         filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
