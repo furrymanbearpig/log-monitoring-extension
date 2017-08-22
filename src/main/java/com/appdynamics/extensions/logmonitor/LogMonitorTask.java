@@ -11,6 +11,7 @@ import com.appdynamics.extensions.logmonitor.exceptions.FileException;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -21,13 +22,22 @@ import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 /**
  * @author Florencio Sarmiento
  */
@@ -42,10 +52,13 @@ public class LogMonitorTask implements Callable<LogMetrics> {
 
     private Map<Pattern, String> replacers;
 
-    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers) {
+    private ExecutorService executorService;
+
+    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
         this.replacers = replacers;
+        this.executorService = executorService;
     }
 
     public LogMetrics call() throws Exception {
@@ -58,12 +71,52 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         long curFilePointer = 0;
 
         try {
-            File file = getLogFile(dirPath);
+/*            File file = getLogFile(dirPath);
             randomAccessFile = new OptimizedRandomAccessFile(file, "r");
             long fileSize = randomAccessFile.length();
             String dynamicLogPath = dirPath + log.getLogName();
-            curFilePointer = getCurrentFilePointer(dynamicLogPath, file.getPath(), fileSize);
             List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
+            curFilePointer = getCurrentFilePointer(dynamicLogPath, file.getPath(), fileSize);
+            long curTimeStampFromFilePtr = getCurrentTimeStampFromFilePtr(dynamicLogPath, file.getPath());
+            long curFileCreationTimeStamp = getCurrentFileCreationTimeStamp(file);
+            List<File> filesToBeProcessed = Lists.newArrayList();
+            if(curFileCreationTimeStamp > curTimeStampFromFilePtr) { //there has been a rollover, we need to get the old file
+                // get list of all files in the directory with TS >= curTimeStampFromFilePtr
+                // check the list for a file that matches the curTimeStampFromFilePtr
+                // if you find this file, update the randomAcceessFile with this one and process this file from the curFilePointer and process the remaining files from offset 0 in parallel.
+
+                // else, process these files in parallel with offset 0 for all. Update the offset in the FP.json
+                // while processing, add logic for the flag and implement the global seed count
+                // once processing is over, return to the main thread using countdown latch
+                // print metrics from the main thread.
+
+
+                filesToBeProcessed = getRequiredFilesFromDir(curTimeStampFromFilePtr, dirPath);
+
+                CountDownLatch latch = new CountDownLatch(filesToBeProcessed.size());
+                for (File currentFile : filesToBeProcessed) {
+                    executorService.execute(new ThreadedFileProcessor(currentFile, latch, log));
+                }
+                latch.await();
+            }
+            */
+
+            File file = getLogFile(dirPath);
+            String dynamicLogPath = dirPath + log.getLogName();
+            curFilePointer = getCurrentFilePointer(dynamicLogPath, file.getPath(), file.length());
+            List<File> filesInDirectory = getFilesFromDirectory(dirPath);
+            for(File currentFile : filesInDirectory) {
+                if(getCurrentFileCreationTimeStamp(currentFile) == getCurrentTimeStampFromFilePtr(dynamicLogPath, file.getPath())) {
+
+                }
+            }
+
+
+
+
+
+            // Pass a data structure and make each thread update it woth the curr FP value. At the end here, use the latest value to update the FP
+
             LOGGER.info(String.format("Processing log file [%s], starting from [%s]",
                     file.getPath(), curFilePointer));
 
@@ -170,6 +223,36 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         }
 
         return currentPosition;
+    }
+
+    private long getCurrentTimeStampFromFilePtr(String dynamicLogPath, String actualLogPath) {
+        FilePointer filePointer =
+                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
+        return filePointer.getFileCreationTime();
+    }
+
+    private long getCurrentFileCreationTimeStamp(File file) throws IOException {
+        Path p = Paths.get(file.getAbsolutePath());
+        BasicFileAttributes view
+                = Files.getFileAttributeView(p, BasicFileAttributeView.class)
+                .readAttributes();
+        return view.creationTime().toMillis();
+    }
+
+    private List<File> getRequiredFilesFromDir(long curTimeStampFromFilePtr, String path) throws IOException {
+        List<File> filesToBeProcessed = Lists.newArrayList();
+        File[] files = new File(path).listFiles();
+        for(File file : files) {
+            if(getCurrentFileCreationTimeStamp(file) >= curTimeStampFromFilePtr) {
+                filesToBeProcessed.add(file);
+            }
+        }
+        return filesToBeProcessed;
+    }
+
+    private List<File> getFilesFromDirectory(String path) throws IOException {
+        File[] files = new File(path).listFiles();
+        return Arrays.asList(files);
     }
 
     private boolean isLogRotated(long fileSize, long startPosition) {

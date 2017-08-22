@@ -92,8 +92,6 @@ public class LogMonitor extends AManagedMonitor {
                             replacers.put(pattern, replaceWith);
                         }
                     }
-
-
                     int noOfThreads = config.getNoOfThreads() > 0 ?
                             config.getNoOfThreads() : DEFAULT_NO_OF_THREADS;
                     threadPool = Executors.newFixedThreadPool(noOfThreads);
@@ -129,7 +127,7 @@ public class LogMonitor extends AManagedMonitor {
                 new ExecutorCompletionService<LogMetrics>(threadPool);
 
         for (Log log : logs) {
-            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers);
+            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers, threadPool);
             logMonitorTasks.submit(task);
         }
 

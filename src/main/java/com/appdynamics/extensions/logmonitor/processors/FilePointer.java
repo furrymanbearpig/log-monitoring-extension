@@ -15,6 +15,8 @@ public class FilePointer {
 	
 	private AtomicLong lastReadPosition = new AtomicLong(0);
 
+	private long fileCreationTime;
+
 	public String getFilename() {
 		return filename;
 	}
@@ -38,7 +40,15 @@ public class FilePointer {
 			this.lastReadPosition.set(lastReadPosition);
 		}
 	}
-	
+
+	public long getFileCreationTime() {
+		return this.fileCreationTime;
+	}
+
+	public void setFileCreationTime(long fileCreationTime) {
+		this.fileCreationTime = fileCreationTime;
+	}
+
 	@Override
 	public String toString() {
 		return ReflectionToStringBuilder.toString(this,

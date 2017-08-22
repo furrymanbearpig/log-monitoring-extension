@@ -1,7 +1,7 @@
 logs:
   - displayName: "Machine Agent Log"
-    logDirectory: "/Users/aditya.jagtiani/Desktop/"
-    logName: "test.log"
+    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/"
+    logName: "machine-agent.log"
     searchStrings:
        - displayName: "Info in lowercase"
          pattern: "info"
@@ -12,7 +12,10 @@ logs:
          pattern: "debug"
          matchExactString: true
          caseSensitive: false
-
+       - displayName: "Trace in any case"
+         pattern: "trace"
+         matchExactString: false
+         caseSensitive: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
