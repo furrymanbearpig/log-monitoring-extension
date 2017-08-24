@@ -8,6 +8,7 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -24,35 +25,48 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPa
 /**
  * Created by aditya.jagtiani on 8/21/17.
  */
-public class ThreadedFileProcessor implements Callable {
+public class ThreadedFileProcessor implements Runnable {
     private static final Logger LOGGER =
             Logger.getLogger(ThreadedFileProcessor.class);
     private CountDownLatch countDownLatch;
     private Log log;
+    private OptimizedRandomAccessFile randomAccessFile;
+    private LogMetrics logMetrics;
 
-    public ThreadedFileProcessor() {}
+    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch, LogMetrics logMetrics) {
+        this.randomAccessFile = randomAccessFile;
+        this.log = log;
+        this.countDownLatch = countDownLatch;
+        this.logMetrics = logMetrics;
+    }
 
-    public void call() {
+    public void run() {
+        List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
+
         if (LOGGER.isDebugEnabled()) {
             for (SearchPattern searchPattern : searchPatterns) {
                 LOGGER.debug(String.format("Searching for [%s]", searchPattern.getPattern().pattern()));
             }
         }
-        if(getCurrentFileCreationTimeStamp(currentFile) == curFileCreationTimeStamp) {
-            // oldest file found
-            randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
-
+        try {
+            processCurrentFile(searchPatterns);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
+    }
+
+    private void processCurrentFile(List<SearchPattern> searchPatterns) throws IOException {
+        String currentLine = null;
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
             curFilePointer = randomAccessFile.getFilePointer();
         }
-        logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(fileSize));
+        logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(randomAccessFile.length()));
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 file.getPath()));
         countDownLatch.countDown();
     }
+
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
                                                          String stringToCheck, LogMetrics logMetrics) {

@@ -101,22 +101,28 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             }
             */
 
-            File file = getLogFile(dirPath);
-            String dynamicLogPath = dirPath + log.getLogName();
-            curFilePointer = getCurrentFilePointer(dynamicLogPath, file.getPath(), file.length());
-            List<File> filesInDirectory = getFilesFromDirectory(dirPath);
-            for(File currentFile : filesInDirectory) {
-                if(getCurrentFileCreationTimeStamp(currentFile) == getCurrentTimeStampFromFilePtr(dynamicLogPath, file.getPath())) {
-
+            File file = new File(dirPath);
+            long currentTimeStampFromFilePtr = getCurrentTimeStampFromFilePtr(dirPath+log.getLogName(), file.getPath());
+            long currentFileCreationTimeStamp = getCurrentFileCreationTimeStamp(file);
+            List<File> filesToBeProcessed = Lists.newArrayList();
+            if(currentFileCreationTimeStamp > currentTimeStampFromFilePtr) { // rollover
+                filesToBeProcessed = getRequiredFilesFromDir(currentTimeStampFromFilePtr, dirPath);
+                CountDownLatch latch = new CountDownLatch(filesToBeProcessed.size());
+                for(File curFile : filesToBeProcessed) {
+                    randomAccessFile = new OptimizedRandomAccessFile(curFile, "r");
+                    if(getCurrentFileCreationTimeStamp(curFile) == currentTimeStampFromFilePtr) { // found oldest file, start from curr file ptr
+                        randomAccessFile.seek(curFilePointer);
+                    }
+                    else if(getCurrentFileCreationTimeStamp(curFile) > currentTimeStampFromFilePtr) { // newer file, process from 0
+                        randomAccessFile.seek(0);
+                    }
+                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics));
                 }
+                latch.await();
             }
 
-
-
-
-
             // Pass a data structure and make each thread update it woth the curr FP value. At the end here, use the latest value to update the FP
-
+            // if no rollover, simply update the file size metric
             LOGGER.info(String.format("Processing log file [%s], starting from [%s]",
                     file.getPath(), curFilePointer));
 
