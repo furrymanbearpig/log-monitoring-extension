@@ -186,23 +186,24 @@ public class LogMonitorTask implements Callable<LogMetrics> {
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
                                                          String stringToCheck, LogMetrics logMetrics) {
-
         for (SearchPattern searchPattern : searchPatterns) {
-
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
-
+            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Global Seed Count";
+            if(!logMetrics.getMetrics().containsKey(currentKey)) {
+                logMetrics.add(currentKey, BigInteger.ZERO);
+            }
             while (matcher.find()) {
+                BigInteger globalSeedCount = logMetrics.getMetrics().get(currentKey);
+                logMetrics.add(currentKey, globalSeedCount.add(BigInteger.ONE));
                 String word = matcher.group().trim();
-
                 String replacedWord = applyReplacers(word);
-
-                if (searchPattern.getCaseSensitive()) {
-
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + replacedWord);
-
-                } else {
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
+                if(searchPattern.getPrintMatchedString()) {
+                    if (searchPattern.getCaseSensitive()) {
+                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + replacedWord);
+                    } else {
+                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
+                    }
                 }
             }
         }

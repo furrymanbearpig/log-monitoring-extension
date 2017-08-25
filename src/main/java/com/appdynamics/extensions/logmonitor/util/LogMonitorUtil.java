@@ -67,7 +67,7 @@ public class LogMonitorUtil {
 
                 pattern = Pattern.compile(rawPatternsStringBuilder.toString());
 
-                SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern, searchString.getCaseSensitive());
+                SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern, searchString.getCaseSensitive(), searchString.getPrintMatchedString());
                 searchPatterns.add(searchPattern);
             }
 

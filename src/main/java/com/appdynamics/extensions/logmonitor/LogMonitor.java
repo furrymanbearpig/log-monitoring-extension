@@ -238,7 +238,7 @@ public class LogMonitor extends AManagedMonitor {
 
 
         Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put(CONFIG_ARG, "/Users/Muddam/AppDynamics/Code/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
+        taskArgs.put(CONFIG_ARG, "/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
 
         monitor.execute(taskArgs, null);
 

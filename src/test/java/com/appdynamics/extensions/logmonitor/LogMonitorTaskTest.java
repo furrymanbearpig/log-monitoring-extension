@@ -38,7 +38,7 @@ public class LogMonitorTaskTest {
     private FilePointerProcessor mockFilePointerProcessor;
 
     @Test
-    public void testMatchExactStringIsTrue() throws Exception {
+    public void testPrintMatchedStringsIsFalse() throws Exception {
         Log log = new Log();
         log.setDisplayName("TestLog");
         log.setLogDirectory("src/test/resources/");
@@ -49,18 +49,22 @@ public class LogMonitorTaskTest {
         searchString.setMatchExactString(true);
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
         searchString1.setMatchExactString(true);
         searchString1.setPattern("info");
         searchString1.setDisplayName("Info");
+        searchString1.setPrintMatchedString(false);
+
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
         searchString2.setMatchExactString(true);
         searchString2.setPattern("error");
         searchString2.setDisplayName("Error");
+        searchString2.setPrintMatchedString(false);
 
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
@@ -76,9 +80,64 @@ public class LogMonitorTaskTest {
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
 
-        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Debug").intValue());
-        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Info").intValue());
-        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Error").intValue());
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
+
+        assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
+                result.getMetrics().get("TestLog|File size (Bytes)").intValue());
+    }
+
+    @Test
+    public void testMatchExactStringIsTrue() throws Exception {
+        Log log = new Log();
+        log.setDisplayName("TestLog");
+        log.setLogDirectory("src/test/resources/");
+        log.setLogName("test-log-1.log");
+
+        SearchString searchString = new SearchString();
+        searchString.setCaseSensitive(false);
+        searchString.setMatchExactString(true);
+        searchString.setPattern("debug");
+        searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(true);
+
+        SearchString searchString1 = new SearchString();
+        searchString1.setCaseSensitive(false);
+        searchString1.setMatchExactString(true);
+        searchString1.setPattern("info");
+        searchString1.setDisplayName("Info");
+        searchString1.setPrintMatchedString(true);
+
+
+        SearchString searchString2 = new SearchString();
+        searchString2.setCaseSensitive(false);
+        searchString2.setMatchExactString(true);
+        searchString2.setPattern("error");
+        searchString2.setDisplayName("Error");
+        searchString2.setPrintMatchedString(true);
+
+
+        log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
+
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
+        FilePointer filePointer = new FilePointer();
+        filePointer.setFilename(log.getLogDirectory() + log.getLogName());
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
+
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
+
+        LogMetrics result = classUnderTest.call();
+        assertEquals(log.getSearchStrings().size() + 4, result.getMetrics().size());
+
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Matches|Debug").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Matches|Info").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Matches|Error").intValue());
+
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -96,36 +155,44 @@ public class LogMonitorTaskTest {
         searchString.setMatchExactString(false);
         searchString.setPattern("<");
         searchString.setDisplayName("Pattern <");
+        searchString.setPrintMatchedString(true);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
         searchString1.setMatchExactString(false);
         searchString1.setPattern(">");
         searchString1.setDisplayName("Pattern >");
+        searchString1.setPrintMatchedString(true);
+
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
         searchString2.setMatchExactString(false);
         searchString2.setPattern("\\*");
         searchString2.setDisplayName("Pattern *");
+        searchString2.setPrintMatchedString(true);
 
         SearchString searchString3 = new SearchString();
         searchString3.setCaseSensitive(false);
         searchString3.setMatchExactString(false);
         searchString3.setPattern("\\[");
         searchString3.setDisplayName("Pattern [");
+        searchString3.setPrintMatchedString(true);
+
 
         SearchString searchString4 = new SearchString();
         searchString4.setCaseSensitive(false);
         searchString4.setMatchExactString(false);
         searchString4.setPattern("\\]");
         searchString4.setDisplayName("Pattern ]");
+        searchString4.setPrintMatchedString(true);
 
         SearchString searchString5 = new SearchString();
         searchString5.setCaseSensitive(false);
         searchString5.setMatchExactString(false);
         searchString5.setPattern("\\.");
         searchString5.setDisplayName("Pattern .");
+        searchString5.setPrintMatchedString(true);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2, searchString3, searchString4, searchString5));
 
@@ -138,14 +205,21 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
+        assertEquals(log.getSearchStrings().size() + 7, result.getMetrics().size());
 
-        assertEquals(5, result.getMetrics().get("TestLog|Search String|Pattern <|<").intValue());
-        assertEquals(6, result.getMetrics().get("TestLog|Search String|Pattern >|>").intValue());
-        assertEquals(16, result.getMetrics().get("TestLog|Search String|Pattern *|*").intValue());
-        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern [|[").intValue());
-        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern ]|]").intValue());
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern .|.").intValue());
+        assertEquals(5, result.getMetrics().get("TestLog|Search String|Pattern <|Matches|<").intValue());
+        assertEquals(6, result.getMetrics().get("TestLog|Search String|Pattern >|Matches|>").intValue());
+        assertEquals(16, result.getMetrics().get("TestLog|Search String|Pattern *|Matches|*").intValue());
+        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern [|Matches|[").intValue());
+        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern ]|Matches|]").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern .|Matches|.").intValue());
+
+        assertEquals(5, result.getMetrics().get("TestLog|Search String|Pattern <|Global Seed Count").intValue());
+        assertEquals(6, result.getMetrics().get("TestLog|Search String|Pattern >|Global Seed Count").intValue());
+        assertEquals(16, result.getMetrics().get("TestLog|Search String|Pattern *|Global Seed Count").intValue());
+        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern [|Global Seed Count").intValue());
+        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern ]|Global Seed Count").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern .|Global Seed Count").intValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -163,18 +237,21 @@ public class LogMonitorTaskTest {
         searchString.setMatchExactString(false);
         searchString.setPattern("(\\s|^)m\\w+(\\s|$)");
         searchString.setDisplayName("Pattern start with M");
+        searchString.setPrintMatchedString(true);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
         searchString1.setMatchExactString(false);
         searchString1.setPattern("<\\w*>");
         searchString1.setDisplayName("Pattern start with <");
+        searchString1.setPrintMatchedString(true);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
         searchString2.setMatchExactString(false);
         searchString2.setPattern("\\[JMX.*\\]");
         searchString2.setDisplayName("Pattern start with [JMX");
+        searchString2.setPrintMatchedString(true);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
@@ -187,24 +264,24 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(12, result.getMetrics().size());
+        assertEquals(15, result.getMetrics().size());
 
         // matches (\\s|^)m\\w+(\\s|$)
-        assertEquals(7, result.getMetrics().get("TestLog|Search String|Pattern start with M|Memorymetricgenerator").intValue());
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with M|Memory").intValue());
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with M|Major").intValue());
-        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with M|Mx").intValue());
-        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with M|Metric").intValue());
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with M|Minor").intValue());
-        assertEquals(3, result.getMetrics().get("TestLog|Search String|Pattern start with M|Metrics").intValue());
-        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with M|Mbean").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Memorymetricgenerator").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Memory").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Major").intValue());
+        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Mx").intValue());
+        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Metric").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Minor").intValue());
+        assertEquals(3, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Metrics").intValue());
+        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with M|Matches|Mbean").intValue());
 
         // matches <\\w*>
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with <|<this>").intValue());
-        assertEquals(3, result.getMetrics().get("TestLog|Search String|Pattern start with <|<again>").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern start with <|Matches|<this>").intValue());
+        assertEquals(3, result.getMetrics().get("TestLog|Search String|Pattern start with <|Matches|<again>").intValue());
 
         // matches \\[JMX.*\\]
-        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with [JMX|[jmxservice]").intValue());
+        assertEquals(1, result.getMetrics().get("TestLog|Search String|Pattern start with [JMX|Matches|[jmxservice]").intValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -228,18 +305,21 @@ public class LogMonitorTaskTest {
         searchString.setMatchExactString(true);
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(true);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
         searchString1.setMatchExactString(true);
         searchString1.setPattern("info");
         searchString1.setDisplayName("Info");
+        searchString1.setPrintMatchedString(true);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
         searchString2.setMatchExactString(true);
         searchString2.setPattern("error");
         searchString2.setDisplayName("Error");
+        searchString2.setPrintMatchedString(true);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
@@ -252,11 +332,15 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(4, result.getMetrics().size());
+        assertEquals(7, result.getMetrics().size());
 
-        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Debug").intValue());
-        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Info").intValue());
-        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Error").intValue());
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Matches|Debug").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Matches|Info").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Matches|Error").intValue());
+
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
 
         long filesize = getFileSize(log.getLogDirectory(), log.getLogName());
         assertEquals(filesize, result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -277,10 +361,14 @@ public class LogMonitorTaskTest {
         updateLogFile(testFilepath, logsToAdd, true);
 
         result = classUnderTest.call();
-        assertEquals(3, result.getMetrics().size());
+        assertEquals(6, result.getMetrics().size());
 
-        assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Debug").intValue());
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Info").intValue());
+        assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Matches|Debug").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Matches|Info").intValue());
+
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
+        assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
+        assertEquals(0, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
     }
 
     @Test
@@ -301,6 +389,7 @@ public class LogMonitorTaskTest {
         searchString.setMatchExactString(true);
         searchString.setPattern("trace");
         searchString.setDisplayName("Trace");
+        searchString.setPrintMatchedString(true);
 
         log.setSearchStrings(Lists.newArrayList(searchString));
 
@@ -313,9 +402,10 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(2, result.getMetrics().size());
+        assertEquals(3, result.getMetrics().size());
 
-        assertEquals(10, result.getMetrics().get("TestLog|Search String|Trace|Trace").intValue());
+        assertEquals(10, result.getMetrics().get("TestLog|Search String|Trace|Matches|Trace").intValue());
+        assertEquals(10, result.getMetrics().get("TestLog|Search String|Trace|Global Seed Count").intValue());
 
         long fileSizeBeforeRotation = getFileSize(log.getLogDirectory(), log.getLogName());
         assertEquals(fileSizeBeforeRotation,
@@ -337,9 +427,10 @@ public class LogMonitorTaskTest {
         updateLogFile(testFilepath, logsToAdd, false);
 
         result = classUnderTest.call();
-        assertEquals(2, result.getMetrics().size());
+        assertEquals(3, result.getMetrics().size());
 
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Trace|Trace").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Trace|Matches|Trace").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Trace|Global Seed Count").intValue());
 
         long fileSizeAfterRotation = getFileSize(log.getLogDirectory(), log.getLogName());
         assertEquals(fileSizeAfterRotation,
@@ -365,12 +456,14 @@ public class LogMonitorTaskTest {
         searchString.setMatchExactString(true);
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(true);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
         searchString1.setMatchExactString(true);
         searchString1.setPattern("error");
         searchString1.setDisplayName("Error");
+        searchString1.setPrintMatchedString(true);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1));
 
@@ -383,9 +476,11 @@ public class LogMonitorTaskTest {
         classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers);
 
         LogMetrics result = classUnderTest.call();
-        assertEquals(2, result.getMetrics().size());
+        assertEquals(4, result.getMetrics().size());
 
-        assertEquals(3, result.getMetrics().get("active-dynamic-*|Search String|Debug|Debug").intValue());
+        assertEquals(3, result.getMetrics().get("active-dynamic-*|Search String|Debug|Matches|Debug").intValue());
+        assertEquals(3, result.getMetrics().get("active-dynamic-*|Search String|Debug|Global Seed Count").intValue());
+        assertEquals(0, result.getMetrics().get("active-dynamic-*|Search String|Error|Global Seed Count").intValue());
 
         long filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
@@ -404,9 +499,11 @@ public class LogMonitorTaskTest {
         copyFile(dynamicLog2, testFilepath);
 
         result = classUnderTest.call();
-        assertEquals(2, result.getMetrics().size());
+        assertEquals(4, result.getMetrics().size());
 
-        assertEquals(7, result.getMetrics().get("active-dynamic-*|Search String|Error|Error").intValue());
+        assertEquals(7, result.getMetrics().get("active-dynamic-*|Search String|Error|Matches|Error").intValue());
+        assertEquals(7, result.getMetrics().get("active-dynamic-*|Search String|Error|Global Seed Count").intValue());
+        assertEquals(0, result.getMetrics().get("active-dynamic-*|Search String|Debug|Global Seed Count").intValue());
 
         filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());

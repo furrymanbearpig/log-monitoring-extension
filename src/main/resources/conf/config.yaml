@@ -1,6 +1,14 @@
+#Prefix to show metrics in AppDynamics.
+#Please find your Component ID by following the metric path section of this document - https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java
+metricPrefix: "Server|Component:<COMPONENT_ID>|Custom Metrics|Log Monitor"
+
+
+#Generic Metric Prefix, publishes metrics to all tiers within associated application (NOT RECOMMENDED)
+#metricPrefix: "Custom Metrics|Log Monitor"
+
 logs:
   - displayName: "Machine Agent Log"
-    logDirectory: "/Users/Muddam/AppDynamics/MachineAgent_4.1.2/logs"
+    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/"
     logName: "machine-agent.log"
     searchStrings:
         #displayName Should be unique across the patterns including the case.
@@ -8,19 +16,12 @@ logs:
          pattern: "DEBUG"
          matchExactString: false
          caseSensitive: true
-       - displayName: "Debug"
-         pattern: "Debug"
-         matchExactString: false
-         caseSensitive: true
+         printMatchedString: false
        - displayName: "Info"
          pattern: "Info"
          matchExactString: false
          caseSensitive: false
-       - displayName: "DynamicLog"
-         pattern: "system\\w+"
-         matchExactString: false
-         caseSensitive: false
-
+         printMatchedString: true
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -32,6 +33,3 @@ metricCharacterReplacer:
       replaceWith: "#"
 # Number of concurrent threads
 noOfThreads: 3
-
-#prefix used to show up metrics in AppDynamics 
-metricPrefix: "Custom Metrics|LogMonitor|"

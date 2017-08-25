@@ -9,6 +9,7 @@ public class SearchString {
     private String pattern;
     private Boolean matchExactString;
     private Boolean caseSensitive;
+    private Boolean printMatchedString;
 
     public String getDisplayName() {
         return displayName;
@@ -41,4 +42,11 @@ public class SearchString {
     public void setCaseSensitive(Boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
     }
+
+    public Boolean getPrintMatchedString() { return printMatchedString;}
+
+    public void setPrintMatchedString(Boolean printMatchedString) {
+        this.printMatchedString = printMatchedString;
+    }
+
 }
