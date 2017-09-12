@@ -2,6 +2,7 @@ package com.appdynamics.extensions.logmonitor;
 
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
+import com.google.common.collect.Maps;
 import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -32,17 +33,19 @@ public class ThreadedFileProcessor implements Runnable {
     private Log log;
     private OptimizedRandomAccessFile randomAccessFile;
     private LogMetrics logMetrics;
+    private Map<Pattern, String> replacers;
+    private long curFilePointer;
 
-    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch, LogMetrics logMetrics) {
+    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch, LogMetrics logMetrics, Map<Pattern, String> replacers) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.countDownLatch = countDownLatch;
         this.logMetrics = logMetrics;
+        this.replacers = replacers;
     }
 
     public void run() {
         List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
-
         if (LOGGER.isDebugEnabled()) {
             for (SearchPattern searchPattern : searchPatterns) {
                 LOGGER.debug(String.format("Searching for [%s]", searchPattern.getPattern().pattern()));
@@ -56,14 +59,14 @@ public class ThreadedFileProcessor implements Runnable {
     }
 
     private void processCurrentFile(List<SearchPattern> searchPatterns) throws IOException {
-        String currentLine = null;
+        String currentLine;
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
             curFilePointer = randomAccessFile.getFilePointer();
         }
         logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(randomAccessFile.length()));
         LOGGER.info(String.format("Successfully processed log file [%s]",
-                file.getPath()));
+                randomAccessFile));
         countDownLatch.countDown();
     }
 

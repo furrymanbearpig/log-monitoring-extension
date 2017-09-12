@@ -86,7 +86,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                 // if you find this file, update the randomAcceessFile with this one and process this file from the curFilePointer and process the remaining files from offset 0 in parallel.
 
                 // else, process these files in parallel with offset 0 for all. Update the offset in the FP.json
-                // while processing, add logic for the flag and implement the global seed count
+                // while processing, add logic for the flag and implement the global seed count (DONE)
                 // once processing is over, return to the main thread using countdown latch
                 // print metrics from the main thread.
 
@@ -116,7 +116,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                     else if(getCurrentFileCreationTimeStamp(curFile) > currentTimeStampFromFilePtr) { // newer file, process from 0
                         randomAccessFile.seek(0);
                     }
-                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics));
+                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers));
                 }
                 latch.await();
             }
