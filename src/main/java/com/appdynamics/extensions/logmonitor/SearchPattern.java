@@ -10,13 +10,13 @@ public class SearchPattern {
     private String displayName;
     private Pattern pattern;
     private Boolean caseSensitive;
+    private Boolean printMatchedString;
 
-
-    public SearchPattern(String displayName, Pattern pattern, Boolean caseSensitive) {
+    public SearchPattern(String displayName, Pattern pattern, Boolean caseSensitive, Boolean printMatchedString) {
         this.displayName = displayName;
         this.pattern = pattern;
         this.caseSensitive = caseSensitive;
-
+        this.printMatchedString = printMatchedString;
     }
 
     public String getDisplayName() {
@@ -28,4 +28,6 @@ public class SearchPattern {
     public Pattern getPattern() {
         return pattern;
     }
+    public Boolean getPrintMatchedString() { return printMatchedString; }
+
 }

@@ -12,6 +12,11 @@ import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -69,7 +74,7 @@ public class LogMonitorUtil {
 
                 pattern = Pattern.compile(rawPatternsStringBuilder.toString());
 
-                SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern, searchString.getCaseSensitive());
+                SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern, searchString.getCaseSensitive(), searchString.getPrintMatchedString());
                 searchPatterns.add(searchPattern);
             }
 
@@ -109,6 +114,14 @@ public class LogMonitorUtil {
         }
 
         return value;
+    }
+
+    public static long getCurrentFileCreationTimeStamp(File file) throws IOException {
+        Path p = Paths.get(file.getAbsolutePath());
+        BasicFileAttributes view
+                = Files.getFileAttributeView(p, BasicFileAttributeView.class)
+                .readAttributes();
+        return view.creationTime().toMillis();
     }
 
 }

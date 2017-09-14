@@ -1,58 +1,43 @@
 package com.appdynamics.extensions.logmonitor;
 
-import static com.appdynamics.extensions.logmonitor.Constants.*;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPattern;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
-
 import com.appdynamics.extensions.logmonitor.config.Log;
-import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.exceptions.FileException;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
-import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
+
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurrentFileCreationTimeStamp;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
+
 /**
- * @author Florencio Sarmiento
+ * Created by aditya.jagtiani on 9/12/17.
  */
 public class LogMonitorTask implements Callable<LogMetrics> {
-
-    private static final Logger LOGGER =
-            Logger.getLogger(LogMonitorTask.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogMonitorTask.class);
     private FilePointerProcessor filePointerProcessor;
-
     private Log log;
-
     private Map<Pattern, String> replacers;
-
     private ExecutorService executorService;
+    private boolean hasLogRolledOver = false;
 
     public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService) {
         this.filePointerProcessor = filePointerProcessor;
@@ -64,97 +49,120 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     public LogMetrics call() throws Exception {
         String dirPath = resolveDirPath(log.getLogDirectory());
         LOGGER.info("Log monitor task started...");
-
         LogMetrics logMetrics = new LogMetrics();
         OptimizedRandomAccessFile randomAccessFile = null;
-
-        long curFilePointer = 0;
+        long curFilePointer;
 
         try {
-/*            File file = getLogFile(dirPath);
+            File file = getLogFile(dirPath);
             randomAccessFile = new OptimizedRandomAccessFile(file, "r");
-            long fileSize = randomAccessFile.length();
+            List<File> filesToBeProcessed; CountDownLatch latch;
             String dynamicLogPath = dirPath + log.getLogName();
-            List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
-            curFilePointer = getCurrentFilePointer(dynamicLogPath, file.getPath(), fileSize);
-            long curTimeStampFromFilePtr = getCurrentTimeStampFromFilePtr(dynamicLogPath, file.getPath());
-            long curFileCreationTimeStamp = getCurrentFileCreationTimeStamp(file);
-            List<File> filesToBeProcessed = Lists.newArrayList();
-            if(curFileCreationTimeStamp > curTimeStampFromFilePtr) { //there has been a rollover, we need to get the old file
-                // get list of all files in the directory with TS >= curTimeStampFromFilePtr
-                // check the list for a file that matches the curTimeStampFromFilePtr
-                // if you find this file, update the randomAcceessFile with this one and process this file from the curFilePointer and process the remaining files from offset 0 in parallel.
-
-                // else, process these files in parallel with offset 0 for all. Update the offset in the FP.json
-                // while processing, add logic for the flag and implement the global seed count (DONE)
-                // once processing is over, return to the main thread using countdown latch
-                // print metrics from the main thread.
-
-
-                filesToBeProcessed = getRequiredFilesFromDir(curTimeStampFromFilePtr, dirPath);
-
-                CountDownLatch latch = new CountDownLatch(filesToBeProcessed.size());
-                for (File currentFile : filesToBeProcessed) {
-                    executorService.execute(new ThreadedFileProcessor(currentFile, latch, log));
-                }
-                latch.await();
-            }
-            */
-
-            File file = new File(dirPath);
-            long currentTimeStampFromFilePtr = getCurrentTimeStampFromFilePtr(dirPath+log.getLogName(), file.getPath());
-            long currentFileCreationTimeStamp = getCurrentFileCreationTimeStamp(file);
-            List<File> filesToBeProcessed = Lists.newArrayList();
-            if(currentFileCreationTimeStamp > currentTimeStampFromFilePtr) { // rollover
-                filesToBeProcessed = getRequiredFilesFromDir(currentTimeStampFromFilePtr, dirPath);
-                CountDownLatch latch = new CountDownLatch(filesToBeProcessed.size());
-                for(File curFile : filesToBeProcessed) {
+            curFilePointer = getCurrentFilePointerOffset(dynamicLogPath, file.getPath(), file.length());
+            long curTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
+            if(hasLogRolledOver) {
+                filesToBeProcessed = getRequiredFilesFromDir(curTimeStampFromFilePointer, dirPath);
+                latch = new CountDownLatch(filesToBeProcessed.size());
+                for (File curFile : filesToBeProcessed) {
                     randomAccessFile = new OptimizedRandomAccessFile(curFile, "r");
-                    if(getCurrentFileCreationTimeStamp(curFile) == currentTimeStampFromFilePtr) { // found oldest file, start from curr file ptr
+                    if (getCurrentFileCreationTimeStamp(curFile) == curTimeStampFromFilePointer) {// found the oldest file, start from CFP
                         randomAccessFile.seek(curFilePointer);
-                    }
-                    else if(getCurrentFileCreationTimeStamp(curFile) > currentTimeStampFromFilePtr) { // newer file, process from 0
+                    } else {
+                        // start from 0
                         randomAccessFile.seek(0);
                     }
-                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers));
-                }
-                latch.await();
-            }
-
-            // Pass a data structure and make each thread update it woth the curr FP value. At the end here, use the latest value to update the FP
-            // if no rollover, simply update the file size metric
-            LOGGER.info(String.format("Processing log file [%s], starting from [%s]",
-                    file.getPath(), curFilePointer));
-
-            randomAccessFile.seek(curFilePointer);
-
-            String currentLine = null;
-
-            if (LOGGER.isDebugEnabled()) {
-                for (SearchPattern searchPattern : searchPatterns) {
-                    LOGGER.debug(String.format("Searching for [%s]", searchPattern.getPattern().pattern()));
+                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, curFile));
                 }
             }
-
-            while ((currentLine = randomAccessFile.readLine()) != null) {
-                incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
-                curFilePointer = randomAccessFile.getFilePointer();
+            else { // when the log has not rolled over
+                randomAccessFile.seek(curFilePointer);
+                latch = new CountDownLatch(1);
+                executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, file)
+                );
             }
-
-            logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(fileSize));
-
-            setNewFilePointer(dynamicLogPath, file.getPath(), curFilePointer);
-
-            LOGGER.info(String.format("Successfully processed log file [%s]",
-                    file.getPath()));
-
-        } finally {
+            latch.await();
+            setNewFilePointer(dynamicLogPath, logMetrics.getFilePointers());
+        }
+        finally {
             closeRandomAccessFile(randomAccessFile);
         }
-
         return logMetrics;
     }
 
+    private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
+
+        FilePointer maxFilePointer = Collections.max(filePointers, new Comparator<FilePointer>() {
+            public int compare(FilePointer file1, FilePointer file2) {
+                if (file1.getFileCreationTime() > file2.getFileCreationTime())
+                    return 1;
+                else if (file1.getFileCreationTime()  < file2.getFileCreationTime())
+                    return -1;
+                return 0;
+            }
+        });
+        filePointerProcessor.updateFilePointer(dynamicLogPath, maxFilePointer.getFilename(), maxFilePointer.getLastReadPosition(), maxFilePointer.getFileCreationTime());
+    }
+
+
+    private String resolveDirPath(String confDirPath) {
+        String resolvedPath = resolvePath(confDirPath);
+
+        if (!resolvedPath.endsWith(File.separator)) {
+            resolvedPath = resolvedPath + File.separator;
+        }
+        return resolvedPath;
+    }
+
+    private long getCurrentTimeStampFromFilePointer(String dynamicLogPath, String actualLogPath) {
+        FilePointer filePointer =
+                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
+        return filePointer.getFileCreationTime();
+    }
+
+    private List<File> getRequiredFilesFromDir(long curTimeStampFromFilePtr, String path) throws IOException {
+        List<File> filesToBeProcessed = Lists.newArrayList();
+        File directory = new File(path);
+
+        if (directory.isDirectory()) {
+            FileFilter fileFilter = new WildcardFileFilter(log.getLogName());
+            File[] files = directory.listFiles(fileFilter);
+
+            if (files != null && files.length > 0) {
+                for (File file : files) {
+                    long curFileCreationTime = getCurrentFileCreationTimeStamp(file);
+                    if (curFileCreationTime >= curTimeStampFromFilePtr) {
+                        filesToBeProcessed.add(file);
+                    }
+                }
+            }
+        } else {
+            throw new FileNotFoundException(
+                    String.format("Directory [%s] not found. Ensure it is a directory.",
+                            path));
+        }
+        return filesToBeProcessed;
+    }
+
+    private long getCurrentFilePointerOffset(String dynamicLogPath,
+                                             String actualLogPath, long fileSize) {
+
+        FilePointer filePointer =
+                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
+
+        long currentPosition = filePointer.getLastReadPosition().get();
+
+        if (isFilenameChanged(filePointer.getFilename(), actualLogPath) ||
+                isLogRotated(fileSize, currentPosition)) {
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Filename has either changed or rotated, resetting position to 0");
+            }
+            hasLogRolledOver = true;
+            //currentPosition = 0;
+        }
+
+        return currentPosition;
+    }
     private File getLogFile(String dirPath) throws FileNotFoundException {
         File directory = new File(dirPath);
         File logFile = null;
@@ -186,16 +194,6 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         return logFile;
     }
 
-    private String resolveDirPath(String confDirPath) {
-        String resolvedPath = resolvePath(confDirPath);
-
-        if (!resolvedPath.endsWith(File.separator)) {
-            resolvedPath = resolvedPath + File.separator;
-        }
-
-        return resolvedPath;
-    }
-
     private File getLatestFile(File[] files) {
         File latestFile = null;
         long lastModified = Long.MIN_VALUE;
@@ -206,59 +204,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                 lastModified = file.lastModified();
             }
         }
-
         return latestFile;
-    }
-
-    private long getCurrentFilePointer(String dynamicLogPath,
-                                       String actualLogPath, long fileSize) {
-
-        FilePointer filePointer =
-                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
-
-        long currentPosition = filePointer.getLastReadPosition().get();
-
-        if (isFilenameChanged(filePointer.getFilename(), actualLogPath) ||
-                isLogRotated(fileSize, currentPosition)) {
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Filename has either changed or rotated, resetting position to 0");
-            }
-
-            currentPosition = 0;
-        }
-
-        return currentPosition;
-    }
-
-    private long getCurrentTimeStampFromFilePtr(String dynamicLogPath, String actualLogPath) {
-        FilePointer filePointer =
-                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
-        return filePointer.getFileCreationTime();
-    }
-
-    private long getCurrentFileCreationTimeStamp(File file) throws IOException {
-        Path p = Paths.get(file.getAbsolutePath());
-        BasicFileAttributes view
-                = Files.getFileAttributeView(p, BasicFileAttributeView.class)
-                .readAttributes();
-        return view.creationTime().toMillis();
-    }
-
-    private List<File> getRequiredFilesFromDir(long curTimeStampFromFilePtr, String path) throws IOException {
-        List<File> filesToBeProcessed = Lists.newArrayList();
-        File[] files = new File(path).listFiles();
-        for(File file : files) {
-            if(getCurrentFileCreationTimeStamp(file) >= curTimeStampFromFilePtr) {
-                filesToBeProcessed.add(file);
-            }
-        }
-        return filesToBeProcessed;
-    }
-
-    private List<File> getFilesFromDirectory(String path) throws IOException {
-        File[] files = new File(path).listFiles();
-        return Arrays.asList(files);
     }
 
     private boolean isLogRotated(long fileSize, long startPosition) {
@@ -269,75 +215,5 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         return !oldFilename.equals(newFilename);
     }
 
-    private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
-                                                         String stringToCheck, LogMetrics logMetrics) {
 
-        for (SearchPattern searchPattern : searchPatterns) {
-            Boolean isPresent = false;
-            Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
-            String logMetricPrefix = getSearchStringPrefix();
-
-            while (matcher.find()) {
-                isPresent = true;
-                String word = matcher.group().trim();
-
-                String replacedWord = applyReplacers(word);
-
-                if (searchPattern.getCaseSensitive()) {
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + replacedWord);
-
-                } else {
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
-                }
-            }
-            if(!isPresent) {
-                String metricPrefix = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR;
-                List<String> metricNames = LogMonitorUtil.getNamesFromSearchStrings(log.getSearchStrings());
-                String patternName = searchPattern.getCaseSensitive() ? applyReplacers(searchPattern.getPattern().pattern().trim())
-                        : WordUtils.capitalizeFully(applyReplacers(searchPattern.getPattern().pattern().trim()));
-                for(String metricName : metricNames) {
-                    if(StringUtils.containsIgnoreCase(patternName, metricName) && !logMetrics.getMetrics().containsKey(metricPrefix + metricName)) {
-                        logMetrics.add(metricPrefix + metricName, BigInteger.ZERO);
-                    }
-                }
-            }
-        }
-    }
-
-    private void setNewFilePointer(String dynamicLogPath,
-                                   String actualLogPath, long lastReadPosition) {
-        filePointerProcessor.updateFilePointer(dynamicLogPath, actualLogPath, lastReadPosition);
-    }
-
-    private String getSearchStringPrefix() {
-        return String.format("%s%s%s", getLogNamePrefix(),
-                SEARCH_STRING, METRIC_PATH_SEPARATOR);
-    }
-
-    private String getLogNamePrefix() {
-        String displayName = StringUtils.isBlank(log.getDisplayName()) ?
-                log.getLogName() : log.getDisplayName();
-
-        return displayName + METRIC_PATH_SEPARATOR;
-    }
-
-    private String applyReplacers(String name) {
-
-        if (name == null || name.length() == 0 || replacers == null) {
-            return name;
-        }
-
-        for (Map.Entry<Pattern, String> replacerEntry : replacers.entrySet()) {
-
-            Pattern pattern = replacerEntry.getKey();
-
-            Matcher matcher = pattern.matcher(name);
-            name = matcher.replaceAll(replacerEntry.getValue());
-        }
-
-        return name;
-    }
 }
-
-
-

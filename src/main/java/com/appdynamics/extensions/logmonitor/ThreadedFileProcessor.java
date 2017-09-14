@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.logmonitor;
 
 import com.appdynamics.extensions.logmonitor.config.Log;
+import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Maps;
 import jdk.nashorn.internal.codegen.CompilerConstants;
@@ -9,6 +10,7 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
@@ -22,6 +24,7 @@ import static com.appdynamics.extensions.logmonitor.Constants.FILESIZE_METRIC_NA
 import static com.appdynamics.extensions.logmonitor.Constants.METRIC_PATH_SEPARATOR;
 import static com.appdynamics.extensions.logmonitor.Constants.SEARCH_STRING;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPattern;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurrentFileCreationTimeStamp;
 
 /**
  * Created by aditya.jagtiani on 8/21/17.
@@ -35,13 +38,16 @@ public class ThreadedFileProcessor implements Runnable {
     private LogMetrics logMetrics;
     private Map<Pattern, String> replacers;
     private long curFilePointer;
+    private long curFileCreationTime;
+    private File currentFile;
 
-    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch, LogMetrics logMetrics, Map<Pattern, String> replacers) {
+    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch, LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.countDownLatch = countDownLatch;
         this.logMetrics = logMetrics;
         this.replacers = replacers;
+        this.currentFile = currentFile;
     }
 
     public void run() {
@@ -64,7 +70,9 @@ public class ThreadedFileProcessor implements Runnable {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
             curFilePointer = randomAccessFile.getFilePointer();
         }
+        curFileCreationTime = getCurrentFileCreationTimeStamp(currentFile);
         logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(randomAccessFile.length()));
+        updateCurrentFilePointer(currentFile.getPath(), curFilePointer, curFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
         countDownLatch.countDown();
@@ -73,37 +81,43 @@ public class ThreadedFileProcessor implements Runnable {
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
                                                          String stringToCheck, LogMetrics logMetrics) {
-
+        // TODO check whether metrics already exist in the map and increment the count if they do, else add for the first tme with 1
         for (SearchPattern searchPattern : searchPatterns) {
-            Boolean isPresent = false;
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
-
+            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Global Seed Count";
+            if(!logMetrics.getMetrics().containsKey(currentKey)) {
+                logMetrics.add(currentKey, BigInteger.ZERO);
+            }
             while (matcher.find()) {
-                isPresent = true;
+                BigInteger globalSeedCount = logMetrics.getMetrics().get(currentKey);
+                logMetrics.add(currentKey, globalSeedCount.add(BigInteger.ONE));
                 String word = matcher.group().trim();
-
                 String replacedWord = applyReplacers(word);
-
-                if (searchPattern.getCaseSensitive()) {
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + replacedWord);
-
-                } else {
-                    logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
-                }
-            }
-            if(!isPresent) {
-                String metricPrefix = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR;
-                List<String> metricNames = LogMonitorUtil.getNamesFromSearchStrings(log.getSearchStrings());
-                String patternName = searchPattern.getCaseSensitive() ? applyReplacers(searchPattern.getPattern().pattern().trim())
-                        : WordUtils.capitalizeFully(applyReplacers(searchPattern.getPattern().pattern().trim()));
-                for(String metricName : metricNames) {
-                    if(StringUtils.containsIgnoreCase(patternName, metricName) && !logMetrics.getMetrics().containsKey(metricPrefix + metricName)) {
-                        logMetrics.add(metricPrefix + metricName, BigInteger.ZERO);
+                if(searchPattern.getPrintMatchedString()) {
+                    if (searchPattern.getCaseSensitive()) {
+                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + replacedWord);
+                    } else {
+                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
                     }
+                    // TODO generate custom event for United
+                    sendEventToController();
                 }
             }
+
         }
+    }
+
+    private void sendEventToController() {
+        
+    }
+
+    private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {
+        FilePointer filePointer = new FilePointer();
+        filePointer.setFilename(filePath);
+        filePointer.setFileCreationTime(creationTimestamp);
+        filePointer.updateLastReadPosition(lastReadPosition);
+        logMetrics.updateFilePointer(filePointer);
     }
 
     private String getSearchStringPrefix() {

@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -31,11 +32,12 @@ public class FilePointerProcessor {
 		initialiseFilePointers();
 	}
 	
-	public void updateFilePointer(String dynamicLogPath, 
-			String actualLogPath, long lastReadPosition) {
+	public void updateFilePointer(String dynamicLogPath,
+								  String actualLogPath, AtomicLong lastReadPosition, long creationTimestamp) {
 		FilePointer filePointer = getFilePointer(dynamicLogPath, actualLogPath);
 		filePointer.setFilename(actualLogPath);
-		filePointer.updateLastReadPosition(lastReadPosition);
+		filePointer.setLastReadPosition(lastReadPosition);
+		filePointer.setFileCreationTime(creationTimestamp);
 	}
 
 	public FilePointer getFilePointer(String dynamicLogPath, String actualLogPath) {
