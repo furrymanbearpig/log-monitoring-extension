@@ -7,26 +7,32 @@ logs:
          pattern: "(\\s|^)m\\w+(\\s|$)"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Words with <"
          pattern: "<\\w*>"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Words with [jmx"
          pattern: "\\[JMX.*\\]"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Debug"
          pattern: "debug"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Info"
          pattern: "info"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Error"
          pattern: "error"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
 
   - displayName: ""
     logDirectory: "src/test/resources"
@@ -36,14 +42,17 @@ logs:
          pattern: "debug"
          matchExactString: true
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Info"
          pattern: "info"
          matchExactString: true
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Error"
          pattern: "error"
          matchExactString: true
          caseSensitive: false
+         printMatchedString: false
 
 metricCharacterReplacer:
     - replace: ","

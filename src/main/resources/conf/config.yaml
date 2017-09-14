@@ -13,6 +13,7 @@ logs:
          pattern: "debug"
          matchExactString: true
          caseSensitive: false
+         printMatchedString: false
        - displayName: "Trace in any case"
          pattern: "trace"
          matchExactString: false

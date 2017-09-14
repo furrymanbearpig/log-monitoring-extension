@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
@@ -117,7 +118,7 @@ public class LogMonitorTest {
 		logMetrics.add("TestLog|File size (Bytes)", BigInteger.valueOf(10));
 		
 		whenNew(LogMonitorTask.class).withArguments(any(FilePointerProcessor.class), 
-				any(Log.class), any(Map.class)).thenReturn(mockLogMonitorTask);
+				any(Log.class), any(Map.class), any(ExecutorService.class)).thenReturn(mockLogMonitorTask);
 		
 		when(mockLogMonitorTask.call()).thenReturn(logMetrics);
 	}

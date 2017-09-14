@@ -469,7 +469,6 @@ public class LogMonitorTaskTest {
     }
 
 
-
     private long getFileSize(String logDir, String logName) throws Exception {
         String fullPath = String.format("%s%s%s", logDir, File.separator, logName);
         RandomAccessFile file = new RandomAccessFile(fullPath, "r");
