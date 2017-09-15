@@ -18,6 +18,26 @@ public class Configuration {
 
     private int noOfThreads;
 
+    public List<ControllerInfo> getControllerInfo() {
+        return controllerInfo;
+    }
+
+    public void setControllerInfo(List<ControllerInfo> controllerInfo) {
+        this.controllerInfo = controllerInfo;
+    }
+
+    public List<EventParameters> getEventParameters() {
+        return eventParameters;
+    }
+
+    public void setEventParameters(List<EventParameters> eventParameters) {
+        this.eventParameters = eventParameters;
+    }
+
+    private List<ControllerInfo> controllerInfo;
+
+    private List<EventParameters> eventParameters;
+
     public String getMetricPrefix() {
         return metricPrefix;
     }
@@ -55,5 +75,4 @@ public class Configuration {
         return ReflectionToStringBuilder.toString(this,
                 ToStringStyle.SHORT_PREFIX_STYLE);
     }
-
 }

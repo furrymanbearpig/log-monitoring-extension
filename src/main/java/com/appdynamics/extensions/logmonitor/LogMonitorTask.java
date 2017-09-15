@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.logmonitor;
 
+import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
+import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.exceptions.FileException;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
@@ -10,6 +12,7 @@ import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.ldap.Control;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -37,13 +40,19 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     private Log log;
     private Map<Pattern, String> replacers;
     private ExecutorService executorService;
+    private ControllerInfo controllerInfo;
+    private EventParameters eventParameters;
     private boolean hasLogRolledOver = false;
 
-    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService) {
+
+    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService,
+                          ControllerInfo controllerInfo, EventParameters eventParameters) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
         this.replacers = replacers;
         this.executorService = executorService;
+        this.controllerInfo = controllerInfo;
+        this.eventParameters = eventParameters;
     }
 
     public LogMetrics call() throws Exception {
@@ -71,13 +80,13 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                         // start from 0
                         randomAccessFile.seek(0);
                     }
-                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, curFile));
+                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, curFile, controllerInfo, eventParameters));
                 }
             }
             else { // when the log has not rolled over
                 randomAccessFile.seek(curFilePointer);
                 latch = new CountDownLatch(1);
-                executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, file)
+                executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, file, controllerInfo, eventParameters)
                 );
             }
             latch.await();

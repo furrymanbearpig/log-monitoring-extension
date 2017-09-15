@@ -23,5 +23,13 @@ public final class Constants {
 	
 	public static final int THREAD_TIMEOUT = 60;
 
-	public static final String REGEX = "[^A-Za-z0-9]";
+	public static final String EVENT_SEVERITY = "INFO";
+
+	public static final String EVENT_TYPE = "CUSTOM";
+
+	public static final String SUMMARY_MESSAGE = "The following pattern has been matched in your logs : ";
+
+	public static final String CONTROLLER_EVENTS_ENDPOINT = "/controller/rest/applications/";
+
+	public static final String EVENT_REQUEST_HEADER = "curl -X POST --user ";
 }

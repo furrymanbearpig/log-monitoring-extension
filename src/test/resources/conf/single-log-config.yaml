@@ -24,3 +24,16 @@ noOfThreads: 3
 
 #prefix used to show up metrics in AppDynamics 
 metricPrefix: "Custom Metrics|LogMonitor|"
+
+
+controllerInfo:
+   - controllerUrl: ""
+     username: ""
+     password: ""
+     account: ""
+
+eventParameters:
+   - customEventType: ""
+     severity: ""
+     summary: ""
+     applicationID: ""

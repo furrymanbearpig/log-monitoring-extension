@@ -74,10 +74,10 @@ public class LogMonitorUtil {
 
                 pattern = Pattern.compile(rawPatternsStringBuilder.toString());
 
-                SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern, searchString.getCaseSensitive(), searchString.getPrintMatchedString());
+                SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern,
+                        searchString.getCaseSensitive(), searchString.getPrintMatchedString(), searchString.getSendEventToController());
                 searchPatterns.add(searchPattern);
             }
-
         }
         return searchPatterns;
     }
@@ -123,5 +123,4 @@ public class LogMonitorUtil {
                 .readAttributes();
         return view.creationTime().toMillis();
     }
-
 }

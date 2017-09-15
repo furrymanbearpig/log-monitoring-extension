@@ -1,10 +1,10 @@
 package com.appdynamics.extensions.logmonitor;
 
+import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
+import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import com.appdynamics.extensions.logmonitor.config.Log;
+import com.appdynamics.extensions.logmonitor.customEvents.CustomEventBuilder;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
-import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
-import com.google.common.collect.Maps;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,24 +29,27 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurre
  * Created by aditya.jagtiani on 8/21/17.
  */
 public class ThreadedFileProcessor implements Runnable {
-    private static final Logger LOGGER =
-            Logger.getLogger(ThreadedFileProcessor.class);
+    private static final Logger LOGGER = Logger.getLogger(ThreadedFileProcessor.class);
     private CountDownLatch countDownLatch;
     private Log log;
     private OptimizedRandomAccessFile randomAccessFile;
     private LogMetrics logMetrics;
     private Map<Pattern, String> replacers;
     private long curFilePointer;
-    private long curFileCreationTime;
     private File currentFile;
+    private ControllerInfo controllerInfo;
+    private EventParameters eventParameters;
 
-    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch, LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile) {
+    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch,
+                                 LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile, ControllerInfo controllerInfo, EventParameters eventParameters) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.countDownLatch = countDownLatch;
         this.logMetrics = logMetrics;
         this.replacers = replacers;
         this.currentFile = currentFile;
+        this.controllerInfo = controllerInfo;
+        this.eventParameters = eventParameters;
     }
 
     public void run() {
@@ -70,7 +72,7 @@ public class ThreadedFileProcessor implements Runnable {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
             curFilePointer = randomAccessFile.getFilePointer();
         }
-        curFileCreationTime = getCurrentFileCreationTimeStamp(currentFile);
+        long curFileCreationTime = getCurrentFileCreationTimeStamp(currentFile);
         logMetrics.add(getLogNamePrefix() + FILESIZE_METRIC_NAME, BigInteger.valueOf(randomAccessFile.length()));
         updateCurrentFilePointer(currentFile.getPath(), curFilePointer, curFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
@@ -81,12 +83,11 @@ public class ThreadedFileProcessor implements Runnable {
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
                                                          String stringToCheck, LogMetrics logMetrics) {
-        // TODO check whether metrics already exist in the map and increment the count if they do, else add for the first tme with 1
         for (SearchPattern searchPattern : searchPatterns) {
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
             String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Global Seed Count";
-            if(!logMetrics.getMetrics().containsKey(currentKey)) {
+            if (!logMetrics.getMetrics().containsKey(currentKey)) {
                 logMetrics.add(currentKey, BigInteger.ZERO);
             }
             while (matcher.find()) {
@@ -94,22 +95,27 @@ public class ThreadedFileProcessor implements Runnable {
                 logMetrics.add(currentKey, globalSeedCount.add(BigInteger.ONE));
                 String word = matcher.group().trim();
                 String replacedWord = applyReplacers(word);
-                if(searchPattern.getPrintMatchedString()) {
+                if (searchPattern.getPrintMatchedString()) {
                     if (searchPattern.getCaseSensitive()) {
                         logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + replacedWord);
                     } else {
                         logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
                     }
-                    // TODO generate custom event for United
-                    sendEventToController();
+                }
+                // sending event to controller for United
+                if (searchPattern.getSendEventToController()) {
+                    if (searchPattern.getCaseSensitive()) {
+                        buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(), replacedWord);
+                    } else {
+                        buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(), WordUtils.capitalizeFully(replacedWord));
+                    }
                 }
             }
-
         }
     }
 
-    private void sendEventToController() {
-        
+    private void buildCustomEvent(String propertyName, String propertyValue) {
+        CustomEventBuilder.createEvent(controllerInfo, eventParameters, propertyName, propertyValue);
     }
 
     private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {

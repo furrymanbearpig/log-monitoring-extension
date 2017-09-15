@@ -8,17 +8,20 @@ logs:
          matchExactString: false
          caseSensitive: false
          printMatchedString: true
+         sendEventToController: true
         #displayName Should be unique across the patterns including the case.
        - displayName: "Debug In Caps"
          pattern: "debug"
          matchExactString: true
          caseSensitive: false
          printMatchedString: false
+         sendEventToController: false
        - displayName: "Trace in any case"
          pattern: "trace"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
+         sendEventToController: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -34,10 +37,14 @@ noOfThreads: 3
 #prefix used to show up metrics in AppDynamics 
 metricPrefix: "Custom Metrics|LogMonitor|"
 
-controller:
-    - url:
-      username:
-      password:
-      accountName:
+controllerInfo:
+   - controllerUrl: "ajagtiani-mac.local:8090/controller"
+     username: "aditya"
+     password: "admin"
+     account: "customer1"
 
-encryptionKey:
+eventParameters:
+   - customEventType: "Log Monitor Custom Events"
+     severity: "INFO"
+     summary: "Summary Message 1"
+     applicationID: "8"

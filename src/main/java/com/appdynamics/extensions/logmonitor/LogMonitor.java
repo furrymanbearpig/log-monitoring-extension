@@ -10,15 +10,16 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.convertV
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
 import static com.appdynamics.extensions.yml.YmlReader.readFromFile;
 
-import com.appdynamics.extensions.logmonitor.config.Configuration;
-import com.appdynamics.extensions.logmonitor.config.Log;
-import com.appdynamics.extensions.logmonitor.config.MetricCharacterReplacer;
+import com.appdynamics.extensions.logmonitor.config.*;
+import com.appdynamics.extensions.logmonitor.customEvents.CustomEventBuilder;
+import com.appdynamics.extensions.logmonitor.customEvents.CustomEventSender;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
@@ -96,12 +97,18 @@ public class LogMonitor extends AManagedMonitor {
                             config.getNoOfThreads() : DEFAULT_NO_OF_THREADS;
                     threadPool = Executors.newFixedThreadPool(noOfThreads);
 
+                    ControllerInfo controllerInfo = config.getControllerInfo().get(0);
+                    EventParameters eventParameters = config.getEventParameters().get(0);
+
                     CompletionService<LogMetrics> logMonitorTasks =
-                            createConcurrentTasks(threadPool, logs, replacers);
+                            createConcurrentTasks(threadPool, logs, replacers, controllerInfo, eventParameters);
 
                     LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size());
                     uploadMetrics(logMetrics, getMetricPrefix(config));
-
+                    // now post the list of custom events.
+                    if(CustomEventBuilder.eventsToBePosted.size() != 0) {
+                        CustomEventSender.postCustomEvent(CustomEventBuilder.eventsToBePosted, new OkHttpClient());
+                    }
                     filePointerProcessor.updateFilePointerFile();
 
                     return new TaskOutput("Log Monitoring task successfully completed");
@@ -121,13 +128,13 @@ public class LogMonitor extends AManagedMonitor {
     }
 
     private CompletionService<LogMetrics> createConcurrentTasks(ExecutorService threadPool,
-                                                                List<Log> logs, Map<Pattern, String> replacers) {
+                                                                List<Log> logs, Map<Pattern, String> replacers, ControllerInfo controllerInfo, EventParameters eventParameters) {
 
         CompletionService<LogMetrics> logMonitorTasks =
                 new ExecutorCompletionService<LogMetrics>(threadPool);
 
         for (Log log : logs) {
-            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers, threadPool);
+            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers, threadPool, controllerInfo, eventParameters);
             logMonitorTasks.submit(task);
         }
 

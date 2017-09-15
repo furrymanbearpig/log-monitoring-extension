@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
+import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
+import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
@@ -41,6 +43,11 @@ public class LogMonitorTaskTest {
     @Mock
     private FilePointerProcessor mockFilePointerProcessor;
 
+    @Mock
+    private ControllerInfo controllerInfo;
+    @Mock
+    private EventParameters eventParameters;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Test
@@ -56,6 +63,7 @@ public class LogMonitorTaskTest {
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
         searchString.setPrintMatchedString(false);
+        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -63,7 +71,7 @@ public class LogMonitorTaskTest {
         searchString1.setPattern("info");
         searchString1.setDisplayName("Info");
         searchString1.setPrintMatchedString(false);
-
+        searchString1.setSendEventToController(false);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
@@ -71,7 +79,7 @@ public class LogMonitorTaskTest {
         searchString2.setPattern("error");
         searchString2.setDisplayName("Error");
         searchString2.setPrintMatchedString(false);
-
+        searchString2.setSendEventToController(false);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
@@ -81,7 +89,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
@@ -107,6 +115,7 @@ public class LogMonitorTaskTest {
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
         searchString.setPrintMatchedString(true);
+        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -114,7 +123,7 @@ public class LogMonitorTaskTest {
         searchString1.setPattern("info");
         searchString1.setDisplayName("Info");
         searchString1.setPrintMatchedString(true);
-
+        searchString1.setSendEventToController(false);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
@@ -122,7 +131,7 @@ public class LogMonitorTaskTest {
         searchString2.setPattern("error");
         searchString2.setDisplayName("Error");
         searchString2.setPrintMatchedString(true);
-
+        searchString2.setSendEventToController(false);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
@@ -132,7 +141,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 4, result.getMetrics().size());
@@ -162,6 +171,7 @@ public class LogMonitorTaskTest {
         searchString.setPattern("<");
         searchString.setDisplayName("Pattern <");
         searchString.setPrintMatchedString(true);
+        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -169,7 +179,7 @@ public class LogMonitorTaskTest {
         searchString1.setPattern(">");
         searchString1.setDisplayName("Pattern >");
         searchString1.setPrintMatchedString(true);
-
+        searchString1.setSendEventToController(false);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
@@ -177,6 +187,7 @@ public class LogMonitorTaskTest {
         searchString2.setPattern("\\*");
         searchString2.setDisplayName("Pattern *");
         searchString2.setPrintMatchedString(true);
+        searchString2.setSendEventToController(false);
 
         SearchString searchString3 = new SearchString();
         searchString3.setCaseSensitive(false);
@@ -184,6 +195,7 @@ public class LogMonitorTaskTest {
         searchString3.setPattern("\\[");
         searchString3.setDisplayName("Pattern [");
         searchString3.setPrintMatchedString(true);
+        searchString3.setSendEventToController(false);
 
 
         SearchString searchString4 = new SearchString();
@@ -192,6 +204,7 @@ public class LogMonitorTaskTest {
         searchString4.setPattern("\\]");
         searchString4.setDisplayName("Pattern ]");
         searchString4.setPrintMatchedString(true);
+        searchString4.setSendEventToController(false);
 
         SearchString searchString5 = new SearchString();
         searchString5.setCaseSensitive(false);
@@ -199,6 +212,7 @@ public class LogMonitorTaskTest {
         searchString5.setPattern("\\.");
         searchString5.setDisplayName("Pattern .");
         searchString5.setPrintMatchedString(true);
+        searchString5.setSendEventToController(false);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2, searchString3, searchString4, searchString5));
 
@@ -208,7 +222,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 7, result.getMetrics().size());
@@ -244,6 +258,7 @@ public class LogMonitorTaskTest {
         searchString.setPattern("(\\s|^)m\\w+(\\s|$)");
         searchString.setDisplayName("Pattern start with M");
         searchString.setPrintMatchedString(true);
+        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -251,6 +266,7 @@ public class LogMonitorTaskTest {
         searchString1.setPattern("<\\w*>");
         searchString1.setDisplayName("Pattern start with <");
         searchString1.setPrintMatchedString(true);
+        searchString1.setSendEventToController(false);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
@@ -258,6 +274,7 @@ public class LogMonitorTaskTest {
         searchString2.setPattern("\\[JMX.*\\]");
         searchString2.setDisplayName("Pattern start with [JMX");
         searchString2.setPrintMatchedString(true);
+        searchString2.setSendEventToController(false);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
@@ -267,7 +284,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(15, result.getMetrics().size());
@@ -312,6 +329,7 @@ public class LogMonitorTaskTest {
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
         searchString.setPrintMatchedString(true);
+        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -319,6 +337,7 @@ public class LogMonitorTaskTest {
         searchString1.setPattern("info");
         searchString1.setDisplayName("Info");
         searchString1.setPrintMatchedString(true);
+        searchString1.setSendEventToController(false);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
@@ -326,6 +345,7 @@ public class LogMonitorTaskTest {
         searchString2.setPattern("error");
         searchString2.setDisplayName("Error");
         searchString2.setPrintMatchedString(true);
+        searchString2.setSendEventToController(false);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
 
@@ -335,7 +355,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + File.separator + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(7, result.getMetrics().size());
@@ -395,6 +415,7 @@ public class LogMonitorTaskTest {
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
         searchString.setPrintMatchedString(false);
+        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -402,6 +423,7 @@ public class LogMonitorTaskTest {
         searchString1.setPattern("error");
         searchString1.setDisplayName("Error");
         searchString1.setPrintMatchedString(false);
+        searchString1.setSendEventToController(false);
 
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1));
 
@@ -411,7 +433,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + File.separator + testFilename);
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(3, result.getMetrics().size());

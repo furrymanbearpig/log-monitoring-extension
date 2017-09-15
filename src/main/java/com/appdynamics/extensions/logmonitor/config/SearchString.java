@@ -10,6 +10,7 @@ public class SearchString {
     private Boolean matchExactString;
     private Boolean caseSensitive;
     private Boolean printMatchedString;
+    private Boolean sendEventToController;
 
     public String getDisplayName() {
         return displayName;
@@ -46,4 +47,8 @@ public class SearchString {
     public void setPrintMatchedString(Boolean printMatchedString) { this.printMatchedString = printMatchedString; }
 
     public Boolean getPrintMatchedString() {return printMatchedString;}
+
+    public void setSendEventToController(Boolean sendEventToController) { this.sendEventToController = sendEventToController;}
+
+    public Boolean getSendEventToController() { return sendEventToController;}
 }

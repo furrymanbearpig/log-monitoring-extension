@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
+import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
+import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,7 +120,7 @@ public class LogMonitorTest {
 		logMetrics.add("TestLog|File size (Bytes)", BigInteger.valueOf(10));
 		
 		whenNew(LogMonitorTask.class).withArguments(any(FilePointerProcessor.class), 
-				any(Log.class), any(Map.class), any(ExecutorService.class)).thenReturn(mockLogMonitorTask);
+				any(Log.class), any(Map.class), any(ExecutorService.class), any(ControllerInfo.class), any(EventParameters.class)).thenReturn(mockLogMonitorTask);
 		
 		when(mockLogMonitorTask.call()).thenReturn(logMetrics);
 	}
