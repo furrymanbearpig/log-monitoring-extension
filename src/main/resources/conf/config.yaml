@@ -4,7 +4,7 @@
 # metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
 # Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
 
-metricPrefix: "Server|Component:<TIER_ID>|Log Monitor|"
+metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
 
 logs:
   - displayName: "Machine Agent Log"
