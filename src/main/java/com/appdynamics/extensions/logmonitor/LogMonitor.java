@@ -1,28 +1,23 @@
 package com.appdynamics.extensions.logmonitor;
 
-import static com.appdynamics.extensions.logmonitor.Constants.CONFIG_ARG;
-import static com.appdynamics.extensions.logmonitor.Constants.DEFAULT_METRIC_PATH;
-import static com.appdynamics.extensions.logmonitor.Constants.DEFAULT_NO_OF_THREADS;
-import static com.appdynamics.extensions.logmonitor.Constants.METRIC_PATH_SEPARATOR;
-import static com.appdynamics.extensions.logmonitor.Constants.THREAD_TIMEOUT;
-import static com.appdynamics.extensions.logmonitor.config.LogConfigValidator.validate;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.convertValueToZeroIfNullOrNegative;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
-import static com.appdynamics.extensions.yml.YmlReader.readFromFile;
-
 import com.appdynamics.extensions.logmonitor.config.*;
 import com.appdynamics.extensions.logmonitor.customEvents.CustomEventBuilder;
-import com.appdynamics.extensions.logmonitor.customEvents.CustomEventSender;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
-import okhttp3.OkHttpClient;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -30,19 +25,20 @@ import org.apache.log4j.PatternLayout;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
+
+import static com.appdynamics.extensions.logmonitor.Constants.*;
+import static com.appdynamics.extensions.logmonitor.config.LogConfigValidator.validate;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.convertValueToZeroIfNullOrNegative;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
+import static com.appdynamics.extensions.yml.YmlReader.logger;
+import static com.appdynamics.extensions.yml.YmlReader.readFromFile;
 
 /**
  * Monitors the log file and counts the no of occurrences of the search terms provided
@@ -105,9 +101,8 @@ public class LogMonitor extends AManagedMonitor {
 
                     LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size());
                     uploadMetrics(logMetrics, getMetricPrefix(config));
-                    // now post the list of custom events.
-                    if(CustomEventBuilder.eventsToBePosted.size() != 0) {
-                        CustomEventSender.postCustomEvent(CustomEventBuilder.eventsToBePosted, new OkHttpClient());
+                    if (CustomEventBuilder.eventsToBePosted.size() > 0) {
+                        uploadCustomEvents(CustomEventBuilder.eventsToBePosted, controllerInfo);
                     }
                     filePointerProcessor.updateFilePointerFile();
 
@@ -211,7 +206,18 @@ public class LogMonitor extends AManagedMonitor {
         );
     }
 
-    private void printMetric(String metricName, BigInteger metricValue, String aggregation, String timeRollup, String cluster) {
+    private void uploadCustomEvents(List<URL> eventEndpoints, ControllerInfo controllerInfo) throws Exception {
+        CredentialsProvider provider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(controllerInfo.getUsername(), controllerInfo.getPassword());
+        provider.setCredentials(AuthScope.ANY, credentials);
+        HttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+        for (URL url : eventEndpoints) {
+            HttpResponse response = httpClient.execute(new HttpPost(url.toURI()));
+            logger.debug("Custom Event Attempted, Response Code = " + response.getStatusLine().getStatusCode());
+        }
+    }
+
+    void printMetric(String metricName, BigInteger metricValue, String aggregation, String timeRollup, String cluster) {
         MetricWriter metricWriter = getMetricWriter(metricName, aggregation,
                 timeRollup, cluster);
 

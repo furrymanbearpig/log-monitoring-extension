@@ -450,8 +450,8 @@ public class LogMonitorTaskTest {
                 .thenReturn(filePointer);
 
         List<String> logsToAdd = Lists.newArrayList();
-        for(int i = 0; i < 100; i++) {
-            logsToAdd.add(new Date() + "	DEBUG	Statement " +i+ "\n");
+        for (int i = 0; i < 100; i++) {
+            logsToAdd.add(new Date() + "	DEBUG	Statement " + i + "\n");
         }
 
         updateLogFile(testFilepath, logsToAdd, true);
@@ -471,8 +471,8 @@ public class LogMonitorTaskTest {
         testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
         copyFile(dynamicLog3, testFilepath);
         logsToAdd.clear();
-        for(int i = 0; i < 100; i++) {
-            logsToAdd.add(new Date() + "	ERROR	Statement " +i+ "\n");
+        for (int i = 0; i < 100; i++) {
+            logsToAdd.add(new Date() + "	ERROR	Statement " + i + "\n");
         }
 
         updateLogFile(testFilepath, logsToAdd, true);
@@ -484,12 +484,6 @@ public class LogMonitorTaskTest {
         filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
     }
-
-    @Test
-    public void testLogRolledOverTimeStampMismatch() {
-
-    }
-
 
     private long getFileSize(String logDir, String logName) throws Exception {
         String fullPath = String.format("%s%s%s", logDir, File.separator, logName);
@@ -531,6 +525,5 @@ public class LogMonitorTaskTest {
     private File getTargetDir() {
         return new File("./target");
     }
-
 }
 

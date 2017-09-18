@@ -8,18 +8,22 @@ import org.apache.commons.lang.builder.ToStringStyle;
  */
 public class ControllerInfo {
 
-    private String controllerUrl;
+    private String host;
+    private int port;
     private String username;
     private String password;
-    private String account;
 
-    public String getControllerUrl() {
-        return controllerUrl;
+    public String getHost() {
+        return host;
     }
 
-    public void setControllerUrl(String controllerUrl) {
-        this.controllerUrl = controllerUrl;
+    public void setHost(String host) {
+        this.host = host;
     }
+
+    public int getPort() { return port;}
+
+    public void setPort(int port) { this.port = port;}
 
     public String getUsername() {
         return username;
@@ -35,14 +39,6 @@ public class ControllerInfo {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     @Override

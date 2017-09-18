@@ -9,6 +9,7 @@ logs:
          caseSensitive: false
          printMatchedString: false
          sendEventToController: false
+
        - displayName: "Words with <"
          pattern: "<\\w*>"
          matchExactString: false
@@ -81,13 +82,12 @@ noOfThreads: 3
 metricPrefix: "Custom Metrics|LogMonitor|"
 
 controllerInfo:
-   - controllerUrl: ""
+   - host: ""
+     port: 0
      username: ""
      password: ""
-     account: ""
 
 eventParameters:
    - customEventType: ""
      severity: ""
-     summary: ""
      applicationID: ""

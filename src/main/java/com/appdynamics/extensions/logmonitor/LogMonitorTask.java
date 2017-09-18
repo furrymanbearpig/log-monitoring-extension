@@ -45,7 +45,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     private boolean hasLogRolledOver = false;
 
 
-    public LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService,
+    LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService,
                           ControllerInfo controllerInfo, EventParameters eventParameters) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
@@ -65,11 +65,12 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         try {
             File file = getLogFile(dirPath);
             randomAccessFile = new OptimizedRandomAccessFile(file, "r");
-            List<File> filesToBeProcessed; CountDownLatch latch;
+            List<File> filesToBeProcessed;
+            CountDownLatch latch;
             String dynamicLogPath = dirPath + log.getLogName();
             curFilePointer = getCurrentFilePointerOffset(dynamicLogPath, file.getPath(), file.length());
             long curTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
-            if(hasLogRolledOver) {
+            if (hasLogRolledOver) {
                 filesToBeProcessed = getRequiredFilesFromDir(curTimeStampFromFilePointer, dirPath);
                 latch = new CountDownLatch(filesToBeProcessed.size());
                 for (File curFile : filesToBeProcessed) {
@@ -82,8 +83,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                     }
                     executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, curFile, controllerInfo, eventParameters));
                 }
-            }
-            else { // when the log has not rolled over
+            } else { // when the log has not rolled over
                 randomAccessFile.seek(curFilePointer);
                 latch = new CountDownLatch(1);
                 executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, file, controllerInfo, eventParameters)
@@ -91,8 +91,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             }
             latch.await();
             setNewFilePointer(dynamicLogPath, logMetrics.getFilePointers());
-        }
-        finally {
+        } finally {
             closeRandomAccessFile(randomAccessFile);
         }
         return logMetrics;
@@ -104,7 +103,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             public int compare(FilePointer file1, FilePointer file2) {
                 if (file1.getFileCreationTime() > file2.getFileCreationTime())
                     return 1;
-                else if (file1.getFileCreationTime()  < file2.getFileCreationTime())
+                else if (file1.getFileCreationTime() < file2.getFileCreationTime())
                     return -1;
                 return 0;
             }
@@ -167,14 +166,13 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                 LOGGER.debug("Filename has either changed or rotated, resetting position to 0");
             }
             hasLogRolledOver = true;
-            //currentPosition = 0;
         }
-
         return currentPosition;
     }
+
     private File getLogFile(String dirPath) throws FileNotFoundException {
         File directory = new File(dirPath);
-        File logFile = null;
+        File logFile;
 
         if (directory.isDirectory()) {
             FileFilter fileFilter = new WildcardFileFilter(log.getLogName());
@@ -223,6 +221,4 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     private boolean isFilenameChanged(String oldFilename, String newFilename) {
         return !oldFilename.equals(newFilename);
     }
-
-
 }

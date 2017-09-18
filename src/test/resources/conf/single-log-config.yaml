@@ -27,13 +27,12 @@ metricPrefix: "Custom Metrics|LogMonitor|"
 
 
 controllerInfo:
-   - controllerUrl: ""
+   - host: ""
+     port: 0
      username: ""
      password: ""
-     account: ""
 
 eventParameters:
    - customEventType: ""
      severity: ""
-     summary: ""
      applicationID: ""

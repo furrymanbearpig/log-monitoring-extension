@@ -25,13 +25,13 @@ public class SearchPattern {
     public String getDisplayName() {
         return displayName;
     }
-    public Boolean getCaseSensitive() {
+    Boolean getCaseSensitive() {
         return caseSensitive;
     }
     public Pattern getPattern() {
         return pattern;
     }
-    public Boolean getPrintMatchedString() { return printMatchedString; }
-    public Boolean getSendEventToController() { return sendEventToController;}
+    Boolean getPrintMatchedString() { return printMatchedString; }
+    Boolean getSendEventToController() { return sendEventToController;}
 
 }

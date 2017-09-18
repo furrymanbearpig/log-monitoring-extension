@@ -1,3 +1,11 @@
+#prefix used to show metrics in all tiers (NOT RECOMMENDED)
+#metricPrefix: "Custom Metrics|LogMonitor|"
+
+# metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
+# Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
+
+metricPrefix: "Server|Component:<TIER_ID>|Log Monitor|"
+
 logs:
   - displayName: "Machine Agent Log"
     logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/"
@@ -10,13 +18,13 @@ logs:
          printMatchedString: true
          sendEventToController: true
         #displayName Should be unique across the patterns including the case.
-       - displayName: "Debug In Caps"
+       - displayName: "Debug In lowercase"
          pattern: "debug"
          matchExactString: true
          caseSensitive: false
          printMatchedString: false
          sendEventToController: false
-       - displayName: "Trace in any case"
+       - displayName: "Trace in lowercase"
          pattern: "trace"
          matchExactString: false
          caseSensitive: false
@@ -31,20 +39,22 @@ metricCharacterReplacer:
       replaceWith: ";"
     - replace: "\\|"
       replaceWith: "#"
+
 # Number of concurrent threads
 noOfThreads: 3
 
-#prefix used to show up metrics in AppDynamics 
-metricPrefix: "Custom Metrics|LogMonitor|"
 
+## For Custom Event Generation
+## Username should be your username@accountName
+## Please create a filter for custom events in your Controller with the given customEventType
+## Matched data will appear in the event summary
 controllerInfo:
-   - controllerUrl: "ajagtiani-mac.local:8090/controller"
-     username: "aditya"
+   - host: "ajagtiani-mac.local"
+     port: 8090
+     username: "aditya@customer1"
      password: "admin"
-     account: "customer1"
 
 eventParameters:
    - customEventType: "Log Monitor Custom Events"
      severity: "INFO"
-     summary: "Summary Message 1"
      applicationID: "8"

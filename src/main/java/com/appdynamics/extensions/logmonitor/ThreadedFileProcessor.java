@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.appdynamics.extensions.logmonitor.Constants.FILESIZE_METRIC_NAME;
-import static com.appdynamics.extensions.logmonitor.Constants.METRIC_PATH_SEPARATOR;
-import static com.appdynamics.extensions.logmonitor.Constants.SEARCH_STRING;
+import static com.appdynamics.extensions.logmonitor.Constants.*;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPattern;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurrentFileCreationTimeStamp;
 
@@ -40,8 +37,8 @@ public class ThreadedFileProcessor implements Runnable {
     private ControllerInfo controllerInfo;
     private EventParameters eventParameters;
 
-    public ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch,
-                                 LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile, ControllerInfo controllerInfo, EventParameters eventParameters) {
+    ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch,
+                          LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile, ControllerInfo controllerInfo, EventParameters eventParameters) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.countDownLatch = countDownLatch;
@@ -61,12 +58,12 @@ public class ThreadedFileProcessor implements Runnable {
         }
         try {
             processCurrentFile(searchPatterns);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void processCurrentFile(List<SearchPattern> searchPatterns) throws IOException {
+    private void processCurrentFile(List<SearchPattern> searchPatterns) throws Exception {
         String currentLine;
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
@@ -82,7 +79,7 @@ public class ThreadedFileProcessor implements Runnable {
 
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
-                                                         String stringToCheck, LogMetrics logMetrics) {
+                                                         String stringToCheck, LogMetrics logMetrics) throws Exception {
         for (SearchPattern searchPattern : searchPatterns) {
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
@@ -114,7 +111,7 @@ public class ThreadedFileProcessor implements Runnable {
         }
     }
 
-    private void buildCustomEvent(String propertyName, String propertyValue) {
+    private void buildCustomEvent(String propertyName, String propertyValue) throws Exception {
         CustomEventBuilder.createEvent(controllerInfo, eventParameters, propertyName, propertyValue);
     }
 

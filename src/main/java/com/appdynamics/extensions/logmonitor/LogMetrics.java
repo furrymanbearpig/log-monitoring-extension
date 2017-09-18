@@ -11,46 +11,47 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * @author Florencio Sarmiento
- *
  */
 public class LogMetrics {
 
-	private Map<String, BigInteger> metrics = new ConcurrentHashMap<String, BigInteger>();
-	private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
+    private Map<String, BigInteger> metrics = new ConcurrentHashMap<String, BigInteger>();
+    private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
 
-	public void add(String metricName) {
-		BigInteger value = metrics.get(metricName);
+    public void add(String metricName) {
+        BigInteger value = metrics.get(metricName);
 
-		if (value != null) {
-			value = value.add(BigInteger.ONE);
-		} else {
-			value = BigInteger.ONE;
-		}
+        if (value != null) {
+            value = value.add(BigInteger.ONE);
+        } else {
+            value = BigInteger.ONE;
+        }
 
-		add(metricName, value);
-	}
-	
-	public void add(String metricName, BigInteger value) {
-		this.metrics.put(metricName, value);
-	}
-	
-	public void addAll(Map<String, BigInteger> metrics) {
-		this.metrics.putAll(metrics);
-	}
-	
-	public Map<String, BigInteger> getMetrics() {
-		return this.metrics;
-	}
+        add(metricName, value);
+    }
 
-	public CopyOnWriteArrayList<FilePointer> getFilePointers() {return this.filePointers;}
+    public void add(String metricName, BigInteger value) {
+        this.metrics.put(metricName, value);
+    }
 
-	@Override
-	public String toString() {
-		return ReflectionToStringBuilder.toString(this,
-				ToStringStyle.SHORT_PREFIX_STYLE);
-	}
+    public void addAll(Map<String, BigInteger> metrics) {
+        this.metrics.putAll(metrics);
+    }
 
-	public void updateFilePointer(FilePointer filePointer) {
-		filePointers.add(filePointer);
-	}
+    public Map<String, BigInteger> getMetrics() {
+        return this.metrics;
+    }
+
+    public CopyOnWriteArrayList<FilePointer> getFilePointers() {
+        return this.filePointers;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this,
+                ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    public void updateFilePointer(FilePointer filePointer) {
+        filePointers.add(filePointer);
+    }
 }
