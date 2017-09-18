@@ -102,7 +102,7 @@ public class LogMonitor extends AManagedMonitor {
                     LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size());
                     uploadMetrics(logMetrics, getMetricPrefix(config));
                     if (CustomEventBuilder.eventsToBePosted.size() > 0) {
-                        uploadCustomEvents(CustomEventBuilder.eventsToBePosted, controllerInfo);
+                        uploadCustomEvents(controllerInfo);
                     }
                     filePointerProcessor.updateFilePointerFile();
 
@@ -206,12 +206,12 @@ public class LogMonitor extends AManagedMonitor {
         );
     }
 
-    private void uploadCustomEvents(List<URL> eventEndpoints, ControllerInfo controllerInfo) throws Exception {
+    private void uploadCustomEvents(ControllerInfo controllerInfo) throws Exception {
         CredentialsProvider provider = new BasicCredentialsProvider();
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(controllerInfo.getUsername(), controllerInfo.getPassword());
         provider.setCredentials(AuthScope.ANY, credentials);
         HttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-        for (URL url : eventEndpoints) {
+        for (URL url : CustomEventBuilder.eventsToBePosted) {
             HttpResponse response = httpClient.execute(new HttpPost(url.toURI()));
             logger.debug("Custom Event Attempted, Response Code = " + response.getStatusLine().getStatusCode());
         }
