@@ -43,18 +43,17 @@ metricCharacterReplacer:
 # Number of concurrent threads
 noOfThreads: 3
 
-
 ## For Custom Event Generation
 ## Username should be your username@accountName
 ## Please create a filter for custom events in your Controller with the given customEventType
 ## Matched data will appear in the event summary
 controllerInfo:
-   - host: "ajagtiani-mac.local"
-     port: 8090
-     username: "aditya@customer1"
-     password: "admin"
+   - host: ""
+     port: 0
+     username: ""
+     password: ""
 
 eventParameters:
    - customEventType: "Log Monitor Custom Events"
      severity: "INFO"
-     applicationID: "8"
+     applicationID: ""

@@ -28,6 +28,5 @@ public class CustomEventBuilder {
                 .setParameter("eventtype", EVENT_TYPE)
                 .setParameter("customeventtype", eventParameters.getCustomEventType());
         eventsToBePosted.add(builder.build().toURL());
-        ;
     }
 }

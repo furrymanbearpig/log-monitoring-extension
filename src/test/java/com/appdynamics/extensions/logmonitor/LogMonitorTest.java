@@ -134,5 +134,4 @@ public class LogMonitorTest {
         verifyPrivate(classUnderTest, never()).invoke("printCollectiveObservedCurrent",
                 metricName, value);
     }
-
 }

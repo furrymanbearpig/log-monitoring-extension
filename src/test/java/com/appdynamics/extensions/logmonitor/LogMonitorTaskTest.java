@@ -398,7 +398,7 @@ public class LogMonitorTaskTest {
     }
 
     @Test
-    public void testLogRolledOverTimeStampMatches() throws Exception {
+    public void testLogRolledOverTimeStamp() throws Exception {
         String dynamicLog1 = this.getClass().getClassLoader().getResource("dynamic-log-1.log").getPath();
 
         String testFilename = "active-dynamic-log-1.log";

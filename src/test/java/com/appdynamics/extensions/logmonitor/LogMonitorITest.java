@@ -21,5 +21,4 @@ public class LogMonitorITest {
         TaskOutput result = classUnderTest.execute(args, null);
         assertTrue(result.getStatusMessage().contains("successfully completed"));
     }
-
 }
