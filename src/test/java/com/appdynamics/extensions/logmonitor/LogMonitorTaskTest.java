@@ -6,13 +6,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
-import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
-import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
-import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -42,11 +39,6 @@ public class LogMonitorTaskTest {
 
     @Mock
     private FilePointerProcessor mockFilePointerProcessor;
-
-    @Mock
-    private ControllerInfo controllerInfo;
-    @Mock
-    private EventParameters eventParameters;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -89,7 +81,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
@@ -141,7 +133,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 4, result.getMetrics().size());
@@ -222,7 +214,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 7, result.getMetrics().size());
@@ -284,7 +276,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(15, result.getMetrics().size());
@@ -355,7 +347,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + File.separator + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(7, result.getMetrics().size());
@@ -433,7 +425,7 @@ public class LogMonitorTaskTest {
         filePointer.setFilename(log.getLogDirectory() + File.separator + testFilename);
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
-        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService, controllerInfo, eventParameters);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
 
         LogMetrics result = classUnderTest.call();
         assertEquals(3, result.getMetrics().size());

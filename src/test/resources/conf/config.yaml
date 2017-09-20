@@ -8,42 +8,36 @@ logs:
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Words with <"
          pattern: "<\\w*>"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Words with [jmx"
          pattern: "\\[JMX.*\\]"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Debug"
          pattern: "debug"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Info"
          pattern: "info"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Error"
          pattern: "error"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
 
   - displayName: ""
@@ -55,22 +49,18 @@ logs:
          matchExactString: true
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Info"
          pattern: "info"
          matchExactString: true
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
 
        - displayName: "Error"
          pattern: "error"
          matchExactString: true
          caseSensitive: false
          printMatchedString: false
-         sendEventToController: false
-
 
 metricCharacterReplacer:
     - replace: ","
@@ -82,14 +72,3 @@ threadTimeOut: 60
 
 #prefix used to show up metrics in AppDynamics 
 metricPrefix: "Custom Metrics|LogMonitor|"
-
-controllerInfo:
-   host: ""
-   port: 0
-   username: ""
-   password: ""
-
-eventParameters:
-   customEventType: ""
-   severity: ""
-   applicationID: ""

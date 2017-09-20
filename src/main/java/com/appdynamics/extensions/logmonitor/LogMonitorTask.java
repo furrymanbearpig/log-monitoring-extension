@@ -1,7 +1,5 @@
 package com.appdynamics.extensions.logmonitor;
 
-import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
-import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.exceptions.FileException;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
@@ -36,19 +34,15 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     private Log log;
     private Map<Pattern, String> replacers;
     private ExecutorService executorService;
-    private ControllerInfo controllerInfo;
-    private EventParameters eventParameters;
     private boolean hasLogRolledOver = false;
 
 
     LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers,
-                   ExecutorService executorService, ControllerInfo controllerInfo, EventParameters eventParameters) {
+                   ExecutorService executorService) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
         this.replacers = replacers;
         this.executorService = executorService;
-        this.controllerInfo = controllerInfo;
-        this.eventParameters = eventParameters;
     }
 
     public LogMetrics call() throws Exception {
@@ -80,13 +74,13 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                         randomAccessFile.seek(0);
                     }
                     executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
-                            replacers, curFile, controllerInfo, eventParameters, searchPatterns));
+                            replacers, curFile, searchPatterns));
                 }
             } else { // when the log has not rolled over
                 randomAccessFile.seek(curFilePointer);
                 latch = new CountDownLatch(1);
                 executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
-                        replacers, file, controllerInfo, eventParameters, searchPatterns)
+                        replacers, file, searchPatterns)
                 );
             }
             latch.await();

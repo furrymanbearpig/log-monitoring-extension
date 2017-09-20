@@ -1,7 +1,6 @@
 package com.appdynamics.extensions.logmonitor;
 
 import com.appdynamics.extensions.logmonitor.config.*;
-import com.appdynamics.extensions.logmonitor.customEvents.CustomEventBuilder;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
@@ -9,14 +8,6 @@ import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -25,7 +16,6 @@ import org.apache.log4j.PatternLayout;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +27,6 @@ import static com.appdynamics.extensions.logmonitor.Constants.*;
 import static com.appdynamics.extensions.logmonitor.config.LogConfigValidator.validate;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.convertValueToZeroIfNullOrNegative;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
-import static com.appdynamics.extensions.yml.YmlReader.logger;
 import static com.appdynamics.extensions.yml.YmlReader.readFromFile;
 
 /**
@@ -93,17 +82,11 @@ public class LogMonitor extends AManagedMonitor {
                             config.getNoOfThreads() : DEFAULT_NO_OF_THREADS;
                     threadPool = Executors.newFixedThreadPool(noOfThreads);
 
-                    ControllerInfo controllerInfo = config.getControllerInfo();
-                    EventParameters eventParameters = config.getEventParameters();
-
                     CompletionService<LogMetrics> logMonitorTasks =
-                            createConcurrentTasks(threadPool, logs, replacers, controllerInfo, eventParameters);
+                            createConcurrentTasks(threadPool, logs, replacers);
 
                     LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size(), config.getThreadTimeOut());
                     uploadMetrics(logMetrics, getMetricPrefix(config));
-                    if (logMetrics.getEventsToBePosted().size() > 0) {
-                        uploadCustomEvents(controllerInfo, logMetrics.getEventsToBePosted());
-                    }
                     filePointerProcessor.updateFilePointerFile();
 
                     return new TaskOutput("Log Monitoring task successfully completed");
@@ -123,13 +106,12 @@ public class LogMonitor extends AManagedMonitor {
     }
 
     private CompletionService<LogMetrics> createConcurrentTasks(ExecutorService threadPool,
-                                                                List<Log> logs, Map<Pattern, String> replacers,
-                                                                ControllerInfo controllerInfo, EventParameters eventParameters) {
+                                                                List<Log> logs, Map<Pattern, String> replacers) {
         CompletionService<LogMetrics> logMonitorTasks =
                 new ExecutorCompletionService<LogMetrics>(threadPool);
 
         for (Log log : logs) {
-            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers, threadPool, controllerInfo, eventParameters);
+            LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers, threadPool);
             logMonitorTasks.submit(task);
         }
         return logMonitorTasks;
@@ -205,17 +187,6 @@ public class LogMonitor extends AManagedMonitor {
         );
     }
 
-    private void uploadCustomEvents(ControllerInfo controllerInfo, List<URL> eventsToBePosted) throws Exception {
-        CredentialsProvider provider = new BasicCredentialsProvider();
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(controllerInfo.getUsername(), controllerInfo.getPassword());
-        provider.setCredentials(AuthScope.ANY, credentials);
-        HttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-        for (URL url : eventsToBePosted) {
-            HttpResponse response = httpClient.execute(new HttpPost(url.toURI()));
-            logger.debug("Custom Event Sent to the Controller, Response Code = " + response.getStatusLine().getStatusCode());
-        }
-    }
-
     private void printMetric(String metricName, BigInteger metricValue, String aggregation, String timeRollup, String cluster) {
         MetricWriter metricWriter = getMetricWriter(metricName, aggregation,
                 timeRollup, cluster);
@@ -251,7 +222,4 @@ public class LogMonitor extends AManagedMonitor {
         monitor.execute(taskArgs, null);
 
     }
-
 }
-
-// TODO Remove event sections from YML for other customers, keep the logic
