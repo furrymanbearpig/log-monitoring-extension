@@ -3,11 +3,11 @@ package com.appdynamics.extensions.logmonitor.util;
 import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.logmonitor.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
-import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * @author Florencio Sarmiento
  */
 public class LogMonitorUtil {
-
+    private static final Logger logger = LoggerFactory.getLogger(LogMonitorUtil.class);
     private static final String CASE_SENSITIVE_PATTERN = "(?-i)";
     private static final String CASE_INSENSITIVE_PATTERN = "(?i)";
 
@@ -51,7 +51,7 @@ public class LogMonitorUtil {
         if (searchStrings != null && !searchStrings.isEmpty()) {
 
             for (SearchString searchString : searchStrings) {
-                Pattern pattern = null;
+                Pattern pattern;
 
                 StringBuilder rawPatternsStringBuilder = new StringBuilder();
 
@@ -87,25 +87,9 @@ public class LogMonitorUtil {
             try {
                 randomAccessFile.close();
             } catch (IOException e) {
+                logger.debug("An error occurred while closing the random access file : " + e.getMessage());
             }
         }
-    }
-
-    public static String getNameFromPattern(String pattern) {
-        return pattern.replaceAll(CASE_INSENSITIVE_PATTERN, "").
-                replaceAll(CASE_SENSITIVE_PATTERN, "").
-                replaceAll("[(?<=\\s|^)]", "").
-                replaceAll("[(?=\\s|$)]", "");
-    }
-
-    public static List<String> getNamesFromSearchStrings(List<SearchString> searchStrings) {
-        List<String> names = Lists.newArrayList();
-        for(SearchString searchString : searchStrings) {
-            String name =  searchString.getCaseSensitive() ? searchString.getPattern().trim()
-                    : WordUtils.capitalizeFully(searchString.getPattern().trim());
-            names.add(name);
-        }
-        return names;
     }
 
     public static BigInteger convertValueToZeroIfNullOrNegative(BigInteger value) {

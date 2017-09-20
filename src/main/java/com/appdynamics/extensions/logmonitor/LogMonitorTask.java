@@ -11,8 +11,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.naming.ldap.Control;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -27,9 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurrentFileCreationTimeStamp;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resolvePath;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
 
 /**
  * Created by aditya.jagtiani on 9/12/17.
@@ -45,8 +41,8 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     private boolean hasLogRolledOver = false;
 
 
-    LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers, ExecutorService executorService,
-                          ControllerInfo controllerInfo, EventParameters eventParameters) {
+    LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers,
+                   ExecutorService executorService, ControllerInfo controllerInfo, EventParameters eventParameters) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
         this.replacers = replacers;
@@ -70,23 +66,27 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             String dynamicLogPath = dirPath + log.getLogName();
             curFilePointer = getCurrentFilePointerOffset(dynamicLogPath, file.getPath(), file.length());
             long curTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
+            List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
             if (hasLogRolledOver) {
                 filesToBeProcessed = getRequiredFilesFromDir(curTimeStampFromFilePointer, dirPath);
                 latch = new CountDownLatch(filesToBeProcessed.size());
                 for (File curFile : filesToBeProcessed) {
                     randomAccessFile = new OptimizedRandomAccessFile(curFile, "r");
-                    if (getCurrentFileCreationTimeStamp(curFile) == curTimeStampFromFilePointer) {// found the oldest file, start from CFP
+                    if (getCurrentFileCreationTimeStamp(curFile) == curTimeStampFromFilePointer) {
+                        // found the oldest file, start from CFP
                         randomAccessFile.seek(curFilePointer);
                     } else {
                         // start from 0
                         randomAccessFile.seek(0);
                     }
-                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, curFile, controllerInfo, eventParameters));
+                    executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
+                            replacers, curFile, controllerInfo, eventParameters, searchPatterns));
                 }
             } else { // when the log has not rolled over
                 randomAccessFile.seek(curFilePointer);
                 latch = new CountDownLatch(1);
-                executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics, replacers, file, controllerInfo, eventParameters)
+                executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
+                        replacers, file, controllerInfo, eventParameters, searchPatterns)
                 );
             }
             latch.await();
@@ -99,7 +99,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
 
-        FilePointer maxFilePointer = Collections.max(filePointers, new Comparator<FilePointer>() {
+        FilePointer latestFilePointer = Collections.max(filePointers, new Comparator<FilePointer>() {
             public int compare(FilePointer file1, FilePointer file2) {
                 if (file1.getFileCreationTime() > file2.getFileCreationTime())
                     return 1;
@@ -108,7 +108,8 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                 return 0;
             }
         });
-        filePointerProcessor.updateFilePointer(dynamicLogPath, maxFilePointer.getFilename(), maxFilePointer.getLastReadPosition(), maxFilePointer.getFileCreationTime());
+        filePointerProcessor.updateFilePointer(dynamicLogPath, latestFilePointer.getFilename(),
+                latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
 
 

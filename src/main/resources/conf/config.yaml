@@ -43,17 +43,20 @@ metricCharacterReplacer:
 # Number of concurrent threads
 noOfThreads: 3
 
+#Thread timeout in seconds
+threadTimeOut: 60
+
 ## For Custom Event Generation
 ## Username should be your username@accountName
 ## Please create a filter for custom events in your Controller with the given customEventType
 ## Matched data will appear in the event summary
 controllerInfo:
-   - host: ""
-     port: 0
-     username: ""
-     password: ""
+   host: ""
+   port: 0
+   username: ""
+   password: ""
 
 eventParameters:
-   - customEventType: "Log Monitor Custom Events"
-     severity: "INFO"
-     applicationID: ""
+   customEventType: "Log Monitor Custom Events"
+   severity: "INFO"
+   applicationID: ""

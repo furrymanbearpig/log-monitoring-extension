@@ -93,16 +93,16 @@ public class LogMonitor extends AManagedMonitor {
                             config.getNoOfThreads() : DEFAULT_NO_OF_THREADS;
                     threadPool = Executors.newFixedThreadPool(noOfThreads);
 
-                    ControllerInfo controllerInfo = config.getControllerInfo().get(0);
-                    EventParameters eventParameters = config.getEventParameters().get(0);
+                    ControllerInfo controllerInfo = config.getControllerInfo();
+                    EventParameters eventParameters = config.getEventParameters();
 
                     CompletionService<LogMetrics> logMonitorTasks =
                             createConcurrentTasks(threadPool, logs, replacers, controllerInfo, eventParameters);
 
-                    LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size());
+                    LogMetrics logMetrics = collectMetrics(logMonitorTasks, logs.size(), config.getThreadTimeOut());
                     uploadMetrics(logMetrics, getMetricPrefix(config));
-                    if (CustomEventBuilder.eventsToBePosted.size() > 0) {
-                        uploadCustomEvents(controllerInfo);
+                    if (logMetrics.getEventsToBePosted().size() > 0) {
+                        uploadCustomEvents(controllerInfo, logMetrics.getEventsToBePosted());
                     }
                     filePointerProcessor.updateFilePointerFile();
 
@@ -123,8 +123,8 @@ public class LogMonitor extends AManagedMonitor {
     }
 
     private CompletionService<LogMetrics> createConcurrentTasks(ExecutorService threadPool,
-                                                                List<Log> logs, Map<Pattern, String> replacers, ControllerInfo controllerInfo, EventParameters eventParameters) {
-
+                                                                List<Log> logs, Map<Pattern, String> replacers,
+                                                                ControllerInfo controllerInfo, EventParameters eventParameters) {
         CompletionService<LogMetrics> logMonitorTasks =
                 new ExecutorCompletionService<LogMetrics>(threadPool);
 
@@ -132,7 +132,6 @@ public class LogMonitor extends AManagedMonitor {
             LogMonitorTask task = new LogMonitorTask(filePointerProcessor, log, replacers, threadPool, controllerInfo, eventParameters);
             logMonitorTasks.submit(task);
         }
-
         return logMonitorTasks;
     }
 
@@ -152,13 +151,13 @@ public class LogMonitor extends AManagedMonitor {
         return validLogs;
     }
 
-    private LogMetrics collectMetrics(CompletionService<LogMetrics> parallelTasks, int noOfTasks) {
+    private LogMetrics collectMetrics(CompletionService<LogMetrics> parallelTasks, int noOfTasks, int threadTimeOut) {
         LogMetrics metrics = new LogMetrics();
 
         for (int i = 0; i < noOfTasks; i++) {
             try {
                 LogMetrics collectedMetrics =
-                        parallelTasks.take().get(THREAD_TIMEOUT, TimeUnit.SECONDS);
+                        parallelTasks.take().get(threadTimeOut, TimeUnit.SECONDS);
                 metrics.addAll(collectedMetrics.getMetrics());
 
             } catch (InterruptedException e) {
@@ -206,18 +205,18 @@ public class LogMonitor extends AManagedMonitor {
         );
     }
 
-    private void uploadCustomEvents(ControllerInfo controllerInfo) throws Exception {
+    private void uploadCustomEvents(ControllerInfo controllerInfo, List<URL> eventsToBePosted) throws Exception {
         CredentialsProvider provider = new BasicCredentialsProvider();
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(controllerInfo.getUsername(), controllerInfo.getPassword());
         provider.setCredentials(AuthScope.ANY, credentials);
         HttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-        for (URL url : CustomEventBuilder.eventsToBePosted) {
+        for (URL url : eventsToBePosted) {
             HttpResponse response = httpClient.execute(new HttpPost(url.toURI()));
-            logger.debug("Custom Event Attempted, Response Code = " + response.getStatusLine().getStatusCode());
+            logger.debug("Custom Event Sent to the Controller, Response Code = " + response.getStatusLine().getStatusCode());
         }
     }
 
-    void printMetric(String metricName, BigInteger metricValue, String aggregation, String timeRollup, String cluster) {
+    private void printMetric(String metricName, BigInteger metricValue, String aggregation, String timeRollup, String cluster) {
         MetricWriter metricWriter = getMetricWriter(metricName, aggregation,
                 timeRollup, cluster);
 
@@ -244,9 +243,7 @@ public class LogMonitor extends AManagedMonitor {
         ca.setThreshold(Level.DEBUG);
         LOGGER.getRootLogger().addAppender(ca);
 
-
         LogMonitor monitor = new LogMonitor();
-
 
         Map<String, String> taskArgs = new HashMap<String, String>();
         taskArgs.put(CONFIG_ARG, "/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
@@ -256,3 +253,5 @@ public class LogMonitor extends AManagedMonitor {
     }
 
 }
+
+// TODO Remove event sections from YML for other customers, keep the logic

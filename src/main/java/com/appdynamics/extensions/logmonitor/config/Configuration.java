@@ -18,25 +18,35 @@ public class Configuration {
 
     private int noOfThreads;
 
-    public List<ControllerInfo> getControllerInfo() {
+    public int getThreadTimeOut() {
+        return threadTimeOut;
+    }
+
+    public void setThreadTimeOut(int threadTimeOut) {
+        this.threadTimeOut = threadTimeOut;
+    }
+
+    private int threadTimeOut;
+
+    public ControllerInfo getControllerInfo() {
         return controllerInfo;
     }
 
-    public void setControllerInfo(List<ControllerInfo> controllerInfo) {
+    public void setControllerInfo(ControllerInfo controllerInfo) {
         this.controllerInfo = controllerInfo;
     }
 
-    public List<EventParameters> getEventParameters() {
+    public EventParameters getEventParameters() {
         return eventParameters;
     }
 
-    public void setEventParameters(List<EventParameters> eventParameters) {
+    public void setEventParameters(EventParameters eventParameters) {
         this.eventParameters = eventParameters;
     }
 
-    private List<ControllerInfo> controllerInfo;
+    private ControllerInfo controllerInfo;
 
-    private List<EventParameters> eventParameters;
+    private EventParameters eventParameters;
 
     public String getMetricPrefix() {
         return metricPrefix;

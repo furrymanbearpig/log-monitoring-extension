@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.logmonitor;
 
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -13,9 +14,9 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * @author Florencio Sarmiento
  */
 public class LogMetrics {
-
     private Map<String, BigInteger> metrics = new ConcurrentHashMap<String, BigInteger>();
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
+    private CopyOnWriteArrayList<URL> eventsToBePosted = new CopyOnWriteArrayList<URL>();
 
     public void add(String metricName) {
         BigInteger value = metrics.get(metricName);
@@ -45,6 +46,7 @@ public class LogMetrics {
         return this.filePointers;
     }
 
+    public CopyOnWriteArrayList<URL> getEventsToBePosted() { return this.eventsToBePosted;}
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this,
@@ -54,4 +56,6 @@ public class LogMetrics {
     public void updateFilePointer(FilePointer filePointer) {
         filePointers.add(filePointer);
     }
+
+    public void updateEventsToBePosted(URL url) { eventsToBePosted.add(url); }
 }

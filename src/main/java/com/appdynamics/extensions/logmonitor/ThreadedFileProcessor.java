@@ -36,9 +36,11 @@ public class ThreadedFileProcessor implements Runnable {
     private File currentFile;
     private ControllerInfo controllerInfo;
     private EventParameters eventParameters;
+    private List<SearchPattern> searchPatterns;
 
     ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch,
-                          LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile, ControllerInfo controllerInfo, EventParameters eventParameters) {
+                          LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile,
+                          ControllerInfo controllerInfo, EventParameters eventParameters, List<SearchPattern> searchPatterns) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.countDownLatch = countDownLatch;
@@ -47,10 +49,10 @@ public class ThreadedFileProcessor implements Runnable {
         this.currentFile = currentFile;
         this.controllerInfo = controllerInfo;
         this.eventParameters = eventParameters;
+        this.searchPatterns = searchPatterns;
     }
 
     public void run() {
-        List<SearchPattern> searchPatterns = createPattern(log.getSearchStrings());
         if (LOGGER.isDebugEnabled()) {
             for (SearchPattern searchPattern : searchPatterns) {
                 LOGGER.debug(String.format("Searching for [%s]", searchPattern.getPattern().pattern()));
@@ -59,7 +61,7 @@ public class ThreadedFileProcessor implements Runnable {
         try {
             processCurrentFile(searchPatterns);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.debug("An error has occurred in the Log Monitoring Task : " + e.getMessage());
         }
     }
 
@@ -77,13 +79,13 @@ public class ThreadedFileProcessor implements Runnable {
         countDownLatch.countDown();
     }
 
-
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
                                                          String stringToCheck, LogMetrics logMetrics) throws Exception {
         for (SearchPattern searchPattern : searchPatterns) {
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
-            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Global Seed Count";
+            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR
+                    + "Global Seed Count";
             if (!logMetrics.getMetrics().containsKey(currentKey)) {
                 logMetrics.add(currentKey, BigInteger.ZERO);
             }
@@ -94,9 +96,11 @@ public class ThreadedFileProcessor implements Runnable {
                 String replacedWord = applyReplacers(word);
                 if (searchPattern.getPrintMatchedString()) {
                     if (searchPattern.getCaseSensitive()) {
-                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + replacedWord);
+                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR +
+                                "Matches" + METRIC_PATH_SEPARATOR + replacedWord);
                     } else {
-                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR + "Matches" + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
+                        logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR +
+                                "Matches" + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
                     }
                 }
                 // sending event to controller for United
@@ -104,7 +108,8 @@ public class ThreadedFileProcessor implements Runnable {
                     if (searchPattern.getCaseSensitive()) {
                         buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(), replacedWord);
                     } else {
-                        buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(), WordUtils.capitalizeFully(replacedWord));
+                        buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(),
+                                WordUtils.capitalizeFully(replacedWord));
                     }
                 }
             }
@@ -112,7 +117,7 @@ public class ThreadedFileProcessor implements Runnable {
     }
 
     private void buildCustomEvent(String propertyName, String propertyValue) throws Exception {
-        CustomEventBuilder.createEvent(controllerInfo, eventParameters, propertyName, propertyValue);
+        logMetrics.updateEventsToBePosted(CustomEventBuilder.createEvent(controllerInfo, eventParameters, propertyName, propertyValue));
     }
 
     private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {
