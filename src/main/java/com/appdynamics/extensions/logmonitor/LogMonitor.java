@@ -207,7 +207,7 @@ public class LogMonitor extends AManagedMonitor {
     }
 
     public static void main(String[] args) throws TaskExecutionException, IOException {
-
+    //TODO check the last read position, it resets to 0. it should be retained.
         ConsoleAppender ca = new ConsoleAppender();
         ca.setWriter(new OutputStreamWriter(System.out));
         ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));

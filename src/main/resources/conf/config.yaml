@@ -8,14 +8,14 @@ metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
 
 logs:
   - displayName: "Machine Agent Log"
-    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/"
-    logName: "machine-agent.log"
+    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/test"
+    logName: "error.log"
     searchStrings:
-       - displayName: "Info in lowercase"
-         pattern: "info"
+       - displayName: "Error in uppercase"
+         pattern: "ERROR"
          matchExactString: false
          caseSensitive: false
-         printMatchedString: true
+         printMatchedString: false
         #displayName Should be unique across the patterns including the case.
        - displayName: "Debug In lowercase"
          pattern: "debug"

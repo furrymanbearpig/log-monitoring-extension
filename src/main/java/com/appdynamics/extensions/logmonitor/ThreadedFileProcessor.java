@@ -59,6 +59,7 @@ public class ThreadedFileProcessor implements Runnable {
 
     private void processCurrentFile(List<SearchPattern> searchPatterns) throws Exception {
         String currentLine;
+        curFilePointer = randomAccessFile.getFilePointer();
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
             curFilePointer = randomAccessFile.getFilePointer();
