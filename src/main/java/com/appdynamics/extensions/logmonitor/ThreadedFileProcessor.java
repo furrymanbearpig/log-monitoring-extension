@@ -78,7 +78,7 @@ public class ThreadedFileProcessor implements Runnable {
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
             String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR
-                    + "Global Seed Count";
+                    + "Occurrences";
             if (!logMetrics.getMetrics().containsKey(currentKey)) {
                 logMetrics.add(currentKey, BigInteger.ZERO);
             }

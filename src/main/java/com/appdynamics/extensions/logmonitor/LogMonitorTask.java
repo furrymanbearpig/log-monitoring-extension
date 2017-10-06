@@ -4,17 +4,17 @@ import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.exceptions.FileException;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
+import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -93,19 +93,10 @@ public class LogMonitorTask implements Callable<LogMetrics> {
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
 
-        FilePointer latestFilePointer = Collections.max(filePointers, new Comparator<FilePointer>() {
-            public int compare(FilePointer file1, FilePointer file2) {
-                if (file1.getFileCreationTime() > file2.getFileCreationTime())
-                    return 1;
-                else if (file1.getFileCreationTime() < file2.getFileCreationTime())
-                    return -1;
-                return 0;
-            }
-        });
+        FilePointer latestFilePointer = LogMonitorUtil.getLatestFilePointer(filePointers);
         filePointerProcessor.updateFilePointer(dynamicLogPath, latestFilePointer.getFilename(),
                 latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
-
 
     private String resolveDirPath(String confDirPath) {
         String resolvedPath = resolvePath(confDirPath);

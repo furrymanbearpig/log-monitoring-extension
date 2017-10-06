@@ -3,18 +3,19 @@ package com.appdynamics.extensions.logmonitor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
+import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
@@ -23,13 +24,11 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -86,9 +85,9 @@ public class LogMonitorTaskTest {
         LogMetrics result = classUnderTest.call();
         assertEquals(log.getSearchStrings().size() + 1, result.getMetrics().size());
 
-        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
-        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
-        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Occurrences").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Occurrences").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Occurrences").intValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -142,9 +141,9 @@ public class LogMonitorTaskTest {
         assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Matches|Info").intValue());
         assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Matches|Error").intValue());
 
-        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
-        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
-        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Occurrences").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Occurrences").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Occurrences").intValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -226,12 +225,12 @@ public class LogMonitorTaskTest {
         assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern ]|Matches|]").intValue());
         assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern .|Matches|.").intValue());
 
-        assertEquals(5, result.getMetrics().get("TestLog|Search String|Pattern <|Global Seed Count").intValue());
-        assertEquals(6, result.getMetrics().get("TestLog|Search String|Pattern >|Global Seed Count").intValue());
-        assertEquals(16, result.getMetrics().get("TestLog|Search String|Pattern *|Global Seed Count").intValue());
-        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern [|Global Seed Count").intValue());
-        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern ]|Global Seed Count").intValue());
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern .|Global Seed Count").intValue());
+        assertEquals(5, result.getMetrics().get("TestLog|Search String|Pattern <|Occurrences").intValue());
+        assertEquals(6, result.getMetrics().get("TestLog|Search String|Pattern >|Occurrences").intValue());
+        assertEquals(16, result.getMetrics().get("TestLog|Search String|Pattern *|Occurrences").intValue());
+        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern [|Occurrences").intValue());
+        assertEquals(23, result.getMetrics().get("TestLog|Search String|Pattern ]|Occurrences").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Pattern .|Occurrences").intValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetrics().get("TestLog|File size (Bytes)").intValue());
@@ -356,12 +355,16 @@ public class LogMonitorTaskTest {
         assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Matches|Info").intValue());
         assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Matches|Error").intValue());
 
-        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
-        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
-        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
+        assertEquals(13, result.getMetrics().get("TestLog|Search String|Debug|Occurrences").intValue());
+        assertEquals(24, result.getMetrics().get("TestLog|Search String|Info|Occurrences").intValue());
+        assertEquals(7, result.getMetrics().get("TestLog|Search String|Error|Occurrences").intValue());
 
         long filesize = getFileSize(log.getLogDirectory(), log.getLogName());
         assertEquals(filesize, result.getMetrics().get("TestLog|File size (Bytes)").intValue());
+
+        FilePointer filePointerAfterCurrentRun = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
+        Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer(filePointerAfterCurrentRun.getFilename(),
+                filePointerAfterCurrentRun.getFilename(), filePointerAfterCurrentRun.getLastReadPosition(), filePointerAfterCurrentRun.getFileCreationTime());
 
         // simulate our filepointer was updated
         filePointer.updateLastReadPosition(filesize);
@@ -384,9 +387,13 @@ public class LogMonitorTaskTest {
         assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Matches|Debug").intValue());
         assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Matches|Info").intValue());
 
-        assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Global Seed Count").intValue());
-        assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Global Seed Count").intValue());
-        assertEquals(0, result.getMetrics().get("TestLog|Search String|Error|Global Seed Count").intValue());
+        assertEquals(2, result.getMetrics().get("TestLog|Search String|Info|Occurrences").intValue());
+        assertEquals(3, result.getMetrics().get("TestLog|Search String|Debug|Occurrences").intValue());
+        assertEquals(0, result.getMetrics().get("TestLog|Search String|Error|Occurrences").intValue());
+
+        filePointerAfterCurrentRun = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
+        Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer(filePointerAfterCurrentRun.getFilename(),
+                filePointerAfterCurrentRun.getFilename(), filePointerAfterCurrentRun.getLastReadPosition(), filePointerAfterCurrentRun.getFileCreationTime());
     }
 
     @Test
@@ -430,8 +437,8 @@ public class LogMonitorTaskTest {
         LogMetrics result = classUnderTest.call();
         assertEquals(3, result.getMetrics().size());
 
-        assertEquals(3, result.getMetrics().get("active-dynamic-*|Search String|Debug|Global Seed Count").intValue());
-        assertEquals(0, result.getMetrics().get("active-dynamic-*|Search String|Error|Global Seed Count").intValue());
+        assertEquals(3, result.getMetrics().get("active-dynamic-*|Search String|Debug|Occurrences").intValue());
+        assertEquals(0, result.getMetrics().get("active-dynamic-*|Search String|Error|Occurrences").intValue());
 
         long filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
@@ -470,11 +477,94 @@ public class LogMonitorTaskTest {
         updateLogFile(testFilepath, logsToAdd, true);
         result = classUnderTest.call();
         assertEquals(3, result.getMetrics().size());
-        assertEquals(107, result.getMetrics().get("active-dynamic-*|Search String|Error|Global Seed Count").intValue());
-        assertEquals(103, result.getMetrics().get("active-dynamic-*|Search String|Debug|Global Seed Count").intValue());
+        assertEquals(107, result.getMetrics().get("active-dynamic-*|Search String|Error|Occurrences").intValue());
+        assertEquals(103, result.getMetrics().get("active-dynamic-*|Search String|Debug|Occurrences").intValue());
 
         filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
+    }
+
+    @Test
+    public void testFilePointerHasLatestTimeStampAfterRolloverExecution() throws Exception {
+        String dynamicLog1 = this.getClass().getClassLoader().getResource("dynamic-log-1.log").getPath();
+
+        String testFilename = "active-dynamic-log-1.log";
+        String testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
+        copyFile(dynamicLog1, testFilepath);
+
+        Log log = new Log();
+        log.setLogDirectory(getTargetDir().getPath());
+        log.setLogName("active-dynamic-*");
+
+        SearchString searchString = new SearchString();
+        searchString.setCaseSensitive(false);
+        searchString.setMatchExactString(true);
+        searchString.setPattern("debug");
+        searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(false);
+        searchString.setSendEventToController(false);
+
+        SearchString searchString1 = new SearchString();
+        searchString1.setCaseSensitive(false);
+        searchString1.setMatchExactString(true);
+        searchString1.setPattern("error");
+        searchString1.setDisplayName("Error");
+        searchString1.setPrintMatchedString(false);
+        searchString1.setSendEventToController(false);
+
+        log.setSearchStrings(Lists.newArrayList(searchString, searchString1));
+
+        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
+
+        FilePointer filePointer = new FilePointer();
+        filePointer.setFilename(log.getLogDirectory() + File.separator + testFilename);
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
+        classUnderTest = new LogMonitorTask(mockFilePointerProcessor, log, replacers, executorService);
+
+        LogMetrics result = classUnderTest.call();
+        long filesize = getFileSize(log.getLogDirectory(), testFilename);
+        FilePointer latestFilePointer = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
+        Mockito.verify(mockFilePointerProcessor, times(1))
+                .updateFilePointer("./target/active-dynamic-*",
+                latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
+
+        // simulate our filepointer was updated
+        filePointer.updateLastReadPosition(filesize);
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString()))
+                .thenReturn(filePointer);
+
+        List<String> logsToAdd = Lists.newArrayList();
+        for (int i = 0; i < 100; i++) {
+            logsToAdd.add(new Date() + "	DEBUG	Statement " + i + "\n");
+        }
+
+        updateLogFile(testFilepath, logsToAdd, true);
+
+        // simulate new file created with different name
+        Thread.sleep(1000);
+        String dynamicLog2 = this.getClass().getClassLoader().getResource("dynamic-log-2.log").getPath();
+
+        testFilename = "active-dynamic-log-2.log";
+        testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
+        copyFile(dynamicLog2, testFilepath);
+
+        // simulate another file created with different name
+        Thread.sleep(1000);
+        String dynamicLog3 = this.getClass().getClassLoader().getResource("dynamic-log-3.log").getPath();
+        testFilename = "active-dynamic-log-3.log";
+        testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
+        copyFile(dynamicLog3, testFilepath);
+        logsToAdd.clear();
+        for (int i = 0; i < 100; i++) {
+            logsToAdd.add(new Date() + "	ERROR	Statement " + i + "\n");
+        }
+
+        updateLogFile(testFilepath, logsToAdd, true);
+        result = classUnderTest.call();
+
+        latestFilePointer = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
+        Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer("./target/active-dynamic-*",
+                latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
 
     private long getFileSize(String logDir, String logName) throws Exception {

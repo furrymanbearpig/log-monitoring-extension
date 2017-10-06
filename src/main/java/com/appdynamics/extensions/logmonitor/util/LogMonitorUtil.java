@@ -3,6 +3,7 @@ package com.appdynamics.extensions.logmonitor.util;
 import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.logmonitor.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
+import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.lang.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
@@ -18,7 +19,10 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 /**
@@ -106,5 +110,17 @@ public class LogMonitorUtil {
                 = Files.getFileAttributeView(p, BasicFileAttributeView.class)
                 .readAttributes();
         return view.creationTime().toMillis();
+    }
+
+    public static FilePointer getLatestFilePointer(CopyOnWriteArrayList<FilePointer> filePointers) {
+        return Collections.max(filePointers, new Comparator<FilePointer>() {
+            public int compare(FilePointer file1, FilePointer file2) {
+                if (file1.getFileCreationTime() > file2.getFileCreationTime())
+                    return 1;
+                else if (file1.getFileCreationTime() < file2.getFileCreationTime())
+                    return -1;
+                return 0;
+            }
+        });
     }
 }
