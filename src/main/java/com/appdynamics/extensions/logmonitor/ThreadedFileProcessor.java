@@ -53,7 +53,7 @@ public class ThreadedFileProcessor implements Runnable {
         try {
             processCurrentFile(searchPatterns);
         } catch (Exception e) {
-            LOGGER.debug("An error has occurred in the Log Monitoring Task : " + e.getMessage());
+            LOGGER.debug("An error has occurred in the Log Monitoring Task : ", e);
         }
     }
 
