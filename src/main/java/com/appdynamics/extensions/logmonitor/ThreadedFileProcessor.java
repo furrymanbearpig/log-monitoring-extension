@@ -8,7 +8,10 @@
 
 package com.appdynamics.extensions.logmonitor;
 
+import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
+import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import com.appdynamics.extensions.logmonitor.config.Log;
+import com.appdynamics.extensions.logmonitor.customEvents.CustomEventBuilder;
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -39,17 +42,21 @@ public class ThreadedFileProcessor implements Runnable {
     private Map<Pattern, String> replacers;
     private long curFilePointer;
     private File currentFile;
+    private ControllerInfo controllerInfo;
+    private EventParameters eventParameters;
     private List<SearchPattern> searchPatterns;
 
     ThreadedFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch countDownLatch,
                           LogMetrics logMetrics, Map<Pattern, String> replacers, File currentFile,
-                          List<SearchPattern> searchPatterns) {
+                          ControllerInfo controllerInfo, EventParameters eventParameters, List<SearchPattern> searchPatterns) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.countDownLatch = countDownLatch;
         this.logMetrics = logMetrics;
         this.replacers = replacers;
         this.currentFile = currentFile;
+        this.controllerInfo = controllerInfo;
+        this.eventParameters = eventParameters;
         this.searchPatterns = searchPatterns;
     }
 
@@ -109,8 +116,21 @@ public class ThreadedFileProcessor implements Runnable {
                                 "Matches" + METRIC_PATH_SEPARATOR + WordUtils.capitalizeFully(replacedWord));
                     }
                 }
+                // sending event to controller for United
+                if (searchPattern.getSendEventToController()) {
+                    if (searchPattern.getCaseSensitive()) {
+                        buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(), replacedWord);
+                    } else {
+                        buildCustomEvent(logMetricPrefix + searchPattern.getDisplayName(),
+                                WordUtils.capitalizeFully(replacedWord));
+                    }
+                }
             }
         }
+    }
+
+    private void buildCustomEvent(String propertyName, String propertyValue) throws Exception {
+        logMetrics.updateEventsToBePosted(CustomEventBuilder.createEvent(controllerInfo, eventParameters, propertyName, propertyValue));
     }
 
     private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {

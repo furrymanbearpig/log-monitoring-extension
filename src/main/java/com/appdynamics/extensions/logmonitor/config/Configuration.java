@@ -36,6 +36,26 @@ public class Configuration {
 
     private int threadTimeOut;
 
+    public ControllerInfo getControllerInfo() {
+        return controllerInfo;
+    }
+
+    public void setControllerInfo(ControllerInfo controllerInfo) {
+        this.controllerInfo = controllerInfo;
+    }
+
+    public EventParameters getEventParameters() {
+        return eventParameters;
+    }
+
+    public void setEventParameters(EventParameters eventParameters) {
+        this.eventParameters = eventParameters;
+    }
+
+    private ControllerInfo controllerInfo;
+
+    private EventParameters eventParameters;
+
     public String getMetricPrefix() {
         return metricPrefix;
     }
