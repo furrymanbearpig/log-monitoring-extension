@@ -10,7 +10,8 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.appdynamics.extensions.logmonitor.config.ControllerInfo;
+import com.appdynamics.extensions.logmonitor.config.EventParameters;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -34,15 +35,19 @@ public class LogMonitorTask implements Callable<LogMetrics> {
     private Log log;
     private Map<Pattern, String> replacers;
     private ExecutorService executorService;
+    private ControllerInfo controllerInfo;
+    private EventParameters eventParameters;
     private boolean hasLogRolledOver = false;
 
 
     LogMonitorTask(FilePointerProcessor filePointerProcessor, Log log, Map<Pattern, String> replacers,
-                   ExecutorService executorService) {
+                   ExecutorService executorService, ControllerInfo controllerInfo, EventParameters eventParameters) {
         this.filePointerProcessor = filePointerProcessor;
         this.log = log;
         this.replacers = replacers;
         this.executorService = executorService;
+        this.controllerInfo = controllerInfo;
+        this.eventParameters = eventParameters;
     }
 
     public LogMetrics call() throws Exception {
@@ -74,13 +79,13 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                         randomAccessFile.seek(0);
                     }
                     executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
-                            replacers, curFile, searchPatterns));
+                            replacers, curFile, controllerInfo, eventParameters, searchPatterns));
                 }
             } else { // when the log has not rolled over
                 randomAccessFile.seek(curFilePointer);
                 latch = new CountDownLatch(1);
                 executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
-                        replacers, file, searchPatterns)
+                        replacers, file, controllerInfo, eventParameters, searchPatterns)
                 );
             }
             latch.await();

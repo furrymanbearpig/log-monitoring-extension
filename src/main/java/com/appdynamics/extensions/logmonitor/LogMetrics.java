@@ -16,6 +16,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 public class LogMetrics {
     private Map<String, BigInteger> metrics = new ConcurrentHashMap<String, BigInteger>();
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
+    private CopyOnWriteArrayList<URL> eventsToBePosted = new CopyOnWriteArrayList<URL>();
 
     public void add(String metricName) {
         BigInteger value = metrics.get(metricName);
@@ -45,6 +46,7 @@ public class LogMetrics {
         return this.filePointers;
     }
 
+    public CopyOnWriteArrayList<URL> getEventsToBePosted() { return this.eventsToBePosted;}
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this,
@@ -55,4 +57,5 @@ public class LogMetrics {
         filePointers.add(filePointer);
     }
 
+    public void updateEventsToBePosted(URL url) { eventsToBePosted.add(url); }
 }

@@ -8,25 +8,28 @@ metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
 
 logs:
   - displayName: "Machine Agent Log"
-    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/test"
-    logName: "error.log"
+    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/"
+    logName: "machine-agent.log"
     searchStrings:
-       - displayName: "Error in uppercase"
-         pattern: "ERROR"
+       - displayName: "Info in lowercase"
+         pattern: "info"
          matchExactString: false
          caseSensitive: false
-         printMatchedString: false
+         printMatchedString: true
+         sendEventToController: false
         #displayName Should be unique across the patterns including the case.
        - displayName: "Debug In lowercase"
          pattern: "debug"
-         matchExactString: true
+         matchExactString: false
          caseSensitive: false
          printMatchedString: false
+         sendEventToController: false
        - displayName: "Trace in lowercase"
          pattern: "trace"
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
+         sendEventToController: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -38,7 +41,22 @@ metricCharacterReplacer:
       replaceWith: "#"
 
 # Number of concurrent threads
-noOfThreads: 3
+noOfThreads: 5
 
 #Thread timeout in seconds
 threadTimeOut: 60
+
+## For Custom Event Generation
+## Username should be your username@accountName
+## Please create a filter for custom events in your Controller with the given customEventType
+## Matched data will appear in the event summary
+controllerInfo:
+   host: ""
+   port: 0
+   username: ""
+   password: ""
+
+eventParameters:
+   customEventType: "Log Monitor Custom Events"
+   severity: "INFO"
+   applicationID: ""

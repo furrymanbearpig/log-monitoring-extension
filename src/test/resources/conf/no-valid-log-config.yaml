@@ -31,3 +31,14 @@ threadTimeOut: 60
 
 #prefix used to show up metrics in AppDynamics 
 metricPrefix: "Custom Metrics|LogMonitor|"
+
+controllerInfo:
+   host: ""
+   port: 0
+   username: ""
+   password: ""
+
+eventParameters:
+   customEventType: ""
+   severity: ""
+   applicationID: ""
