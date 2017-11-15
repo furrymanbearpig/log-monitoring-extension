@@ -1,6 +1,6 @@
 # Log Monitoring Extension  
 
-##Use Case
+## Use Case
 
 Use for monitoring log files to report:
 
@@ -13,7 +13,7 @@ This extension works only with standalone machine agent.
 
 Note: By default, the Machine agent can only send a fixed number of metrics to the controller. This extension can potentially report hundreds of metrics, so to change this limit, please follow the instructions mentioned [here](https://docs.appdynamics.com/display/PRO40/Metrics+Limits).
 
-##Installation
+## Installation
 1. Run 'mvn clean install' from log-monitoring-extension directory
 2. Copy and unzip LogMonitor.zip from 'target' directory into \<machine_agent_dir\>/monitors/
 3. Edit config.yaml file in LogMonitor/conf file and provide the required configuration (see Configuration section)
@@ -83,29 +83,29 @@ metricCharacterReplacer:
 # Number of concurrent threads
 noOfThreads: 3
 
-#Thread timeout in seconds
+# Thread timeout in seconds
 threadTimeOut: 60
 </pre>
 
-##Metric Path
+## Metric Path
 
 Application Infrastructure Performance|\<Tier\>|Custom Metrics|LogMonitor|\<LogName\>|Search String|\<searchStrings displayName\>|\<Matched Term\>
 
 Application Infrastructure Performance|\<Tier\>|Custom Metrics|LogMonitor|\<LogName\>|File size (Bytes)
 
-##Custom Dashboard
+## Custom Dashboard
 ![](https://raw.github.com/Appdynamics/log-monitoring-extension/master/LogMonitorCustomDashboard.png)
 
 ##Contributing
 
 Always feel free to fork and contribute any changes directly here on GitHub
 
-##Community
+## Community
 
 Find out more in the [AppSphere](http://community.appdynamics.com/t5/eXchange-Community-AppDynamics/Log-Monitoring-Extension/idi-p/8830) community.
 
 
-##Support
+## Support
 
 For any questions or feature request, please contact [AppDynamics Center of Excellence](mailto:ace-request@appdynamics.com).
 
