@@ -5,7 +5,7 @@
 Use for monitoring log files to report:
 
 - the no of occurrences of each search term provided
-- filesize
+- filesize 
 
 Typical usage is counting how many 'Warn' and/or 'Error' are logged. 
 
@@ -33,39 +33,59 @@ Note: By default, the Machine agent can only send a fixed number of metrics to t
 | searchStrings/pattern | The strings to search, e.g. "debug", "info", "error". Supports regex if matchExactString is set to false. Note, this is case insensitive regardless.|
 | searchStrings/matchExactString | Allowed values: **true** or **false**. Set to true if you only want to match the exact string, otherwise set to false for regex support and contains in string. |
 | searchStrings/caseSensitive | Allowed values: **true** or **false**. Set to true if you want the search to be case sensitive, otherwise false |
+| searchStrings/printMatchedString | Allowed values: **true** or **false**. Set to true if you wish to see the strings that were matched. Setting it to false will only show the number of matches found. |
 | ----- | ----- |
 | noOfThreads | The no of threads used to process multiple logs concurrently |
 | metricPrefix | The path prefix for viewing metrics in the metric browser. Default value is "Custom Metrics\|LogMonitor\|" |
 
 Below is an example config with multiple log files to monitor, one of which uses the dynamic filename and search string regex support.
 
-~~~~
+<pre>
+#prefix used to show metrics in all tiers (NOT RECOMMENDED)
+#metricPrefix: "Custom Metrics|LogMonitor|"
+
+# metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
+# Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
+
+metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
+
 logs:
   - displayName: "Machine Agent Log"
-    logDirectory: "/Users/Muddam/AppDynamics/MachineAgent_4.1.2/logs"
-    logName: "machine-agent.log"
+    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/test"
+    logName: "error.log"
     searchStrings:
-        #displayName Should be unique across the patterns including the case.
-       - displayName: "Debug In Caps"
-         pattern: "DEBUG"
-         matchExactString: false
-         caseSensitive: true
-       - displayName: "Debug"
-         pattern: "Debug"
-         matchExactString: false
-         caseSensitive: true
-       - displayName: "Info"
-         pattern: "Info"
+       - displayName: "Error in uppercase"
+         pattern: "ERROR"
          matchExactString: false
          caseSensitive: false
+         printMatchedString: false
+        #displayName Should be unique across the patterns including the case.
+       - displayName: "Debug In lowercase"
+         pattern: "debug"
+         matchExactString: true
+         caseSensitive: false
+         printMatchedString: false
+       - displayName: "Trace in lowercase"
+         pattern: "trace"
+         matchExactString: false
+         caseSensitive: false
+         printMatchedString: false
 
-        
+#Replaces characters in metric name with the specified characters.
+# "replace" takes any regular expression
+# "replaceWith" takes the string to replace the matched characters
+metricCharacterReplacer:
+    - replace: ":"
+      replaceWith: ";"
+    - replace: "\\|"
+      replaceWith: "#"
+
 # Number of concurrent threads
 noOfThreads: 3
 
-#prefix used to show up metrics in AppDynamics 
-metricPrefix: "Custom Metrics|LogMonitor|"
-~~~~
+#Thread timeout in seconds
+threadTimeOut: 60
+</pre>
 
 ##Metric Path
 
