@@ -21,7 +21,7 @@ Note: By default, the Machine agent can only send a fixed number of metrics to t
 
 ## Configuration
 
-###config.yaml
+### config.yaml
 
 
 | Param | Description |
