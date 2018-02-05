@@ -479,9 +479,6 @@ public class LogMonitorTaskTest {
         assertEquals(3, result.getMetrics().size());
         assertEquals(107, result.getMetrics().get("active-dynamic-*|Search String|Error|Occurrences").intValue());
         assertEquals(103, result.getMetrics().get("active-dynamic-*|Search String|Debug|Occurrences").intValue());
-
-        filesize = getFileSize(log.getLogDirectory(), testFilename);
-        assertEquals(filesize, result.getMetrics().get("active-dynamic-*|File size (Bytes)").intValue());
     }
 
     @Test
