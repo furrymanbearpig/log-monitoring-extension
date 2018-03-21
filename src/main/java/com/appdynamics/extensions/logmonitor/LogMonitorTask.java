@@ -53,16 +53,16 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         this.executorService = executorService;
     }
 
-    public LogMetrics call() throws Exception {
+    public LogMetrics call() {
         String dirPath = resolveDirPath(log.getLogDirectory());
         LOGGER.info("Log monitor task started...");
         LogMetrics logMetrics = new LogMetrics();
         OptimizedRandomAccessFile randomAccessFile = null;
         long curFilePointer;
-
+        File file = null;
         try {
-            File file = getLogFile(dirPath);
-            randomAccessFile = new OptimizedRandomAccessFile(file, "r");
+            file = getLogFile(dirPath);
+
             List<File> filesToBeProcessed;
             CountDownLatch latch;
             String dynamicLogPath = dirPath + log.getLogName();
@@ -85,6 +85,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
                             replacers, curFile, searchPatterns));
                 }
             } else { // when the log has not rolled over
+                randomAccessFile = new OptimizedRandomAccessFile(file, "r");
                 randomAccessFile.seek(curFilePointer);
                 latch = new CountDownLatch(1);
                 executorService.execute(new ThreadedFileProcessor(randomAccessFile, log, latch, logMetrics,
@@ -93,8 +94,8 @@ public class LogMonitorTask implements Callable<LogMetrics> {
             }
             latch.await();
             setNewFilePointer(dynamicLogPath, logMetrics.getFilePointers());
-        } finally {
-            closeRandomAccessFile(randomAccessFile);
+        } catch(Exception e) {
+            LOGGER.error("File I/O issue while processing " + file.getAbsolutePath(),e);
         }
         return logMetrics;
     }
@@ -145,6 +146,7 @@ public class LogMonitorTask implements Callable<LogMetrics> {
         return filesToBeProcessed;
     }
 
+    //TODO break it into two methods.
     private long getCurrentFilePointerOffset(String dynamicLogPath,
                                              String actualLogPath, long fileSize) {
 

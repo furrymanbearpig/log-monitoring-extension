@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.appdynamics.extensions.logmonitor.Constants.*;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurrentFileCreationTimeStamp;
 
 /**
@@ -63,6 +64,10 @@ public class ThreadedFileProcessor implements Runnable {
         } catch (Exception e) {
             LOGGER.debug("An error has occurred in the Log Monitoring Task : ", e);
         }
+        finally {
+            closeRandomAccessFile(randomAccessFile);
+            countDownLatch.countDown();
+        }
     }
 
     private void processCurrentFile(List<SearchPattern> searchPatterns) throws Exception {
@@ -77,7 +82,7 @@ public class ThreadedFileProcessor implements Runnable {
         updateCurrentFilePointer(currentFile.getPath(), curFilePointer, curFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
-        countDownLatch.countDown();
+
     }
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
