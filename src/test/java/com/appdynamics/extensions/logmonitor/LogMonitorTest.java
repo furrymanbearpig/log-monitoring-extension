@@ -94,7 +94,7 @@ public class LogMonitorTest {
         Map<String, String> args = Maps.newHashMap();
         args.put("config-file", "src/test/resources/conf/single-log-config.yaml");
 
-        when(mockLogMonitorTask.call()).thenThrow(new FileNotFoundException());
+        when(mockLogMonitorTask.call()).thenThrow(new NumberFormatException());
 
         classUnderTest.execute(args, null);
 
