@@ -19,7 +19,7 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
- * @author Florencio Sarmiento
+ * @author Florencio Sarmiento, Aditya Jagtiani
  */
 public class LogMetrics {
     private Map<String, BigInteger> metrics = new ConcurrentHashMap<String, BigInteger>();

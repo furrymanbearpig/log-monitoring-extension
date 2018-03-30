@@ -40,7 +40,7 @@ import static com.appdynamics.extensions.yml.YmlReader.readFromFile;
 /**
  * Monitors the log file and counts the no of occurrences of the search terms provided
  *
- * @author Florencio Sarmiento
+ * @author Florencio Sarmiento, Aditya Jagtiani
  */
 public class LogMonitor extends AManagedMonitor {
 
@@ -210,12 +210,11 @@ public class LogMonitor extends AManagedMonitor {
         metricWriter.printMetric(valueToReport.toString());
     }
 
-    public static String getImplementationVersion() {
+    private static String getImplementationVersion() {
         return LogMonitor.class.getPackage().getImplementationTitle();
     }
 
-    public static void main(String[] args) throws TaskExecutionException, IOException {
-    //TODO check the last read position, it resets to 0. it should be retained.
+    /*public static void main(String[] args) throws TaskExecutionException, IOException {
         ConsoleAppender ca = new ConsoleAppender();
         ca.setWriter(new OutputStreamWriter(System.out));
         ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
@@ -228,6 +227,5 @@ public class LogMonitor extends AManagedMonitor {
         taskArgs.put(CONFIG_ARG, "/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yaml");
 
         monitor.execute(taskArgs, null);
-
-    }
+    }*/
 }

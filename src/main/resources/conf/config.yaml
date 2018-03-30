@@ -7,24 +7,19 @@
 metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
 
 logs:
-  - displayName: "Machine Agent Log"
-    logDirectory: "/Users/aditya.jagtiani/appdynamics/machineagent-4.1.8.12/logs/test"
-    logName: "error.log"
+  - displayName: ""
+    logDirectory: ""
+    logName: ""
     searchStrings:
-       - displayName: "Error in uppercase"
-         pattern: "ERROR"
+       - displayName: ""
+         pattern: ""
          matchExactString: false
          caseSensitive: false
          printMatchedString: false
         #displayName Should be unique across the patterns including the case.
-       - displayName: "Debug In lowercase"
-         pattern: "debug"
+       - displayName: ""
+         pattern: ""
          matchExactString: true
-         caseSensitive: false
-         printMatchedString: false
-       - displayName: "Trace in lowercase"
-         pattern: "trace"
-         matchExactString: false
          caseSensitive: false
          printMatchedString: false
 
@@ -38,7 +33,7 @@ metricCharacterReplacer:
       replaceWith: "#"
 
 # Number of concurrent threads
-noOfThreads: 3
+noOfThreads: 10
 
 #Thread timeout in seconds
 threadTimeOut: 60
