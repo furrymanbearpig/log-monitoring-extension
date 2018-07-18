@@ -8,18 +8,17 @@
 
 package com.appdynamics.extensions.logmonitor.metrics;
 
-import java.math.BigInteger;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Aditya Jagtiani
@@ -44,13 +43,15 @@ public class LogMetrics {
         this.metrics.put(metricName, value);
     }
 
-    public void addAll(Map<String, BigInteger> metrics) {
-        this.metrics.putAll(metrics);
+    public List<Metric> getMetrics() {
+        List<Metric> metrics = Lists.newArrayList();
+        for(Map.Entry<String, BigInteger> metric : this.metrics.entrySet()) {
+            metrics.add(new Metric(metric.getKey(), String.valueOf(metric.getValue()), ""));
+        }
+        return metrics;
     }
 
-    public Map<String, BigInteger> getMetrics() {
-        return this.metrics;
-    }
+    public Map<String, BigInteger> getRawMetricData() {return this.metrics;}
 
     public CopyOnWriteArrayList<FilePointer> getFilePointers() {
         return this.filePointers;

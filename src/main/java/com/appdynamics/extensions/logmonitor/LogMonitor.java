@@ -4,8 +4,6 @@ import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.TasksExecutionServiceProvider;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.logmonitor.config.Log;
-import com.appdynamics.extensions.logmonitor.config.MetricCharacterReplacer;
-import com.appdynamics.extensions.logmonitor.processors.FilePointer;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.appdynamics.extensions.util.AssertUtils;
@@ -15,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.DEFAULT_METRIC_PREFIX;
 import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;

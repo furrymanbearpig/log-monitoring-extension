@@ -45,13 +45,16 @@ public class LogFileProcessor implements Runnable {
     private LogMetrics logMetrics;
     private File currentFile;
     private List<SearchPattern> searchPatterns;
+    private Map<Pattern, String> replacers;
 
-    public LogFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics, File currentFile) {
+    public LogFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
+                            File currentFile, Map<Pattern, String> replacers) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.latch = latch;
         this.logMetrics = logMetrics;
         this.currentFile = currentFile;
+        this.replacers = replacers;
         this.searchPatterns = createPattern(this.log.getSearchStrings());
     }
 
@@ -89,15 +92,19 @@ public class LogFileProcessor implements Runnable {
             String logMetricPrefix = getSearchStringPrefix();
             String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR
                     + "Occurrences";
-            if (!logMetrics.getMetrics().containsKey(currentKey)) {
+            if (!logMetrics.getRawMetricData().containsKey(currentKey)) {
                 logMetrics.add(currentKey, BigInteger.ZERO);
             }
             while (matcher.find()) {
-                BigInteger globalSeedCount = logMetrics.getMetrics().get(currentKey);
-                logMetrics.add(currentKey, globalSeedCount.add(BigInteger.ONE));
+                BigInteger occurrences = logMetrics.getRawMetricData().get(currentKey);
+                logger.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
+                        log.getDisplayName(), stringToCheck, currentKey);
+                logMetrics.add(currentKey, occurrences.add(BigInteger.ONE));
+
                 String word = matcher.group().trim();
                 String replacedWord = applyReplacers(word);
                 if (searchPattern.getPrintMatchedString()) {
+                    logger.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
                     if (searchPattern.getCaseSensitive()) {
                         logMetrics.add(logMetricPrefix + searchPattern.getDisplayName() + METRIC_PATH_SEPARATOR +
                                 "Matches" + METRIC_PATH_SEPARATOR + replacedWord);
@@ -123,27 +130,22 @@ public class LogFileProcessor implements Runnable {
                 SEARCH_STRING, METRIC_PATH_SEPARATOR);
     }
 
-    // TODO
     private String applyReplacers(String name) {
         if (name == null || name.length() == 0 || replacers == null) {
             return name;
         }
 
         for (Map.Entry<Pattern, String> replacerEntry : replacers.entrySet()) {
-
             Pattern pattern = replacerEntry.getKey();
-
             Matcher matcher = pattern.matcher(name);
             name = matcher.replaceAll(replacerEntry.getValue());
         }
-
         return name;
     }
 
     private String getLogNamePrefix() {
         String displayName = StringUtils.isBlank(log.getDisplayName()) ?
                 log.getLogName() : log.getDisplayName();
-
         return displayName + METRIC_PATH_SEPARATOR;
     }
 }

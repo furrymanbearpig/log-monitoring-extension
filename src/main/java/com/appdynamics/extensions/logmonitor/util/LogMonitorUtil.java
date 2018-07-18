@@ -23,9 +23,10 @@ import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -88,7 +89,7 @@ public class LogMonitorUtil {
                 pattern = Pattern.compile(rawPatternsStringBuilder.toString());
 
                 SearchPattern searchPattern = new SearchPattern(searchString.getDisplayName(), pattern,
-                        searchString.getCaseSensitive(), searchString.getPrintMatchedString(), searchString.getSendEventToController());
+                        searchString.getCaseSensitive(), searchString.getPrintMatchedString());
                 searchPatterns.add(searchPattern);
             }
         }
@@ -105,13 +106,6 @@ public class LogMonitorUtil {
         }
     }
 
-    public static BigInteger convertValueToZeroIfNullOrNegative(BigInteger value) {
-        if (value == null || value.compareTo(BigInteger.ZERO) < 0) {
-            return BigInteger.ZERO;
-        }
-
-        return value;
-    }
 
     public static long getCurrentFileCreationTimeStamp(File file) throws IOException {
         Path p = Paths.get(file.getAbsolutePath());
@@ -185,8 +179,16 @@ public class LogMonitorUtil {
         return replacers;
     }
 
-    public static List<Metric> processRawMetrics(Map<String, BigInteger> rawMetrics) {
-        List<Metric> allLogMetrics = Lists.newArrayList();
-        return allLogMetrics;
+    public static boolean isUTF8Encoded(File curFile) throws Exception {
+        byte[] inputBytes = java.nio.file.Files.readAllBytes(Paths.get(curFile.getAbsolutePath()));
+        final String converted = new String(inputBytes, StandardCharsets.UTF_8);
+        final byte[] outputBytes = converted.getBytes(StandardCharsets.UTF_8);
+        return Arrays.equals(inputBytes, outputBytes);
+    }
+
+    public static void convertToUTF8Encoding(File curFile) throws Exception {
+        OutputStream outputStream = new FileOutputStream(curFile, false);
+        Writer outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-8");
+        outputStreamWriter.close();
     }
 }

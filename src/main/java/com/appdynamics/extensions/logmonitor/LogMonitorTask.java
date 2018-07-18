@@ -11,11 +11,7 @@ import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
-
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.processRawMetrics;
 
 /**
  * Created by aditya.jagtiani on 3/30/18.
@@ -50,7 +46,7 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
     private void populateAndPrintMetrics() {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
         List<Metric> allLogMetrics = Lists.newArrayList();
-        allLogMetrics.addAll(processRawMetrics(logFileManager.getLogMetrics().getMetrics()));
+        allLogMetrics.addAll(logFileManager.getLogMetrics().getMetrics());
         metricWriteHelper.transformAndPrintMetrics(allLogMetrics);
         logger.debug("Successfully completed the Log Monitoring task for log {}", log.getLogName());
     }
