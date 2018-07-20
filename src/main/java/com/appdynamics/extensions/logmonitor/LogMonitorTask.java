@@ -46,8 +46,9 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
     private void populateAndPrintMetrics() {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
         List<Metric> allLogMetrics = Lists.newArrayList();
-        allLogMetrics.addAll(logFileManager.getLogMetrics().getMetrics());
+        allLogMetrics.addAll(logFileManager.getLogMetrics().getAllLogMetrics());
         metricWriteHelper.transformAndPrintMetrics(allLogMetrics);
+        filePointerProcessor.updateFilePointerFile();
         logger.debug("Successfully completed the Log Monitoring task for log {}", log.getLogName());
     }
 }

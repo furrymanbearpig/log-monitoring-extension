@@ -53,16 +53,17 @@ public class LogFileManager {
         String dirPath = resolveDirPath(log.getLogDirectory());
         OptimizedRandomAccessFile randomAccessFile; File file = null;
         LogMetrics logMetrics = new LogMetrics();
-
+        logMetrics.setMetricPrefix(monitorContextConfiguration.getMetricPrefix());
         try {
             List<File> filesToBeProcessed; CountDownLatch latch;
-            long currentFilePointerPosition = 0;
+            long currentFilePointerPosition;
             file = getLogFile(dirPath);
             if(file != null) {
                 String dynamicLogPath = dirPath + log.getLogName();
                 long curTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
+                currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath(), file.length(),
+                        curTimeStampFromFilePointer, file);
                 Map<Pattern, String> replacers = getMetricCharacterReplacers();
-
                 if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) { // logs rolled over
                     filesToBeProcessed = getRequiredFilesFromDir(curTimeStampFromFilePointer, dirPath);
                     latch = new CountDownLatch(filesToBeProcessed.size());
@@ -72,8 +73,6 @@ public class LogFileManager {
                             convertToUTF8Encoding(curFile);
                         }
                         randomAccessFile = new OptimizedRandomAccessFile(curFile, "r");
-                        currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath(), file.length(),
-                                curTimeStampFromFilePointer, curFile);
                         randomAccessFile.seek(currentFilePointerPosition);
                         LogFileProcessor logFileProcessor = new LogFileProcessor(randomAccessFile, log, latch, logMetrics, curFile, replacers);
                         executorService.execute("LogFileProcessor", logFileProcessor);

@@ -7,21 +7,22 @@
   -->
 
 <monitor>
-    <name>log-monitor</name>
+    <name>LogMonitor</name>
     <type>managed</type>
+    <enabled>true</enabled>
     <description>Log Monitoring Extension</description>
     <monitor-configuration></monitor-configuration>
     <monitor-run-task>
-        <execution-style>periodic</execution-style>
-        <execution-frequency-in-seconds>60</execution-frequency-in-seconds>
         <name>Log Monitor Run task</name>
         <display-name>Log Monitor Run task</display-name>
         <description>Log Monitor Run task</description>
         <type>java</type>
+        <execution-style>periodic</execution-style>
+        <execution-frequency-in-seconds>60</execution-frequency-in-seconds>
         <execution-timeout-in-secs>60</execution-timeout-in-secs>
         
 		<task-arguments>
-			<argument name="config-file" is-required="true" default-value="monitors/LogMonitor/conf/config.yaml" />
+			<argument name="config-file" is-required="true" default-value="monitors/LogMonitor/config.yml" />
 		</task-arguments>
             
         <java-task>

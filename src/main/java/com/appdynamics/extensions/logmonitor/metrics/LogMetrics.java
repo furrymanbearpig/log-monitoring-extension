@@ -24,34 +24,42 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Aditya Jagtiani
  */
 public class LogMetrics {
-    private Map<String, BigInteger> metrics = new ConcurrentHashMap<String, BigInteger>();
+    private Map<String, Metric> metrics = new ConcurrentHashMap<String, Metric>();
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
 
-    public void add(String metricName) {
-        BigInteger value = metrics.get(metricName);
+    public String getMetricPrefix() {
+        return metricPrefix;
+    }
 
-        if (value != null) {
-            value = value.add(BigInteger.ONE);
+    public void setMetricPrefix(String metricPrefix) {
+        this.metricPrefix = metricPrefix;
+    }
+
+    private String metricPrefix;
+
+    public void add(String metricName, String metricPath) {
+        BigInteger value;
+        if (metrics.containsKey(metricPath + metricName)) {
+            value = new BigInteger(metrics.get(metricPath + metricName).getMetricValue()).add(BigInteger.ONE);
         } else {
             value = BigInteger.ONE;
         }
-
-        add(metricName, value);
+        add(metricPath + metricName, new Metric(metricName, String.valueOf(value), metricPath));
     }
 
-    public void add(String metricName, BigInteger value) {
-        this.metrics.put(metricName, value);
+    public void add(String metricName, Metric metric) {
+        this.metrics.put(metricName, metric);
     }
 
-    public List<Metric> getMetrics() {
+    public List<Metric> getAllLogMetrics() {
         List<Metric> metrics = Lists.newArrayList();
-        for(Map.Entry<String, BigInteger> metric : this.metrics.entrySet()) {
-            metrics.add(new Metric(metric.getKey(), String.valueOf(metric.getValue()), ""));
+        for(Map.Entry<String, Metric> metric : this.metrics.entrySet()) {
+            metrics.add(metric.getValue());
         }
         return metrics;
     }
 
-    public Map<String, BigInteger> getRawMetricData() {return this.metrics;}
+    public Map<String, Metric> getRawMetricData() {return this.metrics;}
 
     public CopyOnWriteArrayList<FilePointer> getFilePointers() {
         return this.filePointers;
@@ -67,5 +75,11 @@ public class LogMetrics {
         filePointers.add(filePointer);
     }
 
+    public void addNew(String metricName, Metric metric) {
+
+    }
+
+
+    // todo refactor this and get rid of the NPE.
 }
 

@@ -145,8 +145,8 @@ public class LogMonitorUtil {
     private static Log initializeLog(Map<String, ?> currentLogFromConfig) {
         Log log = new Log();
         log.setDisplayName((String) currentLogFromConfig.get("displayName"));
-        log.setDisplayName((String) currentLogFromConfig.get("logName"));
-        log.setDisplayName((String) currentLogFromConfig.get("logDirectory"));
+        log.setLogName((String) currentLogFromConfig.get("logName"));
+        log.setLogDirectory((String) currentLogFromConfig.get("logDirectory"));
         log.setSearchStrings(initializeSearchStrings(currentLogFromConfig));
         return log;
     }
