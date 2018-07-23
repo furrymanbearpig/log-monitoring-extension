@@ -40,19 +40,20 @@ public class LogFileManager {
     private FilePointerProcessor filePointerProcessor;
     private MonitorContextConfiguration monitorContextConfiguration;
     private MonitorExecutorService executorService;
+    private LogMetrics logMetrics;
 
     public LogFileManager(FilePointerProcessor filePointerProcessor, Log log, MonitorContextConfiguration monitorContextConfiguration) {
         this.log = log;
         this.filePointerProcessor = filePointerProcessor;
         this.monitorContextConfiguration = monitorContextConfiguration;
         this.executorService = this.monitorContextConfiguration.getContext().getExecutorService();
+        this.logMetrics = new LogMetrics();
     }
 
     public LogMetrics getLogMetrics() {
         logger.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
         String dirPath = resolveDirPath(log.getLogDirectory());
-        OptimizedRandomAccessFile randomAccessFile; File file = null;
-        LogMetrics logMetrics = new LogMetrics();
+        File file = null;
         logMetrics.setMetricPrefix(monitorContextConfiguration.getMetricPrefix());
         try {
             List<File> filesToBeProcessed; CountDownLatch latch;
@@ -72,23 +73,16 @@ public class LogFileManager {
                             logger.debug("Converting current file: {} to UTF-8 encoding for further processing", curFile.getName());
                             convertToUTF8Encoding(curFile);
                         }
-                        randomAccessFile = new OptimizedRandomAccessFile(curFile, "r");
-                        randomAccessFile.seek(currentFilePointerPosition);
-                        LogFileProcessor logFileProcessor = new LogFileProcessor(randomAccessFile, log, latch, logMetrics, curFile, replacers);
-                        executorService.execute("LogFileProcessor", logFileProcessor);
+                        executeLogProcessing(curFile, currentFilePointerPosition, latch, replacers);
                     }
                 } else { // when the log has not rolled over
                     if (!isUTF8Encoded(file)) {
                         logger.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
                         convertToUTF8Encoding(file);
                     }
-                    randomAccessFile = new OptimizedRandomAccessFile(file, "r");
-                    randomAccessFile.seek(currentFilePointerPosition);
                     latch = new CountDownLatch(1);
-                    LogFileProcessor logFileProcessor = new LogFileProcessor(randomAccessFile, log, latch, logMetrics, file, replacers);
-                    executorService.execute("LogFileProcessor", logFileProcessor);
+                    executeLogProcessing(file, currentFilePointerPosition, latch, replacers);
                 }
-
                 latch.await();
                 setNewFilePointer(dynamicLogPath, logMetrics.getFilePointers());
             }
@@ -97,6 +91,15 @@ public class LogFileManager {
             logger.error("File I/O issue while processing : " + file.getAbsolutePath(), e);
         }
         return logMetrics;
+    }
+
+
+    private void executeLogProcessing(File fileToProcess, long filePointerPosition, CountDownLatch latch,
+                                      Map<Pattern, String> replacers) throws Exception {
+        OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(fileToProcess, "r");
+        randomAccessFile.seek(filePointerPosition);
+        LogFileProcessor logFileProcessor = new LogFileProcessor(randomAccessFile, log, latch, logMetrics, fileToProcess, replacers);
+        executorService.execute("LogFileProcessor", logFileProcessor);
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
@@ -147,7 +150,6 @@ public class LogFileManager {
     }
 
     // todo check no file test cases
-    // todo metric character replacement
     private File getLogFile(String dirPath) throws Exception {
         File directory = new File(dirPath);
         File logFile;

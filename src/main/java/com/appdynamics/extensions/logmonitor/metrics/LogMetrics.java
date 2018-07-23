@@ -39,12 +39,12 @@ public class LogMetrics {
 
     public void add(String metricName, String metricPath) {
         BigInteger value;
-        if (metrics.containsKey(metricPath + metricName)) {
-            value = new BigInteger(metrics.get(metricPath + metricName).getMetricValue()).add(BigInteger.ONE);
+        if (metrics.containsKey(metricName)) {
+            value = new BigInteger(metrics.get(metricName).getMetricValue()).add(BigInteger.ONE);
         } else {
             value = BigInteger.ONE;
         }
-        add(metricPath + metricName, new Metric(metricName, String.valueOf(value), metricPath));
+        add(metricName, new Metric(metricName, String.valueOf(value), metricPath));
     }
 
     public void add(String metricName, Metric metric) {
