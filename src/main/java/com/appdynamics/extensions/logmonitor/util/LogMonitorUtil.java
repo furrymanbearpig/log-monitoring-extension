@@ -186,9 +186,18 @@ public class LogMonitorUtil {
         return Arrays.equals(inputBytes, outputBytes);
     }
 
-    public static void convertToUTF8Encoding(File curFile) throws Exception {
-        OutputStream outputStream = new FileOutputStream(curFile, false);
+    public static void convertToUTF8Encoding(File file) throws Exception {
+        String charset = "UTF-16LE";
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader (new FileInputStream(file), charset));
+        String line; StringBuilder sb = new StringBuilder();
+        while( (line = in.readLine()) != null) {
+            sb.append(line);
+            sb.append("\n");
+        }
+        OutputStream outputStream = new FileOutputStream(file, false);
         Writer outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-8");
+        outputStreamWriter.write(sb.toString());
         outputStreamWriter.close();
     }
 }

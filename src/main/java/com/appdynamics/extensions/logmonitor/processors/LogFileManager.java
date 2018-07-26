@@ -47,13 +47,13 @@ public class LogFileManager {
         this.filePointerProcessor = filePointerProcessor;
         this.monitorContextConfiguration = monitorContextConfiguration;
         this.executorService = this.monitorContextConfiguration.getContext().getExecutorService();
-        this.logMetrics = new LogMetrics();
     }
 
     public LogMetrics getLogMetrics() {
         logger.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
         String dirPath = resolveDirPath(log.getLogDirectory());
         File file = null;
+        logMetrics = new LogMetrics();
         logMetrics.setMetricPrefix(monitorContextConfiguration.getMetricPrefix());
         try {
             List<File> filesToBeProcessed; CountDownLatch latch;
@@ -92,6 +92,7 @@ public class LogFileManager {
         }
         return logMetrics;
     }
+
 
 
     private void executeLogProcessing(File fileToProcess, long filePointerPosition, CountDownLatch latch,
@@ -218,9 +219,9 @@ public class LogFileManager {
                                              long curTimeStampFromFilePointer, File curFile) throws Exception {
         FilePointer filePointer =
                 filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
-
         long currentPosition = filePointer.getLastReadPosition().get();
-        if (getCurrentFileCreationTimeStamp(curFile) == curTimeStampFromFilePointer) {
+        if (getCurrentFileCreationTimeStamp(curFile) == curTimeStampFromFilePointer ||
+                !hasLogRolledOver(dynamicLogPath, actualLogPath, fileSize)) {
             // found the oldest file, start from CFP
             return currentPosition;
         } else {
