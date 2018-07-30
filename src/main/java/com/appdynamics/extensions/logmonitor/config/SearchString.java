@@ -1,5 +1,5 @@
 /*
- *  Copyright 2014. AppDynamics LLC and its affiliates.
+ *  Copyright 2018. AppDynamics LLC and its affiliates.
  *  All Rights Reserved.
  *  This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
  *  The copyright notice above does not evidence any actual or intended publication of such source code.
@@ -9,7 +9,7 @@
 package com.appdynamics.extensions.logmonitor.config;
 
 /**
- * @author Satish Muddam
+ * @author Aditya Jagtiani
  */
 public class SearchString {
 
@@ -18,7 +18,6 @@ public class SearchString {
     private Boolean matchExactString;
     private Boolean caseSensitive;
     private Boolean printMatchedString;
-    private Boolean sendEventToController;
 
     public String getDisplayName() {
         return displayName;
@@ -52,11 +51,11 @@ public class SearchString {
         this.caseSensitive = caseSensitive;
     }
 
-    public void setPrintMatchedString(Boolean printMatchedString) { this.printMatchedString = printMatchedString; }
+    public void setPrintMatchedString(Boolean printMatchedString) {
+        this.printMatchedString = printMatchedString;
+    }
 
-    public Boolean getPrintMatchedString() {return printMatchedString;}
-
-    public void setSendEventToController(Boolean sendEventToController) { this.sendEventToController = sendEventToController;}
-
-    public Boolean getSendEventToController() { return sendEventToController;}
+    public Boolean getPrintMatchedString() {
+        return printMatchedString;
+    }
 }

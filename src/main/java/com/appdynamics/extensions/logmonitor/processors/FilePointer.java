@@ -1,5 +1,5 @@
 /*
- *  Copyright 2014. AppDynamics LLC and its affiliates.
+ *  Copyright 2018. AppDynamics LLC and its affiliates.
  *  All Rights Reserved.
  *  This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
  *  The copyright notice above does not evidence any actual or intended publication of such source code.
@@ -14,53 +14,51 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author Florencio Sarmiento
- *
+ * @author Aditya Jagtiani
  */
 public class FilePointer {
-	
-	private volatile String filename;
-	
-	private AtomicLong lastReadPosition = new AtomicLong(0);
 
-	private long fileCreationTime;
+    private volatile String filename;
 
-	public String getFilename() {
-		return filename;
-	}
+    private AtomicLong lastReadPosition = new AtomicLong(0);
 
-	public synchronized void setFilename(String filename) {
-		this.filename = filename;
-	}
+    private long fileCreationTime;
 
-	public AtomicLong getLastReadPosition() {
-		return lastReadPosition;
-	}
+    String getFilename() {
+        return filename;
+    }
 
-	public synchronized void setLastReadPosition(AtomicLong lastReadPosition) {
-		this.lastReadPosition = lastReadPosition;
-	}
-	
-	public synchronized void updateLastReadPosition(long lastReadPosition) {
-		if (this.lastReadPosition == null) {
-			this.lastReadPosition = new AtomicLong(lastReadPosition);
-		} else {
-			this.lastReadPosition.set(lastReadPosition);
-		}
-	}
+    synchronized void setFilename(String filename) {
+        this.filename = filename;
+    }
 
-	public long getFileCreationTime() {
-		return this.fileCreationTime;
-	}
+    AtomicLong getLastReadPosition() {
+        return lastReadPosition;
+    }
 
-	public void setFileCreationTime(long fileCreationTime) {
-		this.fileCreationTime = fileCreationTime;
-	}
+    synchronized void setLastReadPosition(AtomicLong lastReadPosition) {
+        this.lastReadPosition = lastReadPosition;
+    }
 
-	@Override
-	public String toString() {
-		return ReflectionToStringBuilder.toString(this,
-				ToStringStyle.SHORT_PREFIX_STYLE);
-	}
+    synchronized void updateLastReadPosition(long lastReadPosition) {
+        if (this.lastReadPosition == null) {
+            this.lastReadPosition = new AtomicLong(lastReadPosition);
+        } else {
+            this.lastReadPosition.set(lastReadPosition);
+        }
+    }
 
+    public long getFileCreationTime() {
+        return this.fileCreationTime;
+    }
+
+    void setFileCreationTime(long fileCreationTime) {
+        this.fileCreationTime = fileCreationTime;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this,
+                ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }

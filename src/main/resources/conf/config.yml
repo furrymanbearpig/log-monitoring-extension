@@ -4,7 +4,7 @@
 # metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
 # Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
 
-metricPrefix: "Server|Component:20|Custom Metrics|Log Monitor New|"
+metricPrefix: "Server|Component:21|Custom Metrics|Log Monitor Testing|"
 
 logs:
   - displayName: "Log Monitor Testing"
@@ -16,7 +16,12 @@ logs:
          pattern: "demo"
          matchExactString: true
          caseSensitive: true
-         printMatchedString: true
+         printMatchedString: false
+       - displayName: "Error"
+         pattern: "error"
+         matchExactString: true
+         caseSensitive: true
+         printMatchedString: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression

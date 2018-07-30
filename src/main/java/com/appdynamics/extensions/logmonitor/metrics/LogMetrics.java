@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Aditya Jagtiani
  */
 public class LogMetrics {
+    private String metricPrefix;
     private Map<String, Metric> metrics = new ConcurrentHashMap<String, Metric>();
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
 
@@ -34,8 +35,6 @@ public class LogMetrics {
     public void setMetricPrefix(String metricPrefix) {
         this.metricPrefix = metricPrefix;
     }
-
-    private String metricPrefix;
 
     public void add(String metricName, String metricPath) {
         BigInteger value;
@@ -53,13 +52,15 @@ public class LogMetrics {
 
     public List<Metric> getAllLogMetrics() {
         List<Metric> metrics = Lists.newArrayList();
-        for(Map.Entry<String, Metric> metric : this.metrics.entrySet()) {
+        for (Map.Entry<String, Metric> metric : this.metrics.entrySet()) {
             metrics.add(metric.getValue());
         }
         return metrics;
     }
 
-    public Map<String, Metric> getRawMetricData() {return this.metrics;}
+    public Map<String, Metric> getRawMetricData() {
+        return this.metrics;
+    }
 
     public CopyOnWriteArrayList<FilePointer> getFilePointers() {
         return this.filePointers;
@@ -74,12 +75,5 @@ public class LogMetrics {
     public void updateFilePointer(FilePointer filePointer) {
         filePointers.add(filePointer);
     }
-
-    public void addNew(String metricName, Metric metric) {
-
-    }
-
-
-    // todo refactor this and get rid of the NPE.
 }
 

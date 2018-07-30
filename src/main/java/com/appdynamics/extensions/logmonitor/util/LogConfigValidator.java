@@ -14,9 +14,8 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Created by aditya.jagtiani on 6/18/18.
  */
-public class LogConfigValidator {
-
-    public static void validate(Log log) {
+class LogConfigValidator {
+    static void validate(Log log) {
         if (StringUtils.isBlank(log.getLogDirectory())) {
             throw new IllegalArgumentException("Log directory must not be blank.");
         }

@@ -25,10 +25,10 @@ public class FilePointerProcessorTest {
 
     @Test
     public void testUpdateFilePointerFileIsPersisted() {
-        FilePointerProcessor classUnderTest = new FilePointerProcessor();
+        FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
         String logPath = "src/test/resources/test-log-3.log";
 
-        FilePointer origFilePointer =  classUnderTest.getFilePointer(logPath, logPath);
+        FilePointer origFilePointer =  filePointerProcessor.getFilePointer(logPath, logPath);
         assertEquals(0, origFilePointer.getLastReadPosition().get());
 
         // lets update the filePointer
@@ -36,18 +36,18 @@ public class FilePointerProcessorTest {
         String newFilename = "src/test/resources/test-log-4.log";
         origFilePointer.setFilename(newFilename);
         origFilePointer.updateLastReadPosition(newFilePointer);
-        classUnderTest.updateFilePointerFile();
+        filePointerProcessor.updateFilePointerFile();
 
-        // re-initializing the filepointer
+        // re-initialise the filepointer
         // it should pick up from the file
-        classUnderTest = new FilePointerProcessor();
-        FilePointer result = classUnderTest.getFilePointer(logPath, logPath);
+        filePointerProcessor = new FilePointerProcessor();
+        FilePointer result = filePointerProcessor.getFilePointer(logPath, logPath);
         assertEquals(newFilePointer, result.getLastReadPosition().get());
         assertEquals(newFilename, result.getFilename());
     }
 
     @After
-    public void deleteFilePointerFile() throws Exception {
+    public void deleteFilePointerFile() {
         File filePointerFile = new File("./target/classes/com/appdynamics/extensions/logmonitor/" +
                 FILEPOINTER_FILENAME);
         if (filePointerFile.exists()) {

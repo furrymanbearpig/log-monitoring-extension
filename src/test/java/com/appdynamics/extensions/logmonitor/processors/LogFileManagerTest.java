@@ -10,7 +10,6 @@ package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
-import com.appdynamics.extensions.logmonitor.LogMonitorTask;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
@@ -22,13 +21,18 @@ import org.mockito.Mockito;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
+/**
+ * Created by aditya.jagtiani on 6/18/18.
+ */
 
 public class LogFileManagerTest {
     private LogFileManager classUnderTest;
@@ -227,7 +231,6 @@ public class LogFileManagerTest {
         searchString4.setPattern("\\]");
         searchString4.setDisplayName("Pattern ]");
         searchString4.setPrintMatchedString(true);
-        searchString4.setSendEventToController(false);
 
         SearchString searchString5 = new SearchString();
         searchString5.setCaseSensitive(false);
@@ -345,7 +348,6 @@ public class LogFileManagerTest {
         searchString.setPattern("debug");
         searchString.setDisplayName("Debug");
         searchString.setPrintMatchedString(true);
-        searchString.setSendEventToController(false);
 
         SearchString searchString1 = new SearchString();
         searchString1.setCaseSensitive(false);
@@ -353,7 +355,6 @@ public class LogFileManagerTest {
         searchString1.setPattern("info");
         searchString1.setDisplayName("Info");
         searchString1.setPrintMatchedString(true);
-        searchString1.setSendEventToController(false);
 
         SearchString searchString2 = new SearchString();
         searchString2.setCaseSensitive(false);
@@ -361,7 +362,6 @@ public class LogFileManagerTest {
         searchString2.setPattern("error");
         searchString2.setDisplayName("Error");
         searchString2.setPrintMatchedString(true);
-        searchString2.setSendEventToController(false);
 
         monitorContextConfiguration.setConfigYml("src/test/resources/conf/config.yaml");
         log.setSearchStrings(Lists.newArrayList(searchString, searchString1, searchString2));
@@ -469,11 +469,10 @@ public class LogFileManagerTest {
         for (int i = 0; i < 100; i++) {
             logsToAdd.add(new Date() + "	DEBUG	Statement " + i + "\n");
         }
-
         updateLogFile(testFilepath, logsToAdd);
 
         // simulate new file created with different name
-        Thread.sleep(1000);
+        Thread.sleep(500);
         String dynamicLog2 = this.getClass().getClassLoader().getResource("dynamic-log-2.log").getPath();
 
         testFilename = "active-dynamic-log-2.log";
@@ -481,7 +480,7 @@ public class LogFileManagerTest {
         copyFile(dynamicLog2, testFilepath);
 
         // simulate another file created with different name
-        Thread.sleep(1000);
+        Thread.sleep(500);
         String dynamicLog3 = this.getClass().getClassLoader().getResource("dynamic-log-3.log").getPath();
         testFilename = "active-dynamic-log-3.log";
         testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
@@ -490,7 +489,6 @@ public class LogFileManagerTest {
         for (int i = 0; i < 100; i++) {
             logsToAdd.add(new Date() + "	ERROR	Statement " + i + "\n");
         }
-
         updateLogFile(testFilepath, logsToAdd);
         result = classUnderTest.getLogMetrics();
         assertEquals("107", result.getRawMetricData().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
