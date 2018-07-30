@@ -35,7 +35,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
  * Created by aditya.jagtiani on 7/3/18.
  */
 public class LogFileManager {
-    private static final Logger logger = LoggerFactory.getLogger(LogFileManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileManager.class);
     private Log log;
     private FilePointerProcessor filePointerProcessor;
     private MonitorContextConfiguration monitorContextConfiguration;
@@ -49,7 +49,7 @@ public class LogFileManager {
     }
 
     public LogMetrics getLogMetrics() {
-        logger.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
+        LOGGER.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
         String dirPath = resolveDirPath(log.getLogDirectory());
         File file = null;
         OptimizedRandomAccessFile randomAccessFile;
@@ -74,7 +74,7 @@ public class LogFileManager {
                     latch = new CountDownLatch(filesToBeProcessed.size());
                     for (File currentFile : filesToBeProcessed) {
                         if (!isUTF8Encoded(currentFile)) {
-                            logger.debug("Converting current file: {} to UTF-8 encoding for further processing", currentFile.getName());
+                            LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", currentFile.getName());
                             convertToUTF8Encoding(currentFile);
                         }
                         randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
@@ -90,7 +90,7 @@ public class LogFileManager {
                     }
                 } else { // when the log has not rolled over
                     if (!isUTF8Encoded(file)) {
-                        logger.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
+                        LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
                         convertToUTF8Encoding(file);
                     }
                     latch = new CountDownLatch(1);
@@ -103,14 +103,14 @@ public class LogFileManager {
                 setNewFilePointer(dynamicLogPath, logMetrics.getFilePointers());
             }
         } catch (Exception e) {
-            logger.error("File I/O issue while processing : " + file.getAbsolutePath(), e);
+            LOGGER.error("File I/O issue while processing : " + file.getAbsolutePath(), e);
         }
         return logMetrics;
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
         FilePointer latestFilePointer = LogMonitorUtil.getLatestFilePointer(filePointers);
-        logger.debug("Updating File Pointer with the most recently processed log: {}, pointing to file: {} with the " +
+        LOGGER.debug("Updating File Pointer with the most recently processed log: {}, pointing to file: {} with the " +
                         "last read position: {} and a creation time stamp of: {}", dynamicLogPath, latestFilePointer.getFilename(),
                 latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
         filePointerProcessor.updateFilePointer(dynamicLogPath, latestFilePointer.getFilename(),
@@ -172,7 +172,7 @@ public class LogFileManager {
                 }
 
             } else {
-                logger.info("Unable to find any file with name {} in {}. Skipping",
+                LOGGER.info("Unable to find any file with name {} in {}. Skipping",
                         log.getLogName(), dirPath);
                 logFile = null;
             }
@@ -212,7 +212,7 @@ public class LogFileManager {
         long currentPosition = filePointer.getLastReadPosition().get();
         if (isFilenameChanged(filePointer.getFilename(), actualLogPath) ||
                 isLogRotated(fileSize, currentPosition)) {
-            logger.debug("Filename has either changed or rotated, resetting position to 0");
+            LOGGER.debug("Filename has either changed or rotated, resetting position to 0");
             return true;
         }
         return false;

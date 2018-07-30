@@ -27,7 +27,7 @@ import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;
  * Created by aditya.jagtiani on 3/30/18.
  */
 public class LogMonitor extends ABaseMonitor {
-    private static Logger logger = LoggerFactory.getLogger(LogMonitor.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(LogMonitor.class);
     private MonitorContextConfiguration monitorContextConfiguration;
     private Map<String, ?> configYml = Maps.newHashMap();
 
@@ -58,7 +58,7 @@ public class LogMonitor extends ABaseMonitor {
         FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
 
         for(Log log : logsToMonitor) {
-            logger.info("Starting the Log Monitoring Task for log : " + log.getDisplayName());
+            LOGGER.info("Starting the Log Monitoring Task for log : " + log.getDisplayName());
             LogMonitorTask task = new LogMonitorTask(monitorContextConfiguration, taskExecutor.getMetricWriteHelper(), log, filePointerProcessor);
             taskExecutor.submit(log.getDisplayName(), task);
         }

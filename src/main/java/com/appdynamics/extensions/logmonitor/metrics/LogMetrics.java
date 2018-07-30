@@ -58,7 +58,7 @@ public class LogMetrics {
         return metrics;
     }
 
-    public Map<String, Metric> getRawMetricData() {
+    public Map<String, Metric> getMetricMap() {
         return this.metrics;
     }
 

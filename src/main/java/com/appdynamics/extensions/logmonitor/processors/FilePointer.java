@@ -8,39 +8,33 @@
 
 package com.appdynamics.extensions.logmonitor.processors;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * @author Aditya Jagtiani
+ *
  */
 public class FilePointer {
-
     private volatile String filename;
-
     private AtomicLong lastReadPosition = new AtomicLong(0);
-
     private long fileCreationTime;
-
-    String getFilename() {
+    public String getFilename() {
         return filename;
     }
-
-    synchronized void setFilename(String filename) {
+    public synchronized void setFilename(String filename) {
         this.filename = filename;
     }
-
-    AtomicLong getLastReadPosition() {
+    public AtomicLong getLastReadPosition() {
         return lastReadPosition;
     }
-
-    synchronized void setLastReadPosition(AtomicLong lastReadPosition) {
+    public synchronized void setLastReadPosition(AtomicLong lastReadPosition) {
         this.lastReadPosition = lastReadPosition;
     }
 
-    synchronized void updateLastReadPosition(long lastReadPosition) {
+    public synchronized void updateLastReadPosition(long lastReadPosition) {
         if (this.lastReadPosition == null) {
             this.lastReadPosition = new AtomicLong(lastReadPosition);
         } else {
@@ -52,7 +46,7 @@ public class FilePointer {
         return this.fileCreationTime;
     }
 
-    void setFileCreationTime(long fileCreationTime) {
+    public void setFileCreationTime(long fileCreationTime) {
         this.fileCreationTime = fileCreationTime;
     }
 

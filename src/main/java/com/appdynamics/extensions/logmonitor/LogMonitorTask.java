@@ -17,7 +17,7 @@ import java.util.List;
  * Created by aditya.jagtiani on 3/30/18.
  */
 public class LogMonitorTask implements AMonitorTaskRunnable {
-    private static Logger logger = LoggerFactory.getLogger(LogMonitorTask.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(LogMonitorTask.class);
     private MetricWriteHelper metricWriteHelper;
     private MonitorContextConfiguration monitorContextConfiguration;
     private Log log;
@@ -35,12 +35,12 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
         try {
             populateAndPrintMetrics();
         } catch (Exception ex) {
-            logger.error("Log monitoring task failed for Log: " + log.getDisplayName(), ex);
+            LOGGER.error("Log monitoring task failed for Log: " + log.getDisplayName(), ex);
         }
     }
 
     public void onTaskComplete() {
-        logger.info("Completed the Log Monitoring task for log : " + log.getDisplayName());
+        LOGGER.info("Completed the Log Monitoring task for log : " + log.getDisplayName());
     }
 
     private void populateAndPrintMetrics() {
@@ -49,6 +49,6 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
         allLogMetrics.addAll(logFileManager.getLogMetrics().getAllLogMetrics());
         metricWriteHelper.transformAndPrintMetrics(allLogMetrics);
         filePointerProcessor.updateFilePointerFile();
-        logger.debug("Successfully completed the Log Monitoring task for log {}", log.getLogName());
+        LOGGER.debug("Successfully completed the Log Monitoring task for log {}", log.getLogName());
     }
 }

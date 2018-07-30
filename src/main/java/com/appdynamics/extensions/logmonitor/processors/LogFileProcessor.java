@@ -36,8 +36,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurre
  */
 
 public class LogFileProcessor implements Runnable {
-
-    private static final Logger logger = LoggerFactory.getLogger(LogFileProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileProcessor.class);
     private OptimizedRandomAccessFile randomAccessFile;
     private Log log;
     private CountDownLatch latch;
@@ -61,7 +60,7 @@ public class LogFileProcessor implements Runnable {
         try {
             processLogFile();
         } catch (Exception ex) {
-            logger.error("Error encountered while processing log file : {}", log.getDisplayName(), ex);
+            LOGGER.error("Error encountered while processing log file : {}", log.getDisplayName(), ex);
         } finally {
             closeRandomAccessFile(randomAccessFile);
             latch.countDown();
@@ -81,7 +80,7 @@ public class LogFileProcessor implements Runnable {
                 String.valueOf(randomAccessFile.length()), logMetrics.getMetricPrefix() + METRIC_SEPARATOR
                 + metricName));
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
-        logger.info(String.format("Successfully processed log file [%s]",
+        LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
     }
 
@@ -91,22 +90,22 @@ public class LogFileProcessor implements Runnable {
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
             String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_SEPARATOR;
-            if (!logMetrics.getRawMetricData().containsKey(currentKey + OCCURRENCES)) {
+            if (!logMetrics.getMetricMap().containsKey(currentKey + OCCURRENCES)) {
                 String metricName = currentKey + OCCURRENCES;
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
             }
             while (matcher.find()) {
-                BigInteger occurrences = new BigInteger(logMetrics.getRawMetricData().get(currentKey +
+                BigInteger occurrences = new BigInteger(logMetrics.getMetricMap().get(currentKey +
                         OCCURRENCES).getMetricValue());
-                logger.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
+                LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
                         log.getDisplayName(), stringToCheck, currentKey);
                 String metricName = currentKey + OCCURRENCES;
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(occurrences.add(BigInteger.ONE)),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
                 // if each match is to be printed:
                 if (searchPattern.getPrintMatchedString()) {
-                    logger.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
+                    LOGGER.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
                     String replacedWord = applyReplacers(matcher.group().trim());
                     if (searchPattern.getCaseSensitive()) {
                         metricName = currentKey + MATCHES + replacedWord;

@@ -83,11 +83,11 @@ public class LogFileManagerTest {
 
         LogMetrics result = classUnderTest.getLogMetrics();
 
-        assertEquals("13", result.getRawMetricData().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("24", result.getRawMetricData().get("TestLog|Search String|Info|Occurrences").getMetricValue());
-        assertEquals("7", result.getRawMetricData().get("TestLog|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("24", result.getMetricMap().get("TestLog|Search String|Info|Occurrences").getMetricValue());
+        assertEquals("7", result.getMetricMap().get("TestLog|Search String|Error|Occurrences").getMetricValue());
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
-                result.getRawMetricData().get("TestLog|File size (Bytes)").getMetricValue());
+                result.getMetricMap().get("TestLog|File size (Bytes)").getMetricValue());
     }
 
     @Test
@@ -128,16 +128,16 @@ public class LogFileManagerTest {
 
         LogMetrics result = classUnderTest.getLogMetrics();
 
-        assertEquals("13", result.getRawMetricData().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("24", result.getRawMetricData().get("TestLog|Search String|Info|Occurrences").getMetricValue());
-        assertEquals("7", result.getRawMetricData().get("TestLog|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("24", result.getMetricMap().get("TestLog|Search String|Info|Occurrences").getMetricValue());
+        assertEquals("7", result.getMetricMap().get("TestLog|Search String|Error|Occurrences").getMetricValue());
 
-        assertEquals("13", result.getRawMetricData().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
-        assertEquals("24", result.getRawMetricData().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
-        assertEquals("7", result.getRawMetricData().get("TestLog|Search String|Error|Matches|Error").getMetricValue());
+        assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
+        assertEquals("24", result.getMetricMap().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
+        assertEquals("7", result.getMetricMap().get("TestLog|Search String|Error|Matches|Error").getMetricValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
-                result.getRawMetricData().get("TestLog|File size (Bytes)").getMetricValue());
+                result.getMetricMap().get("TestLog|File size (Bytes)").getMetricValue());
     }
 
     @Test
@@ -183,9 +183,9 @@ public class LogFileManagerTest {
         LogMetrics result = classUnderTest.getLogMetrics();
         convertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
 
-        assertEquals("5", result.getRawMetricData().get("TestUTF16Log|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("5", result.getRawMetricData().get("TestUTF16Log|Search String|Info|Occurrences").getMetricValue());
-        assertEquals("0", result.getRawMetricData().get("TestUTF16Log|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("5", result.getMetricMap().get("TestUTF16Log|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("5", result.getMetricMap().get("TestUTF16Log|Search String|Info|Occurrences").getMetricValue());
+        assertEquals("0", result.getMetricMap().get("TestUTF16Log|Search String|Error|Occurrences").getMetricValue());
     }
     //endregion
 
@@ -249,22 +249,22 @@ public class LogFileManagerTest {
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
         LogMetrics result = classUnderTest.getLogMetrics();
 
-        assertEquals("5", result.getRawMetricData().get("TestLog|Search String|Pattern <|Matches|<").getMetricValue());
-        assertEquals("6", result.getRawMetricData().get("TestLog|Search String|Pattern >|Matches|>").getMetricValue());
-        assertEquals("16", result.getRawMetricData().get("TestLog|Search String|Pattern *|Matches|*").getMetricValue());
-        assertEquals("23", result.getRawMetricData().get("TestLog|Search String|Pattern [|Matches|[").getMetricValue());
-        assertEquals("23", result.getRawMetricData().get("TestLog|Search String|Pattern ]|Matches|]").getMetricValue());
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Pattern .|Matches|.").getMetricValue());
+        assertEquals("5", result.getMetricMap().get("TestLog|Search String|Pattern <|Matches|<").getMetricValue());
+        assertEquals("6", result.getMetricMap().get("TestLog|Search String|Pattern >|Matches|>").getMetricValue());
+        assertEquals("16", result.getMetricMap().get("TestLog|Search String|Pattern *|Matches|*").getMetricValue());
+        assertEquals("23", result.getMetricMap().get("TestLog|Search String|Pattern [|Matches|[").getMetricValue());
+        assertEquals("23", result.getMetricMap().get("TestLog|Search String|Pattern ]|Matches|]").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Pattern .|Matches|.").getMetricValue());
 
-        assertEquals("5", result.getRawMetricData().get("TestLog|Search String|Pattern <|Occurrences").getMetricValue());
-        assertEquals("6", result.getRawMetricData().get("TestLog|Search String|Pattern >|Occurrences").getMetricValue());
-        assertEquals("16", result.getRawMetricData().get("TestLog|Search String|Pattern *|Occurrences").getMetricValue());
-        assertEquals("23", result.getRawMetricData().get("TestLog|Search String|Pattern [|Occurrences").getMetricValue());
-        assertEquals("23", result.getRawMetricData().get("TestLog|Search String|Pattern ]|Occurrences").getMetricValue());
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Pattern .|Occurrences").getMetricValue());
+        assertEquals("5", result.getMetricMap().get("TestLog|Search String|Pattern <|Occurrences").getMetricValue());
+        assertEquals("6", result.getMetricMap().get("TestLog|Search String|Pattern >|Occurrences").getMetricValue());
+        assertEquals("16", result.getMetricMap().get("TestLog|Search String|Pattern *|Occurrences").getMetricValue());
+        assertEquals("23", result.getMetricMap().get("TestLog|Search String|Pattern [|Occurrences").getMetricValue());
+        assertEquals("23", result.getMetricMap().get("TestLog|Search String|Pattern ]|Occurrences").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Pattern .|Occurrences").getMetricValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
-                result.getRawMetricData().get("TestLog|File size (Bytes)").getMetricValue());
+                result.getMetricMap().get("TestLog|File size (Bytes)").getMetricValue());
     }
 
     @Test
@@ -306,24 +306,24 @@ public class LogFileManagerTest {
         LogMetrics result = classUnderTest.getLogMetrics();
 
         // matches (\\s|^)m\\w+(\\s|$)
-        assertEquals("7", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Memorymetricgenerator").getMetricValue());
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Memory").getMetricValue());
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Major").getMetricValue());
-        assertEquals("1", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Mx").getMetricValue());
-        assertEquals("1", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Metric").getMetricValue());
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Minor").getMetricValue());
-        assertEquals("3", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Metrics").getMetricValue());
-        assertEquals("1", result.getRawMetricData().get("TestLog|Search String|Pattern start with M|Matches|Mbean").getMetricValue());
+        assertEquals("7", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Memorymetricgenerator").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Memory").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Major").getMetricValue());
+        assertEquals("1", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Mx").getMetricValue());
+        assertEquals("1", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Metric").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Minor").getMetricValue());
+        assertEquals("3", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Metrics").getMetricValue());
+        assertEquals("1", result.getMetricMap().get("TestLog|Search String|Pattern start with M|Matches|Mbean").getMetricValue());
 
         // matches <\\w*>
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Pattern start with <|Matches|<this>").getMetricValue());
-        assertEquals("3", result.getRawMetricData().get("TestLog|Search String|Pattern start with <|Matches|<again>").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Pattern start with <|Matches|<this>").getMetricValue());
+        assertEquals("3", result.getMetricMap().get("TestLog|Search String|Pattern start with <|Matches|<again>").getMetricValue());
 
         // matches \\[JMX.*\\]
-        assertEquals("1", result.getRawMetricData().get("TestLog|Search String|Pattern start with [JMX|Matches|[jmxservice]").getMetricValue());
+        assertEquals("1", result.getMetricMap().get("TestLog|Search String|Pattern start with [JMX|Matches|[jmxservice]").getMetricValue());
 
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
-                result.getRawMetricData().get("TestLog|File size (Bytes)").getMetricValue());
+                result.getMetricMap().get("TestLog|File size (Bytes)").getMetricValue());
     }
 
     //endregion
@@ -373,16 +373,16 @@ public class LogFileManagerTest {
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
         LogMetrics result = classUnderTest.getLogMetrics();
 
-        assertEquals("13", result.getRawMetricData().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
-        assertEquals("24", result.getRawMetricData().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
-        assertEquals("7", result.getRawMetricData().get("TestLog|Search String|Error|Matches|Error").getMetricValue());
+        assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
+        assertEquals("24", result.getMetricMap().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
+        assertEquals("7", result.getMetricMap().get("TestLog|Search String|Error|Matches|Error").getMetricValue());
 
-        assertEquals("13", result.getRawMetricData().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("24", result.getRawMetricData().get("TestLog|Search String|Info|Occurrences").getMetricValue());
-        assertEquals("7", result.getRawMetricData().get("TestLog|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("24", result.getMetricMap().get("TestLog|Search String|Info|Occurrences").getMetricValue());
+        assertEquals("7", result.getMetricMap().get("TestLog|Search String|Error|Occurrences").getMetricValue());
 
         String filesize = getFileSize(log.getLogDirectory(), log.getLogName());
-        assertEquals(filesize, result.getRawMetricData().get("TestLog|File size (Bytes)").getMetricValue());
+        assertEquals(filesize, result.getMetricMap().get("TestLog|File size (Bytes)").getMetricValue());
 
         FilePointer filePointerAfterCurrentRun = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
         Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer(filePointerAfterCurrentRun.getFilename(),
@@ -406,12 +406,12 @@ public class LogFileManagerTest {
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
         result = classUnderTest.getLogMetrics();
 
-        assertEquals("3", result.getRawMetricData().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
+        assertEquals("3", result.getMetricMap().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
 
-        assertEquals("2", result.getRawMetricData().get("TestLog|Search String|Info|Occurrences").getMetricValue());
-        assertEquals("3", result.getRawMetricData().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("0", result.getRawMetricData().get("TestLog|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("2", result.getMetricMap().get("TestLog|Search String|Info|Occurrences").getMetricValue());
+        assertEquals("3", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("0", result.getMetricMap().get("TestLog|Search String|Error|Occurrences").getMetricValue());
 
         filePointerAfterCurrentRun = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
         Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer(filePointerAfterCurrentRun.getFilename(),
@@ -454,11 +454,11 @@ public class LogFileManagerTest {
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
         LogMetrics result = classUnderTest.getLogMetrics();
 
-        assertEquals("3", result.getRawMetricData().get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("0", result.getRawMetricData().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("3", result.getMetricMap().get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("0", result.getMetricMap().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
 
         String filesize = getFileSize(log.getLogDirectory(), testFilename);
-        assertEquals(filesize, result.getRawMetricData().get("active-dynamic-*|File size (Bytes)").getMetricValue());
+        assertEquals(filesize, result.getMetricMap().get("active-dynamic-*|File size (Bytes)").getMetricValue());
 
         // simulate our filepointer was updated
         filePointer.updateLastReadPosition(new Long(filesize));
@@ -472,7 +472,7 @@ public class LogFileManagerTest {
         updateLogFile(testFilepath, logsToAdd);
 
         // simulate new file created with different name
-        Thread.sleep(500);
+        Thread.sleep(1000);
         String dynamicLog2 = this.getClass().getClassLoader().getResource("dynamic-log-2.log").getPath();
 
         testFilename = "active-dynamic-log-2.log";
@@ -480,7 +480,7 @@ public class LogFileManagerTest {
         copyFile(dynamicLog2, testFilepath);
 
         // simulate another file created with different name
-        Thread.sleep(500);
+        Thread.sleep(1000);
         String dynamicLog3 = this.getClass().getClassLoader().getResource("dynamic-log-3.log").getPath();
         testFilename = "active-dynamic-log-3.log";
         testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
@@ -491,8 +491,8 @@ public class LogFileManagerTest {
         }
         updateLogFile(testFilepath, logsToAdd);
         result = classUnderTest.getLogMetrics();
-        assertEquals("107", result.getRawMetricData().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
-        assertEquals("103", result.getRawMetricData().get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("107", result.getMetricMap().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
+        assertEquals("103", result.getMetricMap().get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
     }
 
     @Test
