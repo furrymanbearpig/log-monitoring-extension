@@ -23,13 +23,7 @@
  */
 package org.bitbucket.kienerj;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UTFDataFormatException;
+import java.io.*;
 
 /**
  * Copied from original lib (as jar was compiled with higher JDK causing UnsupportedClassVersionError):
@@ -37,17 +31,17 @@ import java.io.UTFDataFormatException;
  * artifactId: io
  * version: 1.0.0
  * 
- * <p> Wrapper of {@link java.io.RandomAccessFile
+ * <p> Wrapper of {@link RandomAccessFile
  * <code>RandomAccessFile</code>} that has an readLine method performing similar
  * to {@link java.io.BufferedReader#readLine()} while keeping the random access
  * functionality. </p>
  *
- * <p> {@link java.io.RandomAccessFile#readLine()} is very slow as it reads a
- * file byte by byte. This here will perform 2 orders of magnitude faster. 
+ * <p> {@link RandomAccessFile#readLine()} is very slow as it reads a
+ * file byte by byte. This here will perform 2 orders of magnitude faster.
  * For thread-safety all read and write methods are synchronized. </p>
  * </p>
  * If the underlying {@link java.nio.channels.FileChannel
- * <code>FileChannel</code>} is manipulated, the behavior is unpredictable. 
+ * <code>FileChannel</code>} is manipulated, the behavior is unpredictable.
  * Therefore this class does not expose the <code>getFileChannel()</code> method
  * of <code>RandomAccessFile</code>. </p>
  *
@@ -99,7 +93,7 @@ public class OptimizedRandomAccessFile {
      *
      * @return the file descriptor object associated with this stream.
      * @exception IOException if an I/O error occurs.
-     * @see java.io.FileDescriptor
+     * @see FileDescriptor
      */
     public final FileDescriptor getFD() throws IOException {
         return raf.getFD();
@@ -677,8 +671,8 @@ public class OptimizedRandomAccessFile {
      * @exception EOFException if this file reaches the end before reading four
      * bytes.
      * @exception IOException if an I/O error occurs.
-     * @see java.io.RandomAccessFile#readInt()
-     * @see java.lang.Float#intBitsToFloat(int)
+     * @see RandomAccessFile#readInt()
+     * @see Float#intBitsToFloat(int)
      */
     public synchronized final float readFloat() throws IOException {
         resetPosition();
@@ -702,8 +696,8 @@ public class OptimizedRandomAccessFile {
      * @exception EOFException if this file reaches the end before reading eight
      * bytes.
      * @exception IOException if an I/O error occurs.
-     * @see java.io.RandomAccessFile#readLong()
-     * @see java.lang.Double#longBitsToDouble(long)
+     * @see RandomAccessFile#readLong()
+     * @see Double#longBitsToDouble(long)
      */
     public synchronized final double readDouble() throws IOException {
         resetPosition();
@@ -712,7 +706,7 @@ public class OptimizedRandomAccessFile {
 
     /**
      * <p> Read the file line by line omitting the line separator. </p> <p> see
-     * {@link java.io.RandomAccessFile#readLine() readLine()} and see
+     * {@link RandomAccessFile#readLine() readLine()} and see
      * {@link java.io.BufferedReader#readLine(boolean) readLine(boolean ignoreLF)}.
      * <p>
      *
@@ -846,7 +840,7 @@ public class OptimizedRandomAccessFile {
      * @exception IOException if an I/O error occurs.
      * @exception UTFDataFormatException if the bytes do not represent valid
      * modified UTF-8 encoding of a Unicode string.
-     * @see java.io.RandomAccessFile#readUnsignedShort()
+     * @see RandomAccessFile#readUnsignedShort()
      */
     public synchronized final String readUTF() throws IOException {
         resetPosition();
@@ -945,7 +939,7 @@ public class OptimizedRandomAccessFile {
      *
      * @param v a <code>float</code> value to be written.
      * @exception IOException if an I/O error occurs.
-     * @see java.lang.Float#floatToIntBits(float)
+     * @see Float#floatToIntBits(float)
      */
     public synchronized final void writeFloat(float v) throws IOException {
         resetPosition();
@@ -962,7 +956,7 @@ public class OptimizedRandomAccessFile {
      *
      * @param v a <code>double</code> value to be written.
      * @exception IOException if an I/O error occurs.
-     * @see java.lang.Double#doubleToLongBits(double)
+     * @see Double#doubleToLongBits(double)
      */
     public synchronized final void writeDouble(double v) throws IOException {
         resetPosition();
@@ -990,7 +984,7 @@ public class OptimizedRandomAccessFile {
      *
      * @param s a <code>String</code> value to be written.
      * @exception IOException if an I/O error occurs.
-     * @see java.io.RandomAccessFile#writeChar(int)
+     * @see RandomAccessFile#writeChar(int)
      */
     public synchronized final void writeChars(String s) throws IOException {
         resetPosition();

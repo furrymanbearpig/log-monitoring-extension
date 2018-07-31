@@ -4,23 +4,23 @@
 # metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
 # Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
 
-metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
+metricPrefix: "Server|Component:21|Custom Metrics|Log Monitor Testing|"
 
 logs:
-  - displayName: ""
-    logDirectory: ""
-    logName: ""
+  - displayName: "Log Monitor Testing"
+    logDirectory: "/Users/aditya.jagtiani/FileWatcherTesting/LogMonitorTesting"
+    logName: "file1*.log"
     searchStrings:
-       - displayName: ""
-         pattern: ""
-         matchExactString: false
-         caseSensitive: false
-         printMatchedString: false
         #displayName Should be unique across the patterns including the case.
-       - displayName: ""
-         pattern: ""
+       - displayName: "Demo"
+         pattern: "demo"
          matchExactString: true
-         caseSensitive: false
+         caseSensitive: true
+         printMatchedString: false
+       - displayName: "Error"
+         pattern: "error"
+         matchExactString: true
+         caseSensitive: true
          printMatchedString: false
 
 #Replaces characters in metric name with the specified characters.
@@ -33,7 +33,7 @@ metricCharacterReplacer:
       replaceWith: "#"
 
 # Number of concurrent threads
-noOfThreads: 10
+numberOfThreads: 10
 
 #Thread timeout in seconds
 threadTimeOut: 60

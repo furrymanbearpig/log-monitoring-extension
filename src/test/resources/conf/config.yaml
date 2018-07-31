@@ -66,7 +66,7 @@ metricCharacterReplacer:
     - replace: ","
       replaceWith: " "
 # Number of concurrent threads
-noOfThreads: 3
+numberOfThreads: 10
 
 threadTimeOut: 60
 
