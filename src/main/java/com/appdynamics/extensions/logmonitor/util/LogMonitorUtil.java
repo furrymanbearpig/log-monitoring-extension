@@ -125,7 +125,6 @@ public class LogMonitorUtil {
         return validLogs;
     }
 
-
     private static Log initializeLog(Map<String, ?> currentLogFromConfig) {
         Log log = new Log();
         log.setDisplayName((String) currentLogFromConfig.get("displayName"));
@@ -138,7 +137,7 @@ public class LogMonitorUtil {
     private static List<SearchString> initializeSearchStrings(Map<String, ?> currentLogFromConfig) {
         List<SearchString> searchStrings = Lists.newArrayList();
         List<Map<String, ?>> searchStringsForCurrentLog = (List) currentLogFromConfig.get("searchStrings");
-        for(Map<String, ?> searchStringFromLog : searchStringsForCurrentLog) {
+        for (Map<String, ?> searchStringFromLog : searchStringsForCurrentLog) {
             SearchString searchString = new SearchString();
             searchString.setDisplayName((String) searchStringFromLog.get("displayName"));
             searchString.setPattern((String) searchStringFromLog.get("pattern"));
@@ -173,9 +172,10 @@ public class LogMonitorUtil {
     public static void convertToUTF8Encoding(File file) throws Exception {
         String charset = "UTF-16LE";
         BufferedReader in = new BufferedReader(
-                new InputStreamReader (new FileInputStream(file), charset));
-        String line; StringBuilder sb = new StringBuilder();
-        while( (line = in.readLine()) != null) {
+                new InputStreamReader(new FileInputStream(file), charset));
+        String line;
+        StringBuilder sb = new StringBuilder();
+        while ((line = in.readLine()) != null) {
             sb.append(line);
             sb.append("\n");
         }

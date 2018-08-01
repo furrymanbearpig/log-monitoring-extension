@@ -55,7 +55,6 @@ public class LogFileManager {
         OptimizedRandomAccessFile randomAccessFile;
         LogMetrics logMetrics = new LogMetrics();
         logMetrics.setMetricPrefix(monitorContextConfiguration.getMetricPrefix());
-
         try {
             List<File> filesToBeProcessed;
             CountDownLatch latch;
@@ -65,8 +64,7 @@ public class LogFileManager {
             if (file != null) {
                 String dynamicLogPath = dirPath + log.getLogName();
                 long currentTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
-                currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath(), file.length(),
-                        currentTimeStampFromFilePointer, file);
+                currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath());
                 Map<Pattern, String> replacers = getMetricCharacterReplacers();
 
                 if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) { // logs rolled over
@@ -162,21 +160,17 @@ public class LogFileManager {
         if (directory.isDirectory()) {
             FileFilter fileFilter = new WildcardFileFilter(log.getLogName());
             File[] files = directory.listFiles(fileFilter);
-
             if (files != null && files.length > 0) {
                 logFile = getLatestFile(files);
-
                 if (!logFile.canRead()) {
                     throw new IOException(
                             String.format("Unable to read file [%s]", logFile.getPath()));
                 }
-
             } else {
                 LOGGER.info("Unable to find any file with name {} in {}. Skipping",
                         log.getLogName(), dirPath);
                 logFile = null;
             }
-
         } else {
             throw new FileNotFoundException(
                     String.format("Directory [%s] not found. Ensure it is a directory.",
@@ -218,23 +212,13 @@ public class LogFileManager {
         return false;
     }
 
-    private long getCurrentFilePointerOffset(String dynamicLogPath, String actualLogPath, long fileSize,
-                                             long currentTimeStampFromFilePointer, File currentFile) throws Exception {
-        FilePointer filePointer =
-                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
-        return filePointer.getLastReadPosition().get();
-/*        if (getCurrentFileCreationTimeStamp(currentFile) == currentTimeStampFromFilePointer ||
-                !hasLogRolledOver(dynamicLogPath, actualLogPath, fileSize)) {
-            // found the oldest file, start from CFP
-            return currentPosition;
-        } else {
-            // start from 0
-            return 0;
-        }*/
+    private long getCurrentFilePointerOffset(String dynamicLogPath, String actualLogPath) {
+        return filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath).getLastReadPosition().get();
     }
 
     private Map<Pattern, String> getMetricCharacterReplacers() {
-        List<Map<String, String>> metricCharReplacersFromCfg = (List) monitorContextConfiguration.getConfigYml().get("metricCharacterReplacers");
+        List<Map<String, String>> metricCharReplacersFromCfg = (List) monitorContextConfiguration.getConfigYml()
+                .get("metricCharacterReplacers");
         return initializeMetricCharacterReplacers(metricCharReplacersFromCfg);
     }
 }

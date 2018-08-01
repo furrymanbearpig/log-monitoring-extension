@@ -35,7 +35,7 @@ public class FilePointerProcessor {
     private ObjectMapper mapper = new ObjectMapper();
 
     public FilePointerProcessor() {
-        initialiseFilePointers();
+        initializeFilePointers();
     }
 
     void updateFilePointer(String dynamicLogPath,
@@ -71,35 +71,29 @@ public class FilePointerProcessor {
         }
     }
 
-    private void initialiseFilePointers() {
+    private void initializeFilePointers() {
         LOGGER.info("Initialising filepointers...");
-
         File file = new File(getFilePointerPath());
-
         if (!file.exists()) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Unable to find: " + file.getPath());
             }
-
         } else {
             try {
                 filePointers = mapper.readValue(file,
                         new TypeReference<ConcurrentHashMap<String, FilePointer>>() {
                         });
-
             } catch (Exception ex) {
                 LOGGER.error(String.format(
                         "Unfortunately an error occurred while reading filepointer %s",
                         file.getPath()), ex);
             }
         }
-
-        LOGGER.info("Filepointers initialised with: " + filePointers);
+        LOGGER.info("Filepointers initialized with: " + filePointers);
     }
 
     private String getFilePointerPath() {
         String path = null;
-
         try {
             URL classUrl = LogMonitor.class.getResource(
                     LogMonitor.class.getSimpleName() + ".class");
@@ -107,11 +101,9 @@ public class FilePointerProcessor {
 
             // workaround for jar file
             jarPath = jarPath.replace("jar:", "").replace("file:", "");
-
             if (jarPath.contains("!")) {
                 jarPath = jarPath.substring(0, jarPath.indexOf("!"));
             }
-
             File file = new File(jarPath);
             String jarDir = file.getParentFile().toURI().getPath();
 
@@ -122,7 +114,6 @@ public class FilePointerProcessor {
                 path = String.format("%s%s%s", jarDir ,
                         File.separator, FILEPOINTER_FILENAME);
             }
-
         } catch (Exception ex) {
             LOGGER.warn("Unable to resolve installation dir, finding an alternative.");
         }
@@ -131,18 +122,15 @@ public class FilePointerProcessor {
             path = String.format("%s%s%s", new File(".").getAbsolutePath(),
                     File.separator, FILEPOINTER_FILENAME);
         }
-
         try {
             path = URLDecoder.decode(path, "UTF-8");
 
         } catch (UnsupportedEncodingException e) {
             LOGGER.warn(String.format("Unable to decode file path [%s] using UTF-8", path));
         }
-
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Filepointer path: " + path);
         }
-
         return path;
     }
 }

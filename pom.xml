@@ -189,6 +189,6 @@
         </repository>
     </repositories>
     <scm>
-        <connection>scm:git:https://github.com/Appdynamics/new-log-monitor-extension.git</connection>
+        <connection>scm:git:https://github.com/Appdynamics/log-monitor-extension.git</connection>
     </scm>
 </project>

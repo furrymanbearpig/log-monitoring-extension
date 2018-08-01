@@ -136,7 +136,6 @@ public class LogFileProcessor implements Runnable {
         if (name == null || name.length() == 0 || replacers == null) {
             return name;
         }
-
         for (Map.Entry<Pattern, String> replacerEntry : replacers.entrySet()) {
             Pattern pattern = replacerEntry.getKey();
             Matcher matcher = pattern.matcher(name);
