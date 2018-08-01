@@ -54,32 +54,11 @@ public class LogMonitor extends ABaseMonitor {
     public void doRun(TasksExecutionServiceProvider taskExecutor) {
         List<Map<String, ?>> logsFromCfg = (List<Map<String, ?>>) configYml.get("logs");
         List<Log> logsToMonitor = LogMonitorUtil.getValidLogsFromConfig(logsFromCfg);
-
         FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
-
         for(Log log : logsToMonitor) {
             LOGGER.info("Starting the Log Monitoring Task for log : " + log.getDisplayName());
             LogMonitorTask task = new LogMonitorTask(monitorContextConfiguration, taskExecutor.getMetricWriteHelper(), log, filePointerProcessor);
             taskExecutor.submit(log.getDisplayName(), task);
         }
-    }
-
-    public static void main(String[] args) throws TaskExecutionException {
-        ConsoleAppender ca = new ConsoleAppender();
-        ca.setWriter(new OutputStreamWriter(System.out));
-        ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
-        ca.setThreshold(Level
-                .DEBUG);
-        org.apache.log4j.Logger.getRootLogger().addAppender(ca);
-
-
-    /*FileAppender fa = new FileAppender(new PatternLayout("%-5p [%t]: %m%n"), "cache.log");
-    fa.setThreshold(Level.DEBUG);
-    LOGGER.getRootLogger().addAppender(fa);*/
-
-        LogMonitor monitor = new LogMonitor();
-        Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put("config-file", "/Users/aditya.jagtiani/repos/appdynamics/extensions/new-log-monitoring-extension/src/main/resources/conf/config.yml");
-        monitor.execute(taskArgs, null);
     }
 }
