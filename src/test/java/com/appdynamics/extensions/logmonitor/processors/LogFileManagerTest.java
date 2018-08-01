@@ -179,9 +179,9 @@ public class LogFileManagerTest {
         monitorContextConfiguration.setConfigYml("src/test/resources/conf/config.yaml");
 
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
-
         LogMetrics result = classUnderTest.getLogMetrics();
-        convertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
+
+        revertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
 
         assertEquals("5", result.getMetricMap().get("TestUTF16Log|Search String|Debug|Occurrences").getMetricValue());
         assertEquals("5", result.getMetricMap().get("TestUTF16Log|Search String|Info|Occurrences").getMetricValue());
@@ -618,7 +618,7 @@ public class LogFileManagerTest {
         return new File("./target");
     }
 
-    private void convertToUTF16Encoding(File file) throws Exception {
+    private void revertToUTF16Encoding(File file) throws Exception {
         String charset = "UTF-8";
         BufferedReader in = new BufferedReader(
                 new InputStreamReader (new FileInputStream(file), charset));
