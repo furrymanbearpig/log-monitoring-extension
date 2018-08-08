@@ -56,9 +56,7 @@ public class LogFileManager {
         LogMetrics logMetrics = new LogMetrics();
         logMetrics.setMetricPrefix(monitorContextConfiguration.getMetricPrefix());
         try {
-            List<File> filesToBeProcessed;
-            CountDownLatch latch;
-            long currentFilePointerPosition;
+            List<File> filesToBeProcessed; CountDownLatch latch; long currentFilePointerPosition;
             file = getLogFile(dirPath);
 
             if (file != null) {
@@ -71,26 +69,18 @@ public class LogFileManager {
                     filesToBeProcessed = getRequiredFilesFromDir(currentTimeStampFromFilePointer, dirPath);
                     latch = new CountDownLatch(filesToBeProcessed.size());
                     for (File currentFile : filesToBeProcessed) {
-                        if (!isUTF8Encoded(currentFile)) {
-                            LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", currentFile.getName());
-                            convertToUTF8Encoding(currentFile);
-                        }
+                        handleFileEncoding(currentFile);
                         randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
                         if (getCurrentFileCreationTimeStamp(currentFile) == currentTimeStampFromFilePointer) {
-                            // found the oldest file, start from CFP
-                            randomAccessFile.seek(currentFilePointerPosition);
+                            randomAccessFile.seek(currentFilePointerPosition); //found the oldest file, process from CFP
                         } else {
-                            // oldest file processed, start newest file from 0
                             randomAccessFile.seek(0);
                         }
                         executorService.execute("LogFileProcessor", new LogFileProcessor(randomAccessFile, log, latch,
                                 logMetrics, currentFile, replacers));
                     }
                 } else { // when the log has not rolled over
-                    if (!isUTF8Encoded(file)) {
-                        LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
-                        convertToUTF8Encoding(file);
-                    }
+                    handleFileEncoding(file);
                     latch = new CountDownLatch(1);
                     randomAccessFile = new OptimizedRandomAccessFile(file, "r");
                     randomAccessFile.seek(currentFilePointerPosition);
@@ -220,5 +210,12 @@ public class LogFileManager {
         List<Map<String, String>> metricCharReplacersFromCfg = (List) monitorContextConfiguration.getConfigYml()
                 .get("metricCharacterReplacers");
         return initializeMetricCharacterReplacers(metricCharReplacersFromCfg);
+    }
+
+    private void handleFileEncoding(File file) throws Exception {
+        if (!isUTF8Encoded(file)) {
+            LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
+            convertToUTF8Encoding(file);
+        }
     }
 }

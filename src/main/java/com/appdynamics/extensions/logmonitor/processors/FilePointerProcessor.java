@@ -29,8 +29,7 @@ import com.appdynamics.extensions.logmonitor.LogMonitor;
  *
  */
 public class FilePointerProcessor {
-
-    static final Logger LOGGER = Logger.getLogger(FilePointerProcessor.class);
+    private static final Logger LOGGER = Logger.getLogger(FilePointerProcessor.class);
     private ConcurrentHashMap<String, FilePointer> filePointers = new ConcurrentHashMap<String, FilePointer>();
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -50,7 +49,6 @@ public class FilePointerProcessor {
         if (filePointers.containsKey(dynamicLogPath)) {
             return filePointers.get(dynamicLogPath);
         }
-
         FilePointer newFilePointer = new FilePointer();
         newFilePointer.setFilename(actualLogPath);
 
@@ -60,10 +58,8 @@ public class FilePointerProcessor {
 
     public void updateFilePointerFile() {
         File file = new File(getFilePointerPath());
-
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(file, filePointers);
-
         } catch (Exception ex) {
             LOGGER.error(String.format(
                     "Unfortunately an error occurred while saving filepointers to %s",
@@ -72,7 +68,7 @@ public class FilePointerProcessor {
     }
 
     private void initializeFilePointers() {
-        LOGGER.info("Initialising filepointers...");
+        LOGGER.info("Initializing Filepointers...");
         File file = new File(getFilePointerPath());
         if (!file.exists()) {
             if (LOGGER.isDebugEnabled()) {

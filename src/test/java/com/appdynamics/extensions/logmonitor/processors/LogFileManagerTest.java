@@ -80,7 +80,6 @@ public class LogFileManagerTest {
         monitorContextConfiguration.setConfigYml("src/test/resources/conf/config.yaml");
 
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
-
         LogMetrics result = classUnderTest.getLogMetrics();
 
         assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
@@ -125,7 +124,6 @@ public class LogFileManagerTest {
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
-
         LogMetrics result = classUnderTest.getLogMetrics();
 
         assertEquals("13", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
@@ -181,11 +179,11 @@ public class LogFileManagerTest {
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
         LogMetrics result = classUnderTest.getLogMetrics();
 
-        revertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
-
         assertEquals("5", result.getMetricMap().get("TestUTF16Log|Search String|Debug|Occurrences").getMetricValue());
         assertEquals("5", result.getMetricMap().get("TestUTF16Log|Search String|Info|Occurrences").getMetricValue());
         assertEquals("0", result.getMetricMap().get("TestUTF16Log|Search String|Error|Occurrences").getMetricValue());
+
+        revertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
     }
     //endregion
 
@@ -325,7 +323,6 @@ public class LogFileManagerTest {
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 result.getMetricMap().get("TestLog|File size (Bytes)").getMetricValue());
     }
-
     //endregion
 
     //region <Log Manipulation and Rollover Tests>
@@ -393,22 +390,18 @@ public class LogFileManagerTest {
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString()))
                 .thenReturn(filePointer);
 
-        // perform the update
         List<String> logsToAdd = Arrays.asList("",
                 new Date() + "	DEBUG	This is the first line",
                 new Date() + "	INFO	This is the second line",
                 new Date() + "	INFO	This is the third line",
                 new Date() + "	DEBUG	This is the fourth line",
                 new Date() + "	DEBUG	This is the fifth line");
-
         updateLogFile(testFilepath, logsToAdd);
-
         classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
         result = classUnderTest.getLogMetrics();
 
         assertEquals("3", result.getMetricMap().get("TestLog|Search String|Debug|Matches|Debug").getMetricValue());
         assertEquals("2", result.getMetricMap().get("TestLog|Search String|Info|Matches|Info").getMetricValue());
-
         assertEquals("2", result.getMetricMap().get("TestLog|Search String|Info|Occurrences").getMetricValue());
         assertEquals("3", result.getMetricMap().get("TestLog|Search String|Debug|Occurrences").getMetricValue());
         assertEquals("0", result.getMetricMap().get("TestLog|Search String|Error|Occurrences").getMetricValue());
@@ -460,7 +453,7 @@ public class LogFileManagerTest {
         String filesize = getFileSize(log.getLogDirectory(), testFilename);
         assertEquals(filesize, result.getMetricMap().get("active-dynamic-*|File size (Bytes)").getMetricValue());
 
-        // simulate our filepointer was updated
+        // simulate a file pointer update
         filePointer.updateLastReadPosition(new Long(filesize));
         when(mockFilePointerProcessor.getFilePointer(anyString(), anyString()))
                 .thenReturn(filePointer);
@@ -486,12 +479,9 @@ public class LogFileManagerTest {
         testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
         copyFile(dynamicLog3, testFilepath);
         logsToAdd.clear();
-        for (int i = 0; i < 100; i++) {
-            logsToAdd.add(new Date() + "	ERROR	Statement " + i + "\n");
-        }
-        updateLogFile(testFilepath, logsToAdd);
         result = classUnderTest.getLogMetrics();
-        assertEquals("107", result.getMetricMap().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
+
+        assertEquals("7", result.getMetricMap().get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
         assertEquals("103", result.getMetricMap().get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
     }
 
@@ -546,13 +536,11 @@ public class LogFileManagerTest {
         for (int i = 0; i < 100; i++) {
             logsToAdd.add(new Date() + "	DEBUG	Statement " + i + "\n");
         }
-
         updateLogFile(testFilepath, logsToAdd);
 
         // simulate new file created with different name
         Thread.sleep(1000);
         String dynamicLog2 = this.getClass().getClassLoader().getResource("dynamic-log-2.log").getPath();
-
         testFilename = "active-dynamic-log-2.log";
         testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
         copyFile(dynamicLog2, testFilepath);
@@ -570,7 +558,6 @@ public class LogFileManagerTest {
 
         updateLogFile(testFilepath, logsToAdd);
         result = classUnderTest.getLogMetrics();
-
         latestFilePointer = LogMonitorUtil.getLatestFilePointer(result.getFilePointers());
         Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer("./target/active-dynamic-*",
                 latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
