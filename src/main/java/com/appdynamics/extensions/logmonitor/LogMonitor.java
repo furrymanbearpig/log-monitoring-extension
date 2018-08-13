@@ -34,10 +34,14 @@ public class LogMonitor extends ABaseMonitor {
     private Map<String, ?> configYml = Maps.newHashMap();
 
     @Override
-    public String getDefaultMetricPrefix() { return DEFAULT_METRIC_PREFIX; }
+    public String getDefaultMetricPrefix() {
+        return DEFAULT_METRIC_PREFIX;
+    }
 
     @Override
-    public String getMonitorName() { return MONITOR_NAME; }
+    public String getMonitorName() {
+        return MONITOR_NAME;
+    }
 
     @Override
     protected void initializeMoreStuff(Map<String, String> args) {
@@ -57,9 +61,10 @@ public class LogMonitor extends ABaseMonitor {
         List<Map<String, ?>> logsFromConfig = (List<Map<String, ?>>) configYml.get("logs");
         List<Log> logsToMonitor = LogMonitorUtil.getValidLogsFromConfig(logsFromConfig);
         FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
-        for(Log log : logsToMonitor) {
-            LOGGER.info("Starting the Log Monitoring Task for log : " + log.getDisplayName());
-            LogMonitorTask task = new LogMonitorTask(monitorContextConfiguration, taskExecutor.getMetricWriteHelper(), log, filePointerProcessor);
+        for (Log log : logsToMonitor) {
+            LOGGER.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
+            LogMonitorTask task = new LogMonitorTask(monitorContextConfiguration, taskExecutor.getMetricWriteHelper(),
+                    log, filePointerProcessor);
             taskExecutor.submit(log.getDisplayName(), task);
         }
     }

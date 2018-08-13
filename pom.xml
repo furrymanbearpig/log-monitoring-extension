@@ -111,11 +111,10 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
+                                        <Main-Class>com.appdynamics.extensions.workbench.WorkbenchServerLauncher</Main-Class>
                                         <Implementation-Title>Log Monitor v${project.version} Build Date ${maven.build.timestamp}</Implementation-Title>
                                     </manifestEntries>
                                 </transformer>

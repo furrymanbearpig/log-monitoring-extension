@@ -51,10 +51,10 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
         LOGGER.info("Completed the Log Monitoring task for log : " + log.getDisplayName());
     }
 
-    private void populateAndPrintMetrics() {
+    private void populateAndPrintMetrics() throws Exception {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
         List<Metric> allLogMetrics = Lists.newArrayList();
-        allLogMetrics.addAll(logFileManager.getLogMetrics().getAllLogMetrics());
+        allLogMetrics.addAll(logFileManager.getLogMetrics().getFinalMetricList());
         metricWriteHelper.transformAndPrintMetrics(allLogMetrics);
         filePointerProcessor.updateFilePointerFile();
     }

@@ -15,21 +15,24 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * @author Aditya Jagtiani
- *
  */
 public class FilePointer {
     private volatile String filename;
     private AtomicLong lastReadPosition = new AtomicLong(0);
     private long fileCreationTime;
+
     public String getFilename() {
         return filename;
     }
+
     public synchronized void setFilename(String filename) {
         this.filename = filename;
     }
+
     public AtomicLong getLastReadPosition() {
         return lastReadPosition;
     }
+
     public synchronized void setLastReadPosition(AtomicLong lastReadPosition) {
         this.lastReadPosition = lastReadPosition;
     }

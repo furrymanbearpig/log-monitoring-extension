@@ -50,7 +50,7 @@ public class LogMetrics {
         this.metrics.put(metricName, metric);
     }
 
-    public List<Metric> getAllLogMetrics() {
+    public List<Metric> getFinalMetricList() {
         List<Metric> metrics = Lists.newArrayList();
         for (Map.Entry<String, Metric> metric : this.metrics.entrySet()) {
             metrics.add(metric.getValue());
@@ -66,14 +66,14 @@ public class LogMetrics {
         return this.filePointers;
     }
 
+    public void updateFilePointer(FilePointer filePointer) {
+        filePointers.add(filePointer);
+    }
+
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this,
                 ToStringStyle.SHORT_PREFIX_STYLE);
-    }
-
-    public void updateFilePointer(FilePointer filePointer) {
-        filePointers.add(filePointer);
     }
 }
 

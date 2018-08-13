@@ -27,7 +27,6 @@ import com.appdynamics.extensions.logmonitor.LogMonitor;
 
 /**
  * @author Florencio Sarmiento
- *
  */
 public class FilePointerProcessor {
     private static final Logger LOGGER = Logger.getLogger(FilePointerProcessor.class);
@@ -39,7 +38,7 @@ public class FilePointerProcessor {
     }
 
     void updateFilePointer(String dynamicLogPath,
-                                  String actualLogPath, AtomicLong lastReadPosition, long creationTimestamp) {
+                           String actualLogPath, AtomicLong lastReadPosition, long creationTimestamp) {
         FilePointer filePointer = getFilePointer(dynamicLogPath, actualLogPath);
         filePointer.setFilename(actualLogPath);
         filePointer.setLastReadPosition(lastReadPosition);
@@ -62,8 +61,7 @@ public class FilePointerProcessor {
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(file, filePointers);
         } catch (Exception ex) {
-            LOGGER.error(String.format(
-                    "Unfortunately an error occurred while saving filepointers to %s",
+            LOGGER.error(String.format("Unfortunately an error occurred while saving filepointers to %s",
                     file.getPath()), ex);
         }
     }
@@ -81,8 +79,7 @@ public class FilePointerProcessor {
                         new TypeReference<ConcurrentHashMap<String, FilePointer>>() {
                         });
             } catch (Exception ex) {
-                LOGGER.error(String.format(
-                        "Unfortunately an error occurred while reading filepointer %s",
+                LOGGER.error(String.format("Unfortunately an error occurred while reading filepointer %s",
                         file.getPath()), ex);
             }
         }
@@ -108,7 +105,7 @@ public class FilePointerProcessor {
                 path = jarDir + FILEPOINTER_FILENAME;
 
             } else {
-                path = String.format("%s%s%s", jarDir ,
+                path = String.format("%s%s%s", jarDir,
                         File.separator, FILEPOINTER_FILENAME);
             }
         } catch (Exception ex) {

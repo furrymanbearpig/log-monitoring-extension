@@ -42,66 +42,75 @@ public class LogFileManager {
     private MonitorContextConfiguration monitorContextConfiguration;
     private MonitorExecutorService executorService;
 
-    public LogFileManager(FilePointerProcessor filePointerProcessor, Log log, MonitorContextConfiguration monitorContextConfiguration) {
+    public LogFileManager(FilePointerProcessor filePointerProcessor, Log log,
+                          MonitorContextConfiguration monitorContextConfiguration) {
         this.log = log;
         this.filePointerProcessor = filePointerProcessor;
         this.monitorContextConfiguration = monitorContextConfiguration;
         this.executorService = this.monitorContextConfiguration.getContext().getExecutorService();
     }
 
-    public LogMetrics getLogMetrics() {
-        LOGGER.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
+    public LogMetrics getLogMetrics() throws Exception {
+        LOGGER.info("Starting the metric collection process for log : {}", log.getDisplayName());
         String dirPath = resolveDirPath(log.getLogDirectory());
-        File file = null;
-        OptimizedRandomAccessFile randomAccessFile;
+        File file = getLogFile(dirPath);
         LogMetrics logMetrics = new LogMetrics();
         logMetrics.setMetricPrefix(monitorContextConfiguration.getMetricPrefix());
-        try {
-            List<File> filesToBeProcessed; CountDownLatch latch; long currentFilePointerPosition;
-            file = getLogFile(dirPath);
 
-            if (file != null) {
+        if (file != null) {
+            try {
+                CountDownLatch latch;
                 String dynamicLogPath = dirPath + log.getLogName();
                 long currentTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
-                currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath());
-                Map<Pattern, String> replacers = getMetricCharacterReplacers();
+                long currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath());
 
-                if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) { // logs rolled over
-                    filesToBeProcessed = getRequiredFilesFromDir(currentTimeStampFromFilePointer, dirPath);
+                if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) {
+                    List<File> filesToBeProcessed = getFilesToBeProcessedFromDirectory(currentTimeStampFromFilePointer, dirPath);
                     latch = new CountDownLatch(filesToBeProcessed.size());
-                    for (File currentFile : filesToBeProcessed) {
-                        handleFileEncoding(currentFile);
-                        randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
-                        if (getCurrentFileCreationTimeStamp(currentFile) == currentTimeStampFromFilePointer) {
-                            randomAccessFile.seek(currentFilePointerPosition); //found the oldest file, process from CFP
-                        } else {
-                            randomAccessFile.seek(0);
-                        }
-                        executorService.execute("LogFileProcessor", new LogFileProcessor(randomAccessFile, log, latch,
-                                logMetrics, currentFile, replacers));
-                    }
-                } else { // when the log has not rolled over
-                    handleFileEncoding(file);
+                    processRolledOverLogs(filesToBeProcessed, currentTimeStampFromFilePointer, currentFilePointerPosition,
+                            logMetrics, latch);
+                } else {
                     latch = new CountDownLatch(1);
-                    randomAccessFile = new OptimizedRandomAccessFile(file, "r");
-                    randomAccessFile.seek(currentFilePointerPosition);
-                    executorService.execute("LogFileProcessor", new LogFileProcessor(randomAccessFile, log, latch,
-                            logMetrics, file, replacers));
+                    processLogsWithoutRollover(file, latch, currentFilePointerPosition, logMetrics);
                 }
                 latch.await();
                 setNewFilePointer(dynamicLogPath, logMetrics.getFilePointers());
+            } catch (Exception ex) {
+                LOGGER.error("File I/O issue while processing : " + file.getAbsolutePath(), ex);
             }
-        } catch (Exception e) {
-            LOGGER.error("File I/O issue while processing : " + file.getAbsolutePath(), e);
         }
         return logMetrics;
+    }
+
+    private void processRolledOverLogs(List<File> filesToBeProcessed, long currentTimeStampFromFilePointer,
+                                       long currentFilePointerPosition, LogMetrics logMetrics, CountDownLatch latch) throws Exception {
+        for (File currentFile : filesToBeProcessed) {
+            handleFileEncoding(currentFile);
+            OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
+            if (getCurrentFileCreationTimeStamp(currentFile) == currentTimeStampFromFilePointer) {
+                randomAccessFile.seek(currentFilePointerPosition); //found the oldest file, process from CFP
+            } else {
+                randomAccessFile.seek(0);
+            }
+            executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
+                    logMetrics, currentFile, getMetricCharacterReplacers()));
+        }
+    }
+
+    private void processLogsWithoutRollover(File file, CountDownLatch latch, long currentFilePointerPosition,
+                                            LogMetrics logMetrics) throws Exception {
+        handleFileEncoding(file);
+        OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(file, "r");
+        randomAccessFile.seek(currentFilePointerPosition);
+        executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch, logMetrics,
+                file, getMetricCharacterReplacers()));
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
         FilePointer latestFilePointer = LogMonitorUtil.getLatestFilePointer(filePointers);
         LOGGER.debug("Updating File Pointer with the most recently processed log: {}, pointing to file: {} with the " +
-                        "last read position: {} and a creation time stamp of: {}", dynamicLogPath, latestFilePointer.getFilename(),
-                latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
+                        "last read position: {} and a creation time stamp of: {}", dynamicLogPath,
+                latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
         filePointerProcessor.updateFilePointer(dynamicLogPath, latestFilePointer.getFilename(),
                 latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
@@ -120,7 +129,8 @@ public class LogFileManager {
         return filePointer.getFileCreationTime();
     }
 
-    private List<File> getRequiredFilesFromDir(long curTimeStampFromFilePtr, String path) throws IOException {
+    private List<File> getFilesToBeProcessedFromDirectory(long currentTimeStampFromFilePointer, String path)
+            throws IOException {
         List<File> filesToBeProcessed = Lists.newArrayList();
         File directory = new File(path);
 
@@ -131,15 +141,14 @@ public class LogFileManager {
             if (files != null && files.length > 0) {
                 for (File file : files) {
                     long currentFileCreationTime = getCurrentFileCreationTimeStamp(file);
-                    if (currentFileCreationTime >= curTimeStampFromFilePtr) {
+                    if (currentFileCreationTime >= currentTimeStampFromFilePointer) {
                         filesToBeProcessed.add(file);
                     }
                 }
             }
         } else {
             throw new FileNotFoundException(
-                    String.format("Directory [%s] not found. Ensure it is a directory.",
-                            path));
+                    String.format("Directory [%s] not found. Ensure it is a directory.", path));
         }
         return filesToBeProcessed;
     }
@@ -154,18 +163,14 @@ public class LogFileManager {
             if (files != null && files.length > 0) {
                 logFile = getLatestFile(files);
                 if (!logFile.canRead()) {
-                    throw new IOException(
-                            String.format("Unable to read file [%s]", logFile.getPath()));
+                    throw new IOException(String.format("Unable to read file [%s]", logFile.getPath()));
                 }
             } else {
-                LOGGER.info("Unable to find any file with name {} in {}. Skipping",
-                        log.getLogName(), dirPath);
+                LOGGER.info("Unable to find any file with name {} in {}. Skipping", log.getLogName(), dirPath);
                 logFile = null;
             }
         } else {
-            throw new FileNotFoundException(
-                    String.format("Directory [%s] not found. Ensure it is a directory.",
-                            dirPath));
+            throw new FileNotFoundException(String.format("Directory [%s] not found. Ensure that it's a directory", dirPath));
         }
         return logFile;
     }
@@ -195,9 +200,8 @@ public class LogFileManager {
         FilePointer filePointer =
                 filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
         long currentPosition = filePointer.getLastReadPosition().get();
-        if (isFilenameChanged(filePointer.getFilename(), actualLogPath) ||
-                isLogRotated(fileSize, currentPosition)) {
-            LOGGER.debug("Filename has either changed or rotated, resetting position to 0");
+        if (isFilenameChanged(filePointer.getFilename(), actualLogPath) || isLogRotated(fileSize, currentPosition)) {
+            LOGGER.debug("File: {} has either changed or rotated, resetting position to 0", filePointer.getFilename());
             return true;
         }
         return false;

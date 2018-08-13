@@ -36,8 +36,8 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurre
  * Created by aditya.jagtiani on 6/18/18.
  */
 
-public class LogFileProcessor implements Runnable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileProcessor.class);
+public class LogMetricsProcessor implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogMetricsProcessor.class);
     private OptimizedRandomAccessFile randomAccessFile;
     private Log log;
     private CountDownLatch latch;
@@ -46,8 +46,8 @@ public class LogFileProcessor implements Runnable {
     private List<SearchPattern> searchPatterns;
     private Map<Pattern, String> replacers;
 
-    LogFileProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
-                     File currentFile, Map<Pattern, String> replacers) {
+    LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
+                        File currentFile, Map<Pattern, String> replacers) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.latch = latch;
@@ -99,7 +99,8 @@ public class LogFileProcessor implements Runnable {
             }
 
             while (matcher.find()) {
-                BigInteger occurrences = new BigInteger(logMetrics.getMetricMap().get(currentKey + OCCURRENCES).getMetricValue());
+                BigInteger occurrences = new BigInteger(logMetrics.getMetricMap().get(currentKey + OCCURRENCES)
+                        .getMetricValue());
                 LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
                         log.getDisplayName(), stringToCheck, currentKey);
                 String metricName = currentKey + OCCURRENCES;
