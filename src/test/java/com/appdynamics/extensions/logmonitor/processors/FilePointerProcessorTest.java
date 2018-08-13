@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import org.junit.After;
 import org.junit.Test;
 

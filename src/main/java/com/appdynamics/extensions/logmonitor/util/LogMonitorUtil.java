@@ -11,7 +11,7 @@ package com.appdynamics.extensions.logmonitor.util;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
-import com.appdynamics.extensions.logmonitor.processors.FilePointer;
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -85,8 +85,8 @@ public class LogMonitorUtil {
         if (randomAccessFile != null) {
             try {
                 randomAccessFile.close();
-            } catch (IOException e) {
-                logger.debug("An error occurred while closing the random access file : " + e.getMessage());
+            } catch (IOException ex) {
+                logger.debug("An error occurred while closing the random access file : " + ex);
             }
         }
     }
@@ -116,13 +116,25 @@ public class LogMonitorUtil {
         for (Map<String, ?> logFromConfig : logsFromConfig) {
             try {
                 Log log = initializeLog(logFromConfig);
-                LogConfigValidator.validate(log);
+                validateLog(log);
                 validLogs.add(log);
             } catch (IllegalArgumentException ex) {
                 logger.error("Invalid Log Configuration : " + logFromConfig.get("displayName"), ex);
             }
         }
         return validLogs;
+    }
+
+    private static void validateLog(Log log) {
+        if (StringUtils.isBlank(log.getLogDirectory())) {
+            throw new IllegalArgumentException("Log directory must not be blank.");
+        }
+        if (StringUtils.isBlank(log.getLogName())) {
+            throw new IllegalArgumentException("Log name must not be blank.");
+        }
+        if (log.getSearchStrings() == null || log.getSearchStrings().isEmpty()) {
+            throw new IllegalArgumentException("You must provide at least one search string.");
+        }
     }
 
     private static Log initializeLog(Map<String, ?> currentLogFromConfig) {

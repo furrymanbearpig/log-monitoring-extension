@@ -17,6 +17,7 @@ import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;

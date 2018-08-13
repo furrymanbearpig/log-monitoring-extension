@@ -10,6 +10,7 @@ package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;

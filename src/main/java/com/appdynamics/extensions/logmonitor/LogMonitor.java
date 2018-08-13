@@ -1,3 +1,11 @@
+/*
+ *  Copyright 2018. AppDynamics LLC and its affiliates.
+ *  All Rights Reserved.
+ *  This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ *  The copyright notice above does not evidence any actual or intended publication of such source code.
+ *
+ */
+
 package com.appdynamics.extensions.logmonitor;
 
 import com.appdynamics.extensions.ABaseMonitor;
@@ -39,15 +47,15 @@ public class LogMonitor extends ABaseMonitor {
 
     @Override
     protected int getTaskCount() {
-        List<Map<String, ?>> logsFromCfg = (List<Map<String, ?>>) configYml.get("logs");
-        AssertUtils.assertNotNull(logsFromCfg, "Please populate the 'logs' section in the config.yml.");
-        return logsFromCfg.size();
+        List<Map<String, ?>> logsFromConfig = (List<Map<String, ?>>) configYml.get("logs");
+        AssertUtils.assertNotNull(logsFromConfig, "Please populate the 'logs' section in the config.yml.");
+        return logsFromConfig.size();
     }
 
     @Override
     public void doRun(TasksExecutionServiceProvider taskExecutor) {
-        List<Map<String, ?>> logsFromCfg = (List<Map<String, ?>>) configYml.get("logs");
-        List<Log> logsToMonitor = LogMonitorUtil.getValidLogsFromConfig(logsFromCfg);
+        List<Map<String, ?>> logsFromConfig = (List<Map<String, ?>>) configYml.get("logs");
+        List<Log> logsToMonitor = LogMonitorUtil.getValidLogsFromConfig(logsFromConfig);
         FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
         for(Log log : logsToMonitor) {
             LOGGER.info("Starting the Log Monitoring Task for log : " + log.getDisplayName());

@@ -6,7 +6,7 @@
  *
  */
 
-package com.appdynamics.extensions.logmonitor.processors;
+package com.appdynamics.extensions.logmonitor.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 

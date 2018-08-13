@@ -8,7 +8,7 @@
 
 package com.appdynamics.extensions.logmonitor.metrics;
 
-import com.appdynamics.extensions.logmonitor.processors.FilePointer;
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;

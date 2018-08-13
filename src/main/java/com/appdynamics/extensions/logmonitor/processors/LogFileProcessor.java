@@ -8,6 +8,7 @@
 
 package com.appdynamics.extensions.logmonitor.processors;
 
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
@@ -90,30 +91,30 @@ public class LogFileProcessor implements Runnable {
             Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
             String logMetricPrefix = getSearchStringPrefix();
             String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_SEPARATOR;
+
             if (!logMetrics.getMetricMap().containsKey(currentKey + OCCURRENCES)) {
                 String metricName = currentKey + OCCURRENCES;
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
             }
+
             while (matcher.find()) {
-                BigInteger occurrences = new BigInteger(logMetrics.getMetricMap().get(currentKey +
-                        OCCURRENCES).getMetricValue());
+                BigInteger occurrences = new BigInteger(logMetrics.getMetricMap().get(currentKey + OCCURRENCES).getMetricValue());
                 LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
                         log.getDisplayName(), stringToCheck, currentKey);
                 String metricName = currentKey + OCCURRENCES;
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(occurrences.add(BigInteger.ONE)),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
-                // if each match is to be printed:
+
                 if (searchPattern.getPrintMatchedString()) {
                     LOGGER.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
                     String replacedWord = applyReplacers(matcher.group().trim());
                     if (searchPattern.getCaseSensitive()) {
                         metricName = currentKey + MATCHES + replacedWord;
-                        logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
                     } else {
                         metricName = currentKey + MATCHES + WordUtils.capitalizeFully(replacedWord);
-                        logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
                     }
+                    logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
                 }
             }
         }
