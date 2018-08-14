@@ -30,7 +30,7 @@ import com.appdynamics.extensions.logmonitor.LogMonitor;
  */
 public class FilePointerProcessor {
     private static final Logger LOGGER = Logger.getLogger(FilePointerProcessor.class);
-    private ConcurrentHashMap<String, FilePointer> filePointers = new ConcurrentHashMap<String, FilePointer>();
+    private volatile ConcurrentHashMap<String, FilePointer> filePointers = new ConcurrentHashMap<String, FilePointer>();
     private ObjectMapper mapper = new ObjectMapper();
 
     public FilePointerProcessor() {
@@ -94,6 +94,7 @@ public class FilePointerProcessor {
             String jarPath = classUrl.toURI().toString();
 
             // workaround for jar file
+            //TODO see if it works for all use cases.
             jarPath = jarPath.replace("jar:", "").replace("file:", "");
             if (jarPath.contains("!")) {
                 jarPath = jarPath.substring(0, jarPath.indexOf("!"));

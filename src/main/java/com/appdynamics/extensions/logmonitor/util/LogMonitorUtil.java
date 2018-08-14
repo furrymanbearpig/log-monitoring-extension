@@ -174,6 +174,7 @@ public class LogMonitorUtil {
         return replacers;
     }
 
+    //TODO can lead to OOM for huge files
     public static boolean isUTF8Encoded(File curFile) throws Exception {
         byte[] inputBytes = java.nio.file.Files.readAllBytes(Paths.get(curFile.getAbsolutePath()));
         final String converted = new String(inputBytes, StandardCharsets.UTF_8);

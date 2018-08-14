@@ -85,6 +85,7 @@ public class LogFileManager {
     private void processRolledOverLogs(List<File> filesToBeProcessed, long currentTimeStampFromFilePointer,
                                        long currentFilePointerPosition, LogMetrics logMetrics, CountDownLatch latch) throws Exception {
         for (File currentFile : filesToBeProcessed) {
+            //TODO no need to check for file encoding everytime. Instead, take it from yaml.
             handleFileEncoding(currentFile);
             OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
             if (getCurrentFileCreationTimeStamp(currentFile) == currentTimeStampFromFilePointer) {
