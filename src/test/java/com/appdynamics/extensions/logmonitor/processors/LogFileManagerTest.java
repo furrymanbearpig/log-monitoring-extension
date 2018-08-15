@@ -145,6 +145,7 @@ public class LogFileManagerTest {
         log.setDisplayName("TestUTF16Log");
         log.setLogDirectory("src/test/resources/");
         log.setLogName("test-log-utf16.log");
+        log.setEncoding("UTF-16LE");
 
         SearchString searchString = new SearchString();
         searchString.setCaseSensitive(false);
@@ -609,9 +610,10 @@ public class LogFileManagerTest {
     private void revertToUTF16Encoding(File file) throws Exception {
         String charset = "UTF-8";
         BufferedReader in = new BufferedReader(
-                new InputStreamReader (new FileInputStream(file), charset));
-        String line; StringBuilder sb = new StringBuilder();
-        while( (line = in.readLine()) != null) {
+                new InputStreamReader(new FileInputStream(file), charset));
+        String line;
+        StringBuilder sb = new StringBuilder();
+        while ((line = in.readLine()) != null) {
             sb.append(line);
             sb.append("\n");
         }

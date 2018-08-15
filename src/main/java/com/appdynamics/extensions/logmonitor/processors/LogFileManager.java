@@ -16,6 +16,7 @@ import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +86,9 @@ public class LogFileManager {
     private void processRolledOverLogs(List<File> filesToBeProcessed, long currentTimeStampFromFilePointer,
                                        long currentFilePointerPosition, LogMetrics logMetrics, CountDownLatch latch) throws Exception {
         for (File currentFile : filesToBeProcessed) {
-            //TODO no need to check for file encoding everytime. Instead, take it from yaml.
-            handleFileEncoding(currentFile);
+            if (!StringUtils.isBlank(log.getEncoding())) {
+                handleFileEncoding(currentFile);
+            }
             OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(currentFile, "r");
             if (getCurrentFileCreationTimeStamp(currentFile) == currentTimeStampFromFilePointer) {
                 randomAccessFile.seek(currentFilePointerPosition); //found the oldest file, process from CFP
@@ -100,7 +102,9 @@ public class LogFileManager {
 
     private void processLogsWithoutRollover(File file, CountDownLatch latch, long currentFilePointerPosition,
                                             LogMetrics logMetrics) throws Exception {
-        handleFileEncoding(file);
+        if (!StringUtils.isBlank(log.getEncoding())) {
+            handleFileEncoding(file);
+        }
         OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(file, "r");
         randomAccessFile.seek(currentFilePointerPosition);
         executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch, logMetrics,
@@ -219,9 +223,7 @@ public class LogFileManager {
     }
 
     private void handleFileEncoding(File file) throws Exception {
-        if (!isUTF8Encoded(file)) {
-            LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
-            convertToUTF8Encoding(file);
-        }
+        LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
+        convertToUTF8Encoding(file, log.getEncoding());
     }
 }

@@ -10,7 +10,6 @@ package com.appdynamics.extensions.logmonitor.processors;
 
 /**
  * @author Aditya Jagtiani
- *
  */
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.FILEPOINTER_FILENAME;
@@ -29,7 +28,7 @@ public class FilePointerProcessorTest {
         FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
         String logPath = "src/test/resources/test-log-3.log";
 
-        FilePointer origFilePointer =  filePointerProcessor.getFilePointer(logPath, logPath);
+        FilePointer origFilePointer = filePointerProcessor.getFilePointer(logPath, logPath);
         assertEquals(0, origFilePointer.getLastReadPosition().get());
 
         // lets update the filePointer

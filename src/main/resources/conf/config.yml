@@ -4,12 +4,13 @@
 # metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
 # Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
 
-metricPrefix: "Server|Component:<TIER_ID/TIER_NAME>|Custom Metrics|Log Monitor|"
+metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
 
 logs:
   - displayName: ""
     logDirectory: ""
     logName: ""
+    encoding: ""
     searchStrings:
         #displayName Should be unique across the patterns including the case.
        - displayName: ""

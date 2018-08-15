@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * @author Aditya Jagtiani
  */
 public class LogMonitorUtil {
-    private static final Logger logger = LoggerFactory.getLogger(LogMonitorUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogMonitorUtil.class);
     private static final String CASE_SENSITIVE_PATTERN = "(?-i)";
     private static final String CASE_INSENSITIVE_PATTERN = "(?i)";
 
@@ -86,7 +86,7 @@ public class LogMonitorUtil {
             try {
                 randomAccessFile.close();
             } catch (IOException ex) {
-                logger.debug("An error occurred while closing the random access file : " + ex);
+                LOGGER.debug("An error occurred while closing the random access file : " + ex);
             }
         }
     }
@@ -119,7 +119,7 @@ public class LogMonitorUtil {
                 validateLog(log);
                 validLogs.add(log);
             } catch (IllegalArgumentException ex) {
-                logger.error("Invalid Log Configuration : " + logFromConfig.get("displayName"), ex);
+                LOGGER.error("Invalid Log Configuration : " + logFromConfig.get("displayName"), ex);
             }
         }
         return validLogs;
@@ -143,6 +143,12 @@ public class LogMonitorUtil {
         log.setLogName((String) currentLogFromConfig.get("logName"));
         log.setLogDirectory((String) currentLogFromConfig.get("logDirectory"));
         log.setSearchStrings(initializeSearchStrings(currentLogFromConfig));
+        if (currentLogFromConfig.containsKey("encoding")) {
+            String encodingFromConfig = (String) currentLogFromConfig.get("encoding");
+            if (!StringUtils.isBlank(encodingFromConfig) && isValidEncodingType(encodingFromConfig, log.getDisplayName())) {
+                log.setEncoding(encodingFromConfig);
+            }
+        }
         return log;
     }
 
@@ -161,6 +167,16 @@ public class LogMonitorUtil {
         return searchStrings;
     }
 
+    private static boolean isValidEncodingType(String encodingFromConfig, String logDisplayName) {
+        for (EncodingType encodingType : EncodingType.values()) {
+            if (encodingType.getEncodingType().equals(encodingFromConfig)) {
+                return true;
+            }
+        }
+        LOGGER.error("Found Unsupported/Invalid Encoding type log : {}", logDisplayName);
+        return false;
+    }
+
     public static Map<Pattern, String> initializeMetricCharacterReplacers(List<Map<String, String>> metricCharacterReplacers) {
         Map<Pattern, String> replacers = new HashMap<Pattern, String>();
         if (metricCharacterReplacers != null) {
@@ -174,16 +190,7 @@ public class LogMonitorUtil {
         return replacers;
     }
 
-    //TODO can lead to OOM for huge files
-    public static boolean isUTF8Encoded(File curFile) throws Exception {
-        byte[] inputBytes = java.nio.file.Files.readAllBytes(Paths.get(curFile.getAbsolutePath()));
-        final String converted = new String(inputBytes, StandardCharsets.UTF_8);
-        final byte[] outputBytes = converted.getBytes(StandardCharsets.UTF_8);
-        return Arrays.equals(inputBytes, outputBytes);
-    }
-
-    public static void convertToUTF8Encoding(File file) throws Exception {
-        String charset = "UTF-16LE";
+    public static void convertToUTF8Encoding(File file, String charset) throws Exception {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(new FileInputStream(file), charset));
         String line;

@@ -94,7 +94,6 @@ public class FilePointerProcessor {
             String jarPath = classUrl.toURI().toString();
 
             // workaround for jar file
-            //TODO see if it works for all use cases.
             jarPath = jarPath.replace("jar:", "").replace("file:", "");
             if (jarPath.contains("!")) {
                 jarPath = jarPath.substring(0, jarPath.indexOf("!"));

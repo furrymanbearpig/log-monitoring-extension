@@ -23,6 +23,8 @@ public class Log {
 
     private String logName;
 
+    private String encoding;
+
     private List<SearchString> searchStrings;
 
     public String getDisplayName() {
@@ -47,6 +49,14 @@ public class Log {
 
     public void setLogName(String logName) {
         this.logName = logName;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 
     public List<SearchString> getSearchStrings() {
