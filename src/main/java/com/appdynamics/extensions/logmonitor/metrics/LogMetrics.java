@@ -50,14 +50,6 @@ public class LogMetrics {
         this.metrics.put(metricName, metric);
     }
 
-    public List<Metric> getFinalMetricList() {
-        List<Metric> metrics = Lists.newArrayList();
-        for (Map.Entry<String, Metric> metric : this.metrics.entrySet()) {
-            metrics.add(metric.getValue());
-        }
-        return metrics;
-    }
-
     public Map<String, Metric> getMetricMap() {
         return this.metrics;
     }

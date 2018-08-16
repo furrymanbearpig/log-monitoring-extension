@@ -12,6 +12,7 @@ import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
+import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -203,5 +204,13 @@ public class LogMonitorUtil {
         Writer outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-8");
         outputStreamWriter.write(sb.toString());
         outputStreamWriter.close();
+    }
+
+    public static List<Metric> getFinalMetricList(Map<String, Metric> metricMap) {
+        List<Metric> metrics = Lists.newArrayList();
+        for (Map.Entry<String, Metric> metric : metricMap.entrySet()) {
+            metrics.add(metric.getValue());
+        }
+        return metrics;
     }
 }

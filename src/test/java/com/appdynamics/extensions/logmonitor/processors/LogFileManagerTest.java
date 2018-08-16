@@ -10,21 +10,27 @@ package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.logmonitor.LogMonitor;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
+import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -41,6 +47,11 @@ public class LogFileManagerTest {
     private MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Log Monitor",
             "Custom Metrics|Log Monitor|", Mockito.mock(File.class), Mockito.mock(AMonitorJob.class));
 
+    @Before
+    public void setUp() {
+        Map<String, Metric> baseMetricMapForTesting = new ConcurrentHashMap<String, Metric>();
+        Whitebox.setInternalState(LogMonitor.class, baseMetricMapForTesting);
+    }
     //region <Print Matched String Flag Tests>
     @Test
     public void testProcessorWhenPrintMatchedStringIsFalse() throws Exception {

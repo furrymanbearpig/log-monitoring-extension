@@ -20,6 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+
+import static com.appdynamics.extensions.logmonitor.LogMonitor.baseMetrics;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getFinalMetricList;
 
 /**
  * Created by aditya.jagtiani on 3/30/18.
@@ -54,7 +58,16 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
     private void populateAndPrintMetrics() throws Exception {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
         List<Metric> allLogMetrics = Lists.newArrayList();
-        allLogMetrics.addAll(logFileManager.getLogMetrics().getFinalMetricList());
+        Map<String, Metric> processedMetrics = logFileManager.getLogMetrics().getMetricMap();
+
+        if(processedMetrics.size() <= 1) {
+            allLogMetrics.addAll(getFinalMetricList(baseMetrics));
+        }
+
+        else {
+            allLogMetrics.addAll(getFinalMetricList(processedMetrics));
+        }
+
         metricWriteHelper.transformAndPrintMetrics(allLogMetrics);
         filePointerProcessor.updateFilePointerFile();
     }

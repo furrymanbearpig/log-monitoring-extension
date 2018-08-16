@@ -27,6 +27,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.appdynamics.extensions.logmonitor.LogMonitor.baseMetrics;
 import static com.appdynamics.extensions.logmonitor.util.Constants.*;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPattern;
@@ -75,6 +76,7 @@ public class LogMetricsProcessor implements Runnable {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
             currentFilePointer = randomAccessFile.getFilePointer();
         }
+        setBasePatternOccurrenceCount();
         long currentFileCreationTime = getCurrentFileCreationTimeStamp(currentFile);
         String metricName = getLogNamePrefix() + FILESIZE_METRIC_NAME;
         logMetrics.add(metricName, new Metric(metricName,
@@ -83,6 +85,16 @@ public class LogMetricsProcessor implements Runnable {
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
+    }
+
+    private void setBasePatternOccurrenceCount() {
+        for (SearchPattern searchPattern : searchPatterns) {
+            String logMetricPrefix = getSearchStringPrefix();
+            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_SEPARATOR;
+            String metricName = currentKey + OCCURRENCES;
+            baseMetrics.put(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
+                    logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
+        }
     }
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
