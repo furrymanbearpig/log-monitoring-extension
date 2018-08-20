@@ -20,16 +20,24 @@ import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.slf4j.LoggerFactory;
+/*
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+*/
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.DEFAULT_METRIC_PREFIX;
 import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;
@@ -38,7 +46,8 @@ import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;
  * Created by aditya.jagtiani on 3/30/18.
  */
 public class LogMonitor extends ABaseMonitor {
-    private static Logger LOGGER = LoggerFactory.getLogger(LogMonitor.class);
+    //private static Logger LOGGER = Logger.getLogger(LogMonitor.class);
+    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LogMonitor.class);
     private MonitorContextConfiguration monitorContextConfiguration;
     private Map<String, ?> configYml = Maps.newHashMap();
     public static Map<String, Metric> baseMetrics;
@@ -77,29 +86,45 @@ public class LogMonitor extends ABaseMonitor {
         List<Log> logsToMonitor = LogMonitorUtil.getValidLogsFromConfig(logsFromConfig);
         FilePointerProcessor filePointerProcessor = new FilePointerProcessor();
         for (Log log : logsToMonitor) {
-            LOGGER.info("Starting the Log Monitoring Task for log : {}", log.getDisplayName());
+            LOGGER.info("Starting the Log Monitoring Task for log : " + log.getDisplayName());
             LogMonitorTask task = new LogMonitorTask(monitorContextConfiguration, taskExecutor.getMetricWriteHelper(),
                     log, filePointerProcessor);
             taskExecutor.submit(log.getDisplayName(), task);
         }
     }
 
-    public static void main(String[] args) throws TaskExecutionException {
+    /*public static void main(String[] args) throws TaskExecutionException, IOException {
+
         ConsoleAppender ca = new ConsoleAppender();
         ca.setWriter(new OutputStreamWriter(System.out));
         ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
-        ca.setThreshold(Level
-                .DEBUG);
-        org.apache.log4j.Logger.getRootLogger().addAppender(ca);
+        ca.setThreshold(Level.DEBUG);
+        LOGGER.getRootLogger().addAppender(ca);
 
 
-/*FileAppender fa = new FileAppender(new PatternLayout("%-5p [%t]: %m%n"), "cache.log");
-fa.setThreshold(Level.DEBUG);
-LOGGER.getRootLogger().addAppender(fa);*/
+       *//*FileAppender fa = new FileAppender(new PatternLayout("%-5p [%t]: %m%n"), "cache.log");
+       fa.setThreshold(Level.DEBUG);
+       LOGGER.getRootLogger().addAppender(fa);*//*
 
-        LogMonitor monitor = new LogMonitor();
-        Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put("config-file", "/Users/aditya.jagtiani/repos/appdynamics/extensions/new-log-monitoring-extension/src/main/resources/conf/config.yml");
-        monitor.execute(taskArgs, null);
-    }
+
+        final LogMonitor monitor = new LogMonitor();
+
+
+        final Map<String, String> taskArgs = Maps.newHashMap();
+        taskArgs.put("config-file", "/Users/aditya.jagtiani/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yml");
+
+        //monitor.execute(taskArgs, null);
+
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                try {
+                    monitor.execute(taskArgs, null);
+                } catch (Exception e) {
+                    LOGGER.error("Error while running the task", e);
+                }
+            }
+        }, 2, 60, TimeUnit.SECONDS);
+
+    }*/
 }

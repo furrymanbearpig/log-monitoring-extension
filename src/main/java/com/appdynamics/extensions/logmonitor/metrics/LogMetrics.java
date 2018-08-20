@@ -10,12 +10,10 @@ package com.appdynamics.extensions.logmonitor.metrics;
 
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -68,4 +66,3 @@ public class LogMetrics {
                 ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }
-

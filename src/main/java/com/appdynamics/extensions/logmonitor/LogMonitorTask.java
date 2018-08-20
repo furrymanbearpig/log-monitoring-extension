@@ -57,18 +57,17 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
 
     private void populateAndPrintMetrics() throws Exception {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
-        List<Metric> allLogMetrics = Lists.newArrayList();
+        List<Metric> metricsToBePublished = Lists.newArrayList();
         Map<String, Metric> processedMetrics = logFileManager.getLogMetrics().getMetricMap();
 
         if(processedMetrics.size() <= 1) {
-            allLogMetrics.addAll(getFinalMetricList(baseMetrics));
+            metricsToBePublished.addAll(getFinalMetricList(baseMetrics));
         }
 
         else {
-            allLogMetrics.addAll(getFinalMetricList(processedMetrics));
+            metricsToBePublished.addAll(getFinalMetricList(processedMetrics));
         }
-
-        metricWriteHelper.transformAndPrintMetrics(allLogMetrics);
+        metricWriteHelper.transformAndPrintMetrics(metricsToBePublished);
         filePointerProcessor.updateFilePointerFile();
     }
 }

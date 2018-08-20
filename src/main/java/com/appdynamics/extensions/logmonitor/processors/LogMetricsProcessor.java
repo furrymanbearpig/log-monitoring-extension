@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,7 @@ public class LogMetricsProcessor implements Runnable {
         logMetrics.add(metricName, new Metric(metricName,
                 String.valueOf(randomAccessFile.length()), logMetrics.getMetricPrefix() + METRIC_SEPARATOR
                 + metricName));
+        setBasePatternMatchAndFileSizeMetricCount(metricName, String.valueOf(randomAccessFile.length()));
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
@@ -95,6 +97,11 @@ public class LogMetricsProcessor implements Runnable {
             baseMetrics.put(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
                     logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
         }
+    }
+
+    private void setBasePatternMatchAndFileSizeMetricCount(String metricName, String metricValue) {
+        baseMetrics.put(metricName, new Metric(metricName, metricValue,
+                logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
     }
 
     private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
@@ -127,6 +134,7 @@ public class LogMetricsProcessor implements Runnable {
                     } else {
                         metricName = currentKey + MATCHES + WordUtils.capitalizeFully(replacedWord);
                     }
+                    setBasePatternMatchAndFileSizeMetricCount(metricName, String.valueOf(BigDecimal.ZERO));
                     logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
                 }
             }
