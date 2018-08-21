@@ -10,6 +10,7 @@ package com.appdynamics.extensions.logmonitor.util;
 /**
  * @author Aditya Jagtiani
  */
+
 public final class Constants {
     public static final String FILEPOINTER_FILENAME = "filepointer.json";
     public static final String METRIC_SEPARATOR = "|";

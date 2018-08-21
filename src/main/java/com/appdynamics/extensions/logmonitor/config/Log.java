@@ -14,9 +14,11 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import java.util.List;
 
 /**
- * Created by aditya.jagtiani on 3/30/18.
+ * @author Aditya Jagtiani
  */
+
 public class Log {
+
     private String displayName;
 
     private String logDirectory;

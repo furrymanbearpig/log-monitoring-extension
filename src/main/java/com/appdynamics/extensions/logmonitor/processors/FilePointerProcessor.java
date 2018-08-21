@@ -26,7 +26,7 @@ import org.codehaus.jackson.type.TypeReference;
 import com.appdynamics.extensions.logmonitor.LogMonitor;
 
 /**
- * @author Florencio Sarmiento
+ * @author Aditya Jagtiani
  */
 public class FilePointerProcessor {
     private static final Logger LOGGER = Logger.getLogger(FilePointerProcessor.class);

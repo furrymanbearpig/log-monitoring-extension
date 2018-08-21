@@ -8,10 +8,10 @@
 
 package com.appdynamics.extensions.logmonitor.util;
 
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
-import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.collect.Lists;
@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -112,11 +111,11 @@ public class LogMonitorUtil {
         });
     }
 
-    public static List<Log> getValidLogsFromConfig(List<Map<String, ?>> logsFromConfig) {
+    public static List<Log> getValidLogsFromConfig(List<Map<String, ?>> logsFromConfig, String metricPrefix) {
         List<Log> validLogs = new ArrayList<Log>();
         for (Map<String, ?> logFromConfig : logsFromConfig) {
             try {
-                Log log = initializeLog(logFromConfig);
+                Log log = initializeLog(logFromConfig, metricPrefix);
                 validateLog(log);
                 validLogs.add(log);
             } catch (IllegalArgumentException ex) {
@@ -138,12 +137,13 @@ public class LogMonitorUtil {
         }
     }
 
-    private static Log initializeLog(Map<String, ?> currentLogFromConfig) {
+    private static Log initializeLog(Map<String, ?> currentLogFromConfig, String metricPrefix) {
         Log log = new Log();
         log.setDisplayName((String) currentLogFromConfig.get("displayName"));
         log.setLogName((String) currentLogFromConfig.get("logName"));
         log.setLogDirectory((String) currentLogFromConfig.get("logDirectory"));
         log.setSearchStrings(initializeSearchStrings(currentLogFromConfig));
+
         if (currentLogFromConfig.containsKey("encoding")) {
             String encodingFromConfig = (String) currentLogFromConfig.get("encoding");
             if (!StringUtils.isBlank(encodingFromConfig) && isValidEncodingType(encodingFromConfig, log.getDisplayName())) {
@@ -212,5 +212,11 @@ public class LogMonitorUtil {
             metrics.add(metric.getValue());
         }
         return metrics;
+    }
+
+    public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
+        for (Map.Entry<String, Metric> entry : metrics.entrySet()) {
+            entry.getValue().setMetricValue("0");
+        }
     }
 }

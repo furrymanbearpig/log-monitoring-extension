@@ -15,19 +15,19 @@ import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.processors.LogFileManager;
 import com.appdynamics.extensions.metrics.Metric;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
-import static com.appdynamics.extensions.logmonitor.LogMonitor.baseMetrics;
+import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getFinalMetricList;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resetRegisteredMetricOccurrences;
 
 /**
- * Created by aditya.jagtiani on 3/30/18.
+ * @author Aditya Jagtiani
  */
+
 public class LogMonitorTask implements AMonitorTaskRunnable {
     private static Logger LOGGER = LoggerFactory.getLogger(LogMonitorTask.class);
     private MetricWriteHelper metricWriteHelper;
@@ -53,21 +53,13 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
 
     public void onTaskComplete() {
         LOGGER.info("Completed the Log Monitoring task for log : " + log.getDisplayName());
+        resetRegisteredMetricOccurrences(metrics);
     }
 
     private void populateAndPrintMetrics() throws Exception {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
-        List<Metric> metricsToBePublished = Lists.newArrayList();
-        Map<String, Metric> processedMetrics = logFileManager.getLogMetrics().getMetricMap();
-
-        if(processedMetrics.size() <= 1) {
-            metricsToBePublished.addAll(getFinalMetricList(baseMetrics));
-        }
-
-        else {
-            metricsToBePublished.addAll(getFinalMetricList(processedMetrics));
-        }
-        metricWriteHelper.transformAndPrintMetrics(metricsToBePublished);
+        logFileManager.processLogMetrics();
+        metricWriteHelper.transformAndPrintMetrics(getFinalMetricList(metrics));
         filePointerProcessor.updateFilePointerFile();
     }
 }

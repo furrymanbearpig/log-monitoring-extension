@@ -42,5 +42,4 @@ public class SearchPattern {
     public boolean getPrintMatchedString() {
         return printMatchedString;
     }
-
 }

@@ -31,7 +31,6 @@ public class FilePointerProcessorTest {
         FilePointer origFilePointer = filePointerProcessor.getFilePointer(logPath, logPath);
         assertEquals(0, origFilePointer.getLastReadPosition().get());
 
-        // lets update the filePointer
         long newFilePointer = 1234;
         String newFilename = "src/test/resources/test-log-4.log";
         origFilePointer.setFilename(newFilename);

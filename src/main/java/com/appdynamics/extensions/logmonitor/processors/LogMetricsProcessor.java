@@ -15,12 +15,11 @@ import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.metrics.Metric;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
+import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +27,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.appdynamics.extensions.logmonitor.LogMonitor.baseMetrics;
+import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 import static com.appdynamics.extensions.logmonitor.util.Constants.*;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.closeRandomAccessFile;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.createPattern;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getCurrentFileCreationTimeStamp;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
 
 /**
- * Created by aditya.jagtiani on 6/18/18.
+ * @author Aditya Jagtiani
  */
 
 public class LogMetricsProcessor implements Runnable {
@@ -43,10 +40,10 @@ public class LogMetricsProcessor implements Runnable {
     private OptimizedRandomAccessFile randomAccessFile;
     private Log log;
     private CountDownLatch latch;
-    private LogMetrics logMetrics;
     private File currentFile;
     private List<SearchPattern> searchPatterns;
     private Map<Pattern, String> replacers;
+    private LogMetrics logMetrics;
 
     LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
                         File currentFile, Map<Pattern, String> replacers) {
@@ -73,52 +70,39 @@ public class LogMetricsProcessor implements Runnable {
     private void processLogFile() throws Exception {
         long currentFilePointer = randomAccessFile.getFilePointer();
         String currentLine;
+        setBaseOccurrenceCountForConfiguredPatterns();
         while ((currentLine = randomAccessFile.readLine()) != null) {
-            incrementWordCountIfSearchStringMatched(searchPatterns, currentLine, logMetrics);
+            incrementWordCountIfSearchStringMatched(searchPatterns, currentLine);
             currentFilePointer = randomAccessFile.getFilePointer();
         }
-        setBasePatternOccurrenceCount();
         long currentFileCreationTime = getCurrentFileCreationTimeStamp(currentFile);
         String metricName = getLogNamePrefix() + FILESIZE_METRIC_NAME;
         logMetrics.add(metricName, new Metric(metricName,
                 String.valueOf(randomAccessFile.length()), logMetrics.getMetricPrefix() + METRIC_SEPARATOR
                 + metricName));
-        setBasePatternMatchAndFileSizeMetricCount(metricName, String.valueOf(randomAccessFile.length()));
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
     }
 
-    private void setBasePatternOccurrenceCount() {
+    private void setBaseOccurrenceCountForConfiguredPatterns() {
         for (SearchPattern searchPattern : searchPatterns) {
-            String logMetricPrefix = getSearchStringPrefix();
-            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_SEPARATOR;
-            String metricName = currentKey + OCCURRENCES;
-            baseMetrics.put(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
-                    logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
-        }
-    }
-
-    private void setBasePatternMatchAndFileSizeMetricCount(String metricName, String metricValue) {
-        baseMetrics.put(metricName, new Metric(metricName, metricValue,
-                logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
-    }
-
-    private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns,
-                                                         String stringToCheck, LogMetrics logMetrics) {
-        for (SearchPattern searchPattern : searchPatterns) {
-            Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
-            String logMetricPrefix = getSearchStringPrefix();
-            String currentKey = logMetricPrefix + searchPattern.getDisplayName() + METRIC_SEPARATOR;
-
-            if (!logMetrics.getMetricMap().containsKey(currentKey + OCCURRENCES)) {
+            String currentKey = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_SEPARATOR;
+            if (!metrics.containsKey(currentKey + OCCURRENCES)) {
                 String metricName = currentKey + OCCURRENCES;
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
             }
+        }
+    }
+
+    private void incrementWordCountIfSearchStringMatched(List<SearchPattern> searchPatterns, String stringToCheck) {
+        for (SearchPattern searchPattern : searchPatterns) {
+            Matcher matcher = searchPattern.getPattern().matcher(stringToCheck);
+            String currentKey = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_SEPARATOR;
 
             while (matcher.find()) {
-                BigInteger occurrences = new BigInteger(logMetrics.getMetricMap().get(currentKey + OCCURRENCES)
+                BigInteger occurrences = new BigInteger(metrics.get(currentKey + OCCURRENCES)
                         .getMetricValue());
                 LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
                         log.getDisplayName(), stringToCheck, currentKey);
@@ -134,7 +118,6 @@ public class LogMetricsProcessor implements Runnable {
                     } else {
                         metricName = currentKey + MATCHES + WordUtils.capitalizeFully(replacedWord);
                     }
-                    setBasePatternMatchAndFileSizeMetricCount(metricName, String.valueOf(BigDecimal.ZERO));
                     logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
                 }
             }

@@ -6,6 +6,7 @@
  *
  */
 
+
 package com.appdynamics.extensions.logmonitor.metrics;
 
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
@@ -14,16 +15,16 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 
 /**
  * @author Aditya Jagtiani
  */
+
 public class LogMetrics {
     private String metricPrefix;
-    private Map<String, Metric> metrics = new ConcurrentHashMap<String, Metric>();
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
 
     public String getMetricPrefix() {
@@ -45,11 +46,7 @@ public class LogMetrics {
     }
 
     public void add(String metricName, Metric metric) {
-        this.metrics.put(metricName, metric);
-    }
-
-    public Map<String, Metric> getMetricMap() {
-        return this.metrics;
+        metrics.put(metricName, metric);
     }
 
     public CopyOnWriteArrayList<FilePointer> getFilePointers() {

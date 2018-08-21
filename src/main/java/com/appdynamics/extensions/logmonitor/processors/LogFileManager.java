@@ -34,8 +34,9 @@ import java.util.regex.Pattern;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
 
 /**
- * Created by aditya.jagtiani on 7/3/18.
+ * @author Aditya Jagtiani
  */
+
 public class LogFileManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogFileManager.class);
     private Log log;
@@ -51,7 +52,7 @@ public class LogFileManager {
         this.executorService = this.monitorContextConfiguration.getContext().getExecutorService();
     }
 
-    public LogMetrics getLogMetrics() throws Exception {
+    public LogMetrics processLogMetrics() throws Exception {
         LOGGER.info("Starting the metric collection process for log : {}", log.getDisplayName());
         String dirPath = resolveDirPath(log.getLogDirectory());
         File file = getLogFile(dirPath);

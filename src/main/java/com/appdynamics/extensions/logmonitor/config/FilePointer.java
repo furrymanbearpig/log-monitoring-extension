@@ -16,6 +16,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 /**
  * @author Aditya Jagtiani
  */
+
 public class FilePointer {
     private volatile String filename;
     private AtomicLong lastReadPosition = new AtomicLong(0);
