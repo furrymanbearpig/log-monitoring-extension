@@ -149,13 +149,14 @@ Assuming that your logger settings make myLog.log rollover to a max of five file
 
 Configure the path to the config.yml by editing the ```<task-arguments>``` in the monitor.xml file in the `<MACHINE_AGENT_HOME>/monitors/LogMonitor/` directory: 
 
-     ```
-     <task-arguments>
-         <!-- config file-->
-         <argument name="config-file" is-required="true" default-value="monitors/LogMonitor/config.yml" />
-          ....
-     </task-arguments>
-      ```
+```
+<task-arguments>
+     <!-- config file-->
+     <argument name="config-file" is-required="true" default-value="monitors/LogMonitor/config.yml" />
+      ....
+</task-arguments>
+```
+
 Restart the machine agent once this is done. 
 
 ### Metrics
