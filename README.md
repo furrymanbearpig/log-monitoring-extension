@@ -1,8 +1,7 @@
 # AppDynamics Log Monitoring Extension
 
 ### Use Case
-The AppDynamics Log Monitoring Extension monitors the occurrences of configured text or patterns in a set of log files, and the sizes of these files. The extension works 
-seamlessly with logs that are constantly generated and rotating from time to time. 
+The AppDynamics Log Monitoring Extension monitors the occurrences of configured text or regular expressions in a set of log files, and the sizes of these files. The extension works seamlessly with logs that are constantly generated and rotating from time to time. 
 
 ### Prerequisites
 In order to use this extension, you need a [Standalone JAVA Machine Agent](https://docs.appdynamics.com/display/PRO44/Java+Agent) or a [SIM Agent](https://docs.appdynamics.com/display/PRO44/Server+Visibility).
