@@ -255,4 +255,4 @@ Always feel free to fork and contribute any changes directly via [GitHub](https:
 |Extension Version         |3.0.0       |
 |Controller Compatibility  |4.0 or Later|
 |Last Update               |08/22/2018 |
-|List of Changes           |[Change log](https://github.com/Appdynamics/log-monitoring-extension/blob/log-monitoring-extension-3.0.0/changelog.md) |
+|List of Changes           |[Change log](https://github.com/Appdynamics/log-monitoring-extension/blob/master/CHANGELOG.md) |
