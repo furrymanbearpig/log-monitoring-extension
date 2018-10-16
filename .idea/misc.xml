@@ -5,6 +5,9 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../aws-api-gateway-monitoring-extension/pom.xml" />
+        <option value="$PROJECT_DIR$/../solr-monitoring-extension/target/maven-archiver/pom.properties" />
+        <option value="$PROJECT_DIR$/../solr-monitoring-extension/pom.xml" />
       </list>
     </option>
   </component>
