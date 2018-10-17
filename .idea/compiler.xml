@@ -9,5 +9,8 @@
         <module name="log-monitoring-extension" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="aws-api-gateway-monitoring-extension" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

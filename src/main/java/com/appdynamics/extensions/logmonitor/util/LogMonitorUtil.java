@@ -31,6 +31,10 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
+import static com.appdynamics.extensions.logmonitor.util.Constants.FILESIZE_METRIC_NAME;
+import static com.appdynamics.extensions.logmonitor.util.Constants.MATCHES;
+import static com.appdynamics.extensions.logmonitor.util.Constants.OCCURRENCES;
+
 /**
  * @author Aditya Jagtiani
  */
@@ -216,7 +220,10 @@ public class LogMonitorUtil {
 
     public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
         for (Map.Entry<String, Metric> entry : metrics.entrySet()) {
-            entry.getValue().setMetricValue("0");
+            if(!entry.getKey().contains(FILESIZE_METRIC_NAME) && (entry.getKey().contains(OCCURRENCES) ||
+                    entry.getKey().contains(MATCHES))) {
+                entry.getValue().setMetricValue("0");
+            }
         }
     }
 }
