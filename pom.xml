@@ -6,7 +6,7 @@
 
     <groupId>log-monitoring-extension</groupId>
     <artifactId>log-monitoring-extension</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <name>Log Monitor</name>
     <description>Inspects logs and counts the number of occurrences of specified search terms</description>
 
