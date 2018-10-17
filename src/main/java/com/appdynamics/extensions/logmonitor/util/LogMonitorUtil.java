@@ -216,9 +216,7 @@ public class LogMonitorUtil {
 
     public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
         for (Map.Entry<String, Metric> entry : metrics.entrySet()) {
-            if(!entry.getKey().contains("File size")) {
-                entry.getValue().setMetricValue("0");
-            }
+            entry.getValue().setMetricValue("0");
         }
     }
 }
