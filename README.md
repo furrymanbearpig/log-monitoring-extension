@@ -32,7 +32,7 @@ If SIM is enabled, please use the default metric prefix.
 
 ### 2. Log Configuration
 
-This includes specifying the location of the logs and the various search strings/regular expressions to be searched for in the logs.
+This includes specifying the location of the logs and the various search strings/regular expressions to be searched for in the logs. For Windows, use escape characters while configuring log directories. For example: C:\\\Directory\\\LogsToMonitor\\\. Note that '\\' is the escape sequence. 
  
 There are multiple scenarios that can be configured in the ```logs``` section:
 
