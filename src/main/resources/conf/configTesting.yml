@@ -1,0 +1,59 @@
+#prefix used to show metrics in all tiers (NOT RECOMMENDED)
+#metricPrefix: "Custom Metrics|LogMonitor|"
+
+# metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
+# Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
+
+metricPrefix: "Server|Component:172|Custom Metrics|Log Monitor Testing|"
+
+logs:
+  - displayName: "Log Monitor Testing"
+    logDirectory: "/Users/aj89/Documents/LogMonitorTesting"
+    logName: "server*.log"
+    searchStrings:
+        #displayName Should be unique across the patterns including the case.
+      - displayName: "Certificate"
+        pattern: "SIP-09070(.*)admin"
+        matchExactString: false
+        caseSensitive: true
+        printMatchedString: true
+      - displayName: "Couldn't load database"
+        pattern: "SIP-10314"
+        matchExactString: false
+        caseSensitive: true
+        printMatchedString: true
+      - displayName: "Repository error"
+        pattern: "SIP-18009"
+        matchExactString: false
+        caseSensitive: true
+        printMatchedString: true
+
+
+#Replaces characters in metric name with the specified characters.
+# "replace" takes any regular expression
+# "replaceWith" takes the string to replace the matched characters
+metricCharacterReplacer:
+    - replace: ":"
+      replaceWith: ";"
+    - replace: "\\|"
+      replaceWith: "#"
+
+# Number of concurrent threads
+numberOfThreads: 10
+
+#Thread timeout in seconds
+threadTimeOut: 60
+
+eventsServiceParameters:
+  host:
+  port:
+  globalAccountName:
+  eventsApiKey:
+  useSsl:
+  queryParameters:
+    - query:
+      startTime: #optional
+      endTime: #optional
+      limit: #optional. Default = 100, max = 10000
+
+
