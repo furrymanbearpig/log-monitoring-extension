@@ -8,8 +8,9 @@
 
 package com.appdynamics.extensions.logmonitor.processors;
 
-import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
@@ -42,6 +43,8 @@ public class LogFileManager {
     private Log log;
     private FilePointerProcessor filePointerProcessor;
     private MonitorContextConfiguration monitorContextConfiguration;
+    private boolean sendDataToEventsService;
+    private int logMatchOffset;
     private MonitorExecutorService executorService;
 
     public LogFileManager(FilePointerProcessor filePointerProcessor, Log log,
@@ -50,6 +53,8 @@ public class LogFileManager {
         this.filePointerProcessor = filePointerProcessor;
         this.monitorContextConfiguration = monitorContextConfiguration;
         this.executorService = this.monitorContextConfiguration.getContext().getExecutorService();
+        this.sendDataToEventsService = (Boolean) this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService");
+        this.logMatchOffset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
     }
 
     public LogMetrics processLogMetrics() throws Exception {
@@ -97,7 +102,7 @@ public class LogFileManager {
                 randomAccessFile.seek(0);
             }
             executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
-                    logMetrics, currentFile, getMetricCharacterReplacers()));
+                    logMetrics, currentFile, getMetricCharacterReplacers(), monitorContextConfiguration));
         }
     }
 
@@ -109,7 +114,23 @@ public class LogFileManager {
         OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(file, "r");
         randomAccessFile.seek(currentFilePointerPosition);
         executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch, logMetrics,
-                file, getMetricCharacterReplacers()));
+                file, getMetricCharacterReplacers(), monitorContextConfiguration));
+    }
+
+    private void processLogEvents(File file, OptimizedRandomAccessFile randomAccessFile, CountDownLatch latch) {
+        if(sendDataToEventsService) {
+            try {
+                EventsServiceDataManager eventsServiceDataManager = monitorContextConfiguration.getContext().getEventsServiceDataManager();
+                executorService.execute("LogEventsProcessor", new LogEventsProcessor(eventsServiceDataManager, randomAccessFile, log, latch,
+                        file, logMatchOffset));
+            }
+            catch (Exception ex) {
+                LOGGER.error("The events service data manager failed to initialize. Check your config.yml and retry.");
+            }
+        }
+        else {
+            LOGGER.info("This data does not have to be sent to the events service, skipping.");
+        }
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {

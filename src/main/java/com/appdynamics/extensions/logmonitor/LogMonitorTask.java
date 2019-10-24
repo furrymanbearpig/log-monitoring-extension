@@ -53,7 +53,6 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
 
     public void onTaskComplete() {
         LOGGER.info("Completed the Log Monitoring task for log : " + log.getDisplayName());
-        resetRegisteredMetricOccurrences(metrics);
     }
 
     private void populateAndPrintMetrics() throws Exception {

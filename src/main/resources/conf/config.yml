@@ -40,3 +40,15 @@ numberOfThreads: 20
 
 #Thread timeout in seconds
 threadTimeOut: 60
+
+sendDataToEventsService: true
+
+logMatchOffset: 5
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host: ""
+  port: 9080
+  globalAccountName: ""
+  eventsApiKey: ""
+  useSsl: false
