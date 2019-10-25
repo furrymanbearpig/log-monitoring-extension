@@ -66,14 +66,12 @@ public class LogEventsProcessor implements Runnable {
     }
 
     private void processLogFile() throws Exception {
-        long currentFilePointer = randomAccessFile.getFilePointer();
         String currentLine;
         while((currentLine = randomAccessFile.readLine()) != null) {
             for(SearchPattern searchPattern : searchPatterns) {
                 Matcher matcher = searchPattern.getPattern().matcher(currentLine);
                 while(matcher.find()) {
                     eventsToBePublished.add(generateEvent(searchPattern, randomAccessFile, currentLine));
-                    currentFilePointer = randomAccessFile.getFilePointer();
                 }
 
             }

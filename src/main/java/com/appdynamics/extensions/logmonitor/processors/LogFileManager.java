@@ -103,6 +103,7 @@ public class LogFileManager {
             }
             executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
                     logMetrics, currentFile, getMetricCharacterReplacers(), monitorContextConfiguration));
+            processLogEvents(currentFile, randomAccessFile, latch);
         }
     }
 

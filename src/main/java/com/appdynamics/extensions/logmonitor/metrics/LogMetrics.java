@@ -9,6 +9,7 @@
 
 package com.appdynamics.extensions.logmonitor.metrics;
 
+import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
@@ -26,6 +27,7 @@ import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 public class LogMetrics {
     private String metricPrefix;
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
+    private CopyOnWriteArrayList<LogEvent> eventsToBePublished = new CopyOnWriteArrayList<LogEvent>();
 
     public String getMetricPrefix() {
         return metricPrefix;
@@ -61,5 +63,9 @@ public class LogMetrics {
     public String toString() {
         return ReflectionToStringBuilder.toString(this,
                 ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    public void addLogEvent(LogEvent logEvent) {
+        eventsToBePublished.add(logEvent);
     }
 }

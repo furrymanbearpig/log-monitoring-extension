@@ -10,6 +10,7 @@ package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +51,8 @@ public class LogMetricsProcessor implements Runnable {
     private LogMetrics logMetrics;
     private MonitorContextConfiguration monitorContextConfiguration;
     private boolean isEventsServiceEnabled;
+    private EventsServiceDataManager eventsServiceDataManager;
+    private LogEventsProcessor2 logEventsProcessor;
 
     LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
                         File currentFile, Map<Pattern, String> replacers, MonitorContextConfiguration monitorContextConfiguration) {
@@ -59,7 +63,9 @@ public class LogMetricsProcessor implements Runnable {
         this.currentFile = currentFile;
         this.replacers = replacers;
         this.searchPatterns = createPattern(this.log.getSearchStrings());
+        this.monitorContextConfiguration = monitorContextConfiguration;
         isEventsServiceEnabled = (Boolean) this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService");
+
     }
 
     public void run() {
@@ -77,6 +83,11 @@ public class LogMetricsProcessor implements Runnable {
         long currentFilePointer = randomAccessFile.getFilePointer();
         String currentLine;
         setBaseOccurrenceCountForConfiguredPatterns();
+        eventsServiceDataManager = evaluateEventsServiceConfig();
+        if(eventsServiceDataManager != null) {
+            int offset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
+            logEventsProcessor = new LogEventsProcessor2(eventsServiceDataManager, offset, log);
+        }
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine);
             currentFilePointer = randomAccessFile.getFilePointer();
@@ -128,8 +139,8 @@ public class LogMetricsProcessor implements Runnable {
                 }
 
                 //TODO move events service code here.
-                if (isEventsServiceEnabled) {
-                    processLogEvents(searchPattern, randomAccessFile, stringToCheck);
+                if (logEventsProcessor != null) {
+                    logEventsProcessor.processLogEvents(searchPattern, randomAccessFile, stringToCheck);
                 } else {
                     LOGGER.info("This data does not have to be sent to the events service, skipping.");
                 }
@@ -137,28 +148,12 @@ public class LogMetricsProcessor implements Runnable {
         }
     }
 
-    private void processLogEvents(SearchPattern searchPattern, OptimizedRandomAccessFile currentFile, String currentMatch) {
-        try {
-            EventsServiceDataManager eventsServiceDataManager = monitorContextConfiguration.getContext().getEventsServiceDataManager();
-            int offset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
-            createLogSchema();
-            createLogEvent(searchPattern, currentFile, currentMatch, offset);
-        } catch (Exception ex) {
-            LOGGER.error("The events service data manager failed to initialize. Check your config.yml and retry.");
+    private EventsServiceDataManager evaluateEventsServiceConfig() {
+        if(isEventsServiceEnabled) {
+            return monitorContextConfiguration.getContext().getEventsServiceDataManager();
         }
+        return null;
     }
-
-    private void createLogSchema() throws Exception {
-        if(com.appdynamics.extensions.util.StringUtils.hasText(eventsServiceDataManager.retrieveSchema(SCHEMA_NAME))) {
-            LOGGER.info("Schema: {} already exists", SCHEMA_NAME);
-        }
-        else {
-            eventsServiceDataManager.createSchema(SCHEMA_NAME, FileUtils.readFileToString(new File("src/main/" +
-                    "resources/eventsService/logSchema.json")));
-        }
-    }
-
-
 
     private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {
         FilePointer filePointer = new FilePointer();
