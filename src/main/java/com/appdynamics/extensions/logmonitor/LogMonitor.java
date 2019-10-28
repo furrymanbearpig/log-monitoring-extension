@@ -64,7 +64,11 @@ public class LogMonitor extends ABaseMonitor {
         configYml = monitorContextConfiguration.getConfigYml();
     }
 
-    @Override
+    protected List<Map<String, ?>> getServers() {
+        return null;
+    }
+
+
     protected int getTaskCount() {
         List<Map<String, ?>> logsFromConfig = (List<Map<String, ?>>) configYml.get("logs");
         AssertUtils.assertNotNull(logsFromConfig, "Please populate the 'logs' section in the config.yml.");

@@ -138,7 +138,8 @@ public class LogFileManager {
         FilePointer latestFilePointer = LogMonitorUtil.getLatestFilePointer(filePointers);
         LOGGER.debug("Updating File Pointer with the most recently processed log: {}, pointing to file: {} with the " +
                         "last read position: {} and a creation time stamp of: {}", dynamicLogPath,
-                latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
+                latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(),
+                latestFilePointer.getFileCreationTime());
         filePointerProcessor.updateFilePointer(dynamicLogPath, latestFilePointer.getFilename(),
                 latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
