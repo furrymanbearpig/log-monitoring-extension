@@ -4,7 +4,6 @@ import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
-import com.sun.xml.internal.ws.developer.SerializationFeature;
 import org.apache.commons.io.FileUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.codehaus.jackson.map.ObjectMapper;

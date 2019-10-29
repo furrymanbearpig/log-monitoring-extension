@@ -76,7 +76,7 @@ metricPrefix: "Custom Metrics|LogMonitor|"
 
 sendDataToEventsService: true
 
-logMatchOffset: 5
+logMatchOffset: 0
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:

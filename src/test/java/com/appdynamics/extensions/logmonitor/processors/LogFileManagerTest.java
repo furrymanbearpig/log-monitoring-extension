@@ -581,6 +581,41 @@ public class LogFileManagerTest {
         Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer("./target/active-dynamic-*",
                 latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
+
+    @Test
+    public void testProcessorWhenEventsServiceIsEnabled() throws Exception {
+        Log log = new Log();
+        log.setDisplayName("TestLog");
+        log.setLogDirectory("src/test/resources/");
+        log.setLogName("test-log-1.log");
+
+        SearchString searchString = new SearchString();
+        searchString.setCaseSensitive(false);
+        searchString.setMatchExactString(true);
+        searchString.setPattern("debug");
+        searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(false);
+
+        log.setSearchStrings(Lists.newArrayList(searchString));
+
+        FilePointer filePointer = new FilePointer();
+        filePointer.setFilename(log.getLogDirectory() + log.getLogName());
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
+
+        MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Log Monitor",
+                "Custom Metrics|Log Monitor|", Mockito.mock(File.class), Mockito.mock(AMonitorJob.class));
+        monitorContextConfiguration.setConfigYml("src/test/resources/conf/config-eventsService.yaml");
+
+        classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
+        classUnderTest.processLogMetrics();
+
+        assertEquals("13", metrics.get("TestLog|Search String|Debug|Occurrences").getMetricValue());
+
+        assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
+                metrics.get("TestLog|File size (Bytes)").getMetricValue());
+    }
+
+
     //endregion
 
     //region <Test Utilities>

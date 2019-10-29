@@ -142,7 +142,6 @@ public class LogMetricsProcessor implements Runnable {
 
                 //TODO move events service code here.
                 if (logEventsProcessor != null) {
-                    //collect events in list here
                     eventsToBePublished.addAll(logEventsProcessor.processLogEvents(searchPattern, randomAccessFile, stringToCheck));
                     logEventsProcessor.publishEvents(eventsToBePublished);
                 } else {

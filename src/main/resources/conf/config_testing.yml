@@ -1,0 +1,38 @@
+#prefix used to show metrics in all tiers (NOT RECOMMENDED)
+#metricPrefix: "Custom Metrics|LogMonitor|"
+
+# metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
+# Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
+
+metricPrefix: "Server|Component:5064|Custom Metrics|LogMonitor|"
+
+logs:
+
+- displayName: "p_aym_ws11 ramp_gateway.log"
+  logDirectory: "/Users/aj89/Documents/LogMonitorTestingUnited"
+  logName: "ramp_gateway.log"
+  searchStrings:
+  #displayName Should be unique across the various patterns.
+  - displayName: "Test"
+    pattern: "EWR"
+    matchExactString: true
+    caseSensitive: true
+  - displayName: "Test2"
+    pattern: "ORD"
+    matchExactString: true
+    caseSensitive: true
+
+#Replaces characters in metric name with the specified characters.
+# "replace" takes any regular expression
+# "replaceWith" takes the string to replace the matched characters
+metricCharacterReplacer:
+- replace: ":"
+  replaceWith: ";"
+- replace: "\\|"
+  replaceWith: "#"
+
+# Number of concurrent threads
+noOfThreads: 6
+
+#Thread timeout in seconds
+threadTimeOut: 60

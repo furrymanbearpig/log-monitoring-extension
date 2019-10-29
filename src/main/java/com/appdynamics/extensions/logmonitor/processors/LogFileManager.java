@@ -38,6 +38,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
  * @author Aditya Jagtiani
  */
 
+// todo - init events service etc in this class and let the creation of events happen as matches are found in LMP
 public class LogFileManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogFileManager.class);
     private Log log;
@@ -46,6 +47,7 @@ public class LogFileManager {
     private boolean sendDataToEventsService;
     private int logMatchOffset;
     private MonitorExecutorService executorService;
+    private EventsServiceDataManager eventsServiceDataManager;
 
     public LogFileManager(FilePointerProcessor filePointerProcessor, Log log,
                           MonitorContextConfiguration monitorContextConfiguration) {
@@ -70,7 +72,12 @@ public class LogFileManager {
                 String dynamicLogPath = dirPath + log.getLogName();
                 long currentTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
                 long currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath());
-
+                if(sendDataToEventsService) {
+                    initializeEventsServiceDataManager();
+                }
+                else {
+                    LOGGER.info("This data does not have to be sent to the events service, skipping.");
+                }
                 if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) {
                     List<File> filesToBeProcessed = getFilesToBeProcessedFromDirectory(currentTimeStampFromFilePointer, dirPath);
                     latch = new CountDownLatch(filesToBeProcessed.size());
@@ -89,6 +96,10 @@ public class LogFileManager {
         return logMetrics;
     }
 
+    private void initializeEventsServiceDataManager() {
+            eventsServiceDataManager = monitorContextConfiguration.getContext().getEventsServiceDataManager();
+    }
+
     private void processRolledOverLogs(List<File> filesToBeProcessed, long currentTimeStampFromFilePointer,
                                        long currentFilePointerPosition, LogMetrics logMetrics, CountDownLatch latch) throws Exception {
         for (File currentFile : filesToBeProcessed) {
@@ -103,7 +114,7 @@ public class LogFileManager {
             }
             executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
                     logMetrics, currentFile, getMetricCharacterReplacers(), monitorContextConfiguration));
-            processLogEvents(currentFile, randomAccessFile, latch);
+            //processLogEvents(currentFile, randomAccessFile, latch);
         }
     }
 
