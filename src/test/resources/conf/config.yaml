@@ -74,7 +74,7 @@ threadTimeOut: 60
 metricPrefix: "Custom Metrics|LogMonitor|"
 
 
-sendDataToEventsService: true
+sendDataToEventsService: false
 
 logMatchOffset: 0
 

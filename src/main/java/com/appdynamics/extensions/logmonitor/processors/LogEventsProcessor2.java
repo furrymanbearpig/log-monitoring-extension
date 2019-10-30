@@ -28,11 +28,11 @@ public class LogEventsProcessor2 {
         this.offset = offset;
         this.eventsToBePublished = new CopyOnWriteArrayList<LogEvent>();
         this.log = log;
+        createLogSchema();
     }
 
     public List<LogEvent> processLogEvents(SearchPattern searchPattern, OptimizedRandomAccessFile currentFile, String currentMatch) {
         try {
-            createLogSchema();
             eventsToBePublished.add(createLogEvent(searchPattern, currentFile, currentMatch, offset));
         } catch (Exception ex) {
             LOGGER.error("The events service data manager failed to initialize. Check your config.yml and retry.");
@@ -40,12 +40,17 @@ public class LogEventsProcessor2 {
         return eventsToBePublished;
     }
 
-    private void createLogSchema() throws Exception {
-        if (com.appdynamics.extensions.util.StringUtils.hasText(eventsServiceDataManager.retrieveSchema(SCHEMA_NAME))) {
-            LOGGER.info("Schema: {} already exists", SCHEMA_NAME);
-        } else {
-            eventsServiceDataManager.createSchema(SCHEMA_NAME, FileUtils.readFileToString(new File("src/main/" +
-                    "resources/eventsService/logSchema.json")));
+    private void createLogSchema() {
+        try {
+            if (com.appdynamics.extensions.util.StringUtils.hasText(eventsServiceDataManager.retrieveSchema(SCHEMA_NAME))) {
+                LOGGER.info("Schema: {} already exists", SCHEMA_NAME);
+            } else {
+                eventsServiceDataManager.createSchema(SCHEMA_NAME, FileUtils.readFileToString(new File("src/main/" +
+                        "resources/eventsService/logSchema.json")));
+            }
+        }
+        catch (Exception ex) {
+            LOGGER.error("Error encountered while creating schema for log {}", log.getDisplayName(), ex);
         }
     }
 
@@ -56,10 +61,11 @@ public class LogEventsProcessor2 {
             logEvent.setLogDisplayName(log.getDisplayName());
             logEvent.setSearchPattern(searchPattern.getDisplayName());
             if (offset > 0) {
-                OptimizedRandomAccessFile randomAccessFileCopy = randomAccessFile;
+                long originalFilePointerPosition = randomAccessFile.getFilePointer();
                 for (int i = 0; i < offset; i++) {
-                    currentMatch += randomAccessFileCopy.readLine();
+                    currentMatch += randomAccessFile.readLine();
                 }
+                randomAccessFile.seek(originalFilePointerPosition);
             }
             logEvent.setLogMatch(currentMatch);
             logEvent.setSearchPattern(searchPattern.getPattern().pattern());

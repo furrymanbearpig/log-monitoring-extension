@@ -143,7 +143,7 @@ public class LogMetricsProcessor implements Runnable {
                 //TODO move events service code here.
                 if (logEventsProcessor != null) {
                     eventsToBePublished.addAll(logEventsProcessor.processLogEvents(searchPattern, randomAccessFile, stringToCheck));
-                    logEventsProcessor.publishEvents(eventsToBePublished);
+                    logEventsProcessor.publishEvents(eventsToBePublished); //todo publish events at the end
                 } else {
                     LOGGER.info("This data does not have to be sent to the events service, skipping.");
                 }
