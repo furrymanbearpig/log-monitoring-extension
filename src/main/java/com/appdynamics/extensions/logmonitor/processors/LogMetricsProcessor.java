@@ -32,7 +32,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 import static com.appdynamics.extensions.logmonitor.util.Constants.*;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
 
@@ -66,7 +65,6 @@ public class LogMetricsProcessor implements Runnable {
         this.searchPatterns = createPattern(this.log.getSearchStrings());
         this.monitorContextConfiguration = monitorContextConfiguration;
         isEventsServiceEnabled = (Boolean) this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService");
-
     }
 
     public void run() {
@@ -85,7 +83,7 @@ public class LogMetricsProcessor implements Runnable {
         String currentLine;
         setBaseOccurrenceCountForConfiguredPatterns();
         eventsServiceDataManager = evaluateEventsServiceConfig();
-        if(eventsServiceDataManager != null) {
+        if (eventsServiceDataManager != null) {
             int offset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
             logEventsProcessor = new LogEventsProcessor(eventsServiceDataManager, offset, log);
             eventsToBePublished = new CopyOnWriteArrayList<LogEvent>();
@@ -99,6 +97,7 @@ public class LogMetricsProcessor implements Runnable {
         logMetrics.add(metricName, new Metric(metricName,
                 String.valueOf(randomAccessFile.length()), logMetrics.getMetricPrefix() + METRIC_SEPARATOR
                 + metricName));
+        logEventsProcessor.publishEvents(eventsToBePublished);
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
@@ -107,11 +106,9 @@ public class LogMetricsProcessor implements Runnable {
     private void setBaseOccurrenceCountForConfiguredPatterns() {
         for (SearchPattern searchPattern : searchPatterns) {
             String currentKey = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_SEPARATOR;
-            if (!metrics.containsKey(currentKey + OCCURRENCES)) {
-                String metricName = currentKey + OCCURRENCES;
-                logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
-                        logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
-            }
+            String metricName = currentKey + OCCURRENCES;
+            logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
+                    logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
         }
     }
 
@@ -121,7 +118,7 @@ public class LogMetricsProcessor implements Runnable {
             String currentKey = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_SEPARATOR;
 
             while (matcher.find()) {
-                BigInteger occurrences = new BigInteger(metrics.get(currentKey + OCCURRENCES)
+                BigInteger occurrences = new BigInteger(logMetrics.getMetrics().get(currentKey + OCCURRENCES)
                         .getMetricValue());
                 LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
                         log.getDisplayName(), stringToCheck, currentKey);
@@ -143,7 +140,6 @@ public class LogMetricsProcessor implements Runnable {
                 //TODO move events service code here.
                 if (logEventsProcessor != null) {
                     eventsToBePublished.add(logEventsProcessor.processLogEvent(searchPattern, randomAccessFile, stringToCheck));
-                    logEventsProcessor.publishEvents(eventsToBePublished); //todo publish events at the end
                 } else {
                     LOGGER.info("This data does not have to be sent to the events service, skipping.");
                 }
@@ -152,7 +148,7 @@ public class LogMetricsProcessor implements Runnable {
     }
 
     private EventsServiceDataManager evaluateEventsServiceConfig() {
-        if(isEventsServiceEnabled) {
+        if (isEventsServiceEnabled) {
             return monitorContextConfiguration.getContext().getEventsServiceDataManager();
         }
         return null;

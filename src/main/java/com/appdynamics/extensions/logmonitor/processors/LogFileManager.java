@@ -38,16 +38,12 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
  * @author Aditya Jagtiani
  */
 
-// todo - init events service etc in this class and let the creation of events happen as matches are found in LMP
 public class LogFileManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogFileManager.class);
     private Log log;
     private FilePointerProcessor filePointerProcessor;
     private MonitorContextConfiguration monitorContextConfiguration;
-    private boolean sendDataToEventsService;
-    private int logMatchOffset;
     private MonitorExecutorService executorService;
-    private EventsServiceDataManager eventsServiceDataManager;
 
     public LogFileManager(FilePointerProcessor filePointerProcessor, Log log,
                           MonitorContextConfiguration monitorContextConfiguration) {
@@ -55,8 +51,6 @@ public class LogFileManager {
         this.filePointerProcessor = filePointerProcessor;
         this.monitorContextConfiguration = monitorContextConfiguration;
         this.executorService = this.monitorContextConfiguration.getContext().getExecutorService();
-        this.sendDataToEventsService = (Boolean) this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService");
-        this.logMatchOffset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
     }
 
     public LogMetrics processLogMetrics() throws Exception {
@@ -72,12 +66,6 @@ public class LogFileManager {
                 String dynamicLogPath = dirPath + log.getLogName();
                 long currentTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
                 long currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath());
-                if(sendDataToEventsService) {
-                    initializeEventsServiceDataManager();
-                }
-                else {
-                    LOGGER.info("This data does not have to be sent to the events service, skipping.");
-                }
                 if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) {
                     List<File> filesToBeProcessed = getFilesToBeProcessedFromDirectory(currentTimeStampFromFilePointer, dirPath);
                     latch = new CountDownLatch(filesToBeProcessed.size());
@@ -96,10 +84,6 @@ public class LogFileManager {
         return logMetrics;
     }
 
-    private void initializeEventsServiceDataManager() {
-            eventsServiceDataManager = monitorContextConfiguration.getContext().getEventsServiceDataManager();
-    }
-
     private void processRolledOverLogs(List<File> filesToBeProcessed, long currentTimeStampFromFilePointer,
                                        long currentFilePointerPosition, LogMetrics logMetrics, CountDownLatch latch) throws Exception {
         for (File currentFile : filesToBeProcessed) {
@@ -114,7 +98,6 @@ public class LogFileManager {
             }
             executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
                     logMetrics, currentFile, getMetricCharacterReplacers(), monitorContextConfiguration));
-            //processLogEvents(currentFile, randomAccessFile, latch);
         }
     }
 
@@ -127,22 +110,6 @@ public class LogFileManager {
         randomAccessFile.seek(currentFilePointerPosition);
         executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch, logMetrics,
                 file, getMetricCharacterReplacers(), monitorContextConfiguration));
-    }
-
-    private void processLogEvents(File file, OptimizedRandomAccessFile randomAccessFile, CountDownLatch latch) {
-        if(sendDataToEventsService) {
-            try {
-                EventsServiceDataManager eventsServiceDataManager = monitorContextConfiguration.getContext().getEventsServiceDataManager();
-                executorService.execute("LogEventsProcessor", new LogEventsProcessor(eventsServiceDataManager, randomAccessFile, log, latch,
-                        file, logMatchOffset));
-            }
-            catch (Exception ex) {
-                LOGGER.error("The events service data manager failed to initialize. Check your config.yml and retry.");
-            }
-        }
-        else {
-            LOGGER.info("This data does not have to be sent to the events service, skipping.");
-        }
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {

@@ -218,12 +218,12 @@ public class LogMonitorUtil {
         return metrics;
     }
 
-    public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
+/*    public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
         for (Map.Entry<String, Metric> entry : metrics.entrySet()) {
             if(!entry.getKey().contains(FILESIZE_METRIC_NAME) && (entry.getKey().contains(OCCURRENCES) ||
                     entry.getKey().contains(MATCHES))) {
                 entry.getValue().setMetricValue("0");
             }
         }
-    }
+    }*/
 }

@@ -16,9 +16,8 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.math.BigInteger;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 
 /**
  * @author Aditya Jagtiani
@@ -28,6 +27,7 @@ public class LogMetrics {
     private String metricPrefix;
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
     private CopyOnWriteArrayList<LogEvent> eventsToBePublished = new CopyOnWriteArrayList<LogEvent>();
+    private ConcurrentHashMap<String, Metric> metrics = new ConcurrentHashMap<String, Metric>();
 
     public String getMetricPrefix() {
         return metricPrefix;
@@ -57,6 +57,10 @@ public class LogMetrics {
 
     public void updateFilePointer(FilePointer filePointer) {
         filePointers.add(filePointer);
+    }
+
+    public ConcurrentHashMap<String, Metric> getMetrics() {
+        return metrics;
     }
 
     @Override

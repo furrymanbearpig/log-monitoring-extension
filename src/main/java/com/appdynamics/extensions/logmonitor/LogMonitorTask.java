@@ -12,17 +12,13 @@ import com.appdynamics.extensions.AMonitorTaskRunnable;
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.logmonitor.config.Log;
+import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.processors.LogFileManager;
-import com.appdynamics.extensions.metrics.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
-import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getFinalMetricList;
-import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.resetRegisteredMetricOccurrences;
 
 /**
  * @author Aditya Jagtiani
@@ -57,8 +53,8 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
 
     private void populateAndPrintMetrics() throws Exception {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
-        logFileManager.processLogMetrics();
-        metricWriteHelper.transformAndPrintMetrics(getFinalMetricList(metrics));
+        LogMetrics logMetrics = logFileManager.processLogMetrics();
+        metricWriteHelper.transformAndPrintMetrics(getFinalMetricList(logMetrics.getMetrics()));
         filePointerProcessor.updateFilePointerFile();
     }
 }

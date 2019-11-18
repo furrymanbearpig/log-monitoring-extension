@@ -25,6 +25,7 @@ import org.apache.log4j.PatternLayout;
 
 import java.io.File;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +42,6 @@ public class LogMonitor extends ABaseMonitor {
     private static Logger LOGGER = Logger.getLogger(LogMonitor.class);
     private MonitorContextConfiguration monitorContextConfiguration;
     private Map<String, ?> configYml = Maps.newHashMap();
-    public static Map<String, Metric> metrics;
-
-    @Override
-    public void onConfigReload(File file) {
-        metrics = new ConcurrentHashMap<String, Metric>();
-    }
 
     @Override
     public String getDefaultMetricPrefix() {
@@ -65,7 +60,8 @@ public class LogMonitor extends ABaseMonitor {
     }
 
     protected List<Map<String, ?>> getServers() {
-        return null;
+        return new ArrayList<Map<String, ?>>() {
+        };
     }
 
 
@@ -103,7 +99,7 @@ LOGGER.getRootLogger().addAppender(fa);*/
 
         LogMonitor monitor = new LogMonitor();
         Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put("config-file", "/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/configTesting.yml");
+        taskArgs.put("config-file", "/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yml");
         monitor.execute(taskArgs, null);
     }
 }

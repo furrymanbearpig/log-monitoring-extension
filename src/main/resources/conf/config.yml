@@ -7,22 +7,17 @@
 metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
 
 logs:
-  - displayName: ""
-    logDirectory: ""
-    logName: ""
+  - displayName: "TESTING"
+    logDirectory: "/Users/aj89/Documents/LogMonitorTesting"
+    logName: "server.log"
     encoding: ""      #Not mandatory. Supported types: UTF8, UTF16, UTF16-LE, UTF16-BE, UTF32, UTF-32LE, UTF32-BE
     searchStrings:
         #displayName Should be unique across the various patterns.
-       - displayName: ""
-         pattern: ""
+       - displayName: "Info Statements"
+         pattern: "INFO"
          matchExactString: true
          caseSensitive: true
          printMatchedString: false
-       - displayName: ""
-         pattern: ""
-         matchExactString: true
-         caseSensitive: true
-         printMatchedString: true
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -41,11 +36,12 @@ numberOfThreads: 20
 #Thread timeout in seconds
 threadTimeOut: 60
 
-sendDataToEventsService: true
+sendDataToEventsService: false
 
 logMatchOffset: 5
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+# Uncomment this section only if you want to send data to the events service
 eventsServiceParameters:
   host: ""
   port: 9080
