@@ -41,7 +41,6 @@ sendDataToEventsService: false
 logMatchOffset: 5
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
-# Uncomment this section only if you want to send data to the events service
 eventsServiceParameters:
   host: ""
   port: 9080

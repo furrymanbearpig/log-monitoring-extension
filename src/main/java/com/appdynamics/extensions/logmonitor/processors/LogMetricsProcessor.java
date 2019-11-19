@@ -97,7 +97,9 @@ public class LogMetricsProcessor implements Runnable {
         logMetrics.add(metricName, new Metric(metricName,
                 String.valueOf(randomAccessFile.length()), logMetrics.getMetricPrefix() + METRIC_SEPARATOR
                 + metricName));
-        logEventsProcessor.publishEvents(eventsToBePublished);
+        if(logEventsProcessor != null) {
+            logEventsProcessor.publishEvents(eventsToBePublished);
+        }
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
