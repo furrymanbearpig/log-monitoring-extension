@@ -39,6 +39,6 @@ public class LogEventsProcessorTest {
         LogEventsProcessor classUnderTest = new LogEventsProcessor(eventsServiceDataManager, offset, log);
         LogEvent logEvent = classUnderTest.processLogEvent(searchPattern, randomAccessFile, "");
 
-        Assert.assertEquals("11234", logEvent.getLogMatch());
+        Assert.assertEquals("1\n1\n2\n3\n4\n", logEvent.getLogMatch());
     }
 }

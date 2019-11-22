@@ -44,6 +44,8 @@ public class LogFileManager {
     private FilePointerProcessor filePointerProcessor;
     private MonitorContextConfiguration monitorContextConfiguration;
     private MonitorExecutorService executorService;
+    private EventsServiceDataManager eventsServiceDataManager;
+    private int offset;
 
     public LogFileManager(FilePointerProcessor filePointerProcessor, Log log,
                           MonitorContextConfiguration monitorContextConfiguration) {
@@ -66,6 +68,8 @@ public class LogFileManager {
                 String dynamicLogPath = dirPath + log.getLogName();
                 long currentTimeStampFromFilePointer = getCurrentTimeStampFromFilePointer(dynamicLogPath, file.getPath());
                 long currentFilePointerPosition = getCurrentFilePointerOffset(dynamicLogPath, file.getPath());
+                eventsServiceDataManager = evaluateEventsServiceConfig();
+                offset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
                 if (hasLogRolledOver(dynamicLogPath, file.getPath(), file.length())) {
                     List<File> filesToBeProcessed = getFilesToBeProcessedFromDirectory(currentTimeStampFromFilePointer, dirPath);
                     latch = new CountDownLatch(filesToBeProcessed.size());
@@ -97,7 +101,7 @@ public class LogFileManager {
                 randomAccessFile.seek(0);
             }
             executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
-                    logMetrics, currentFile, getMetricCharacterReplacers(), monitorContextConfiguration));
+                    logMetrics, currentFile, getMetricCharacterReplacers(), eventsServiceDataManager, offset));
         }
     }
 
@@ -109,7 +113,7 @@ public class LogFileManager {
         OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(file, "r");
         randomAccessFile.seek(currentFilePointerPosition);
         executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch, logMetrics,
-                file, getMetricCharacterReplacers(), monitorContextConfiguration));
+                file, getMetricCharacterReplacers(), eventsServiceDataManager, offset));
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
@@ -228,5 +232,12 @@ public class LogFileManager {
     private void handleFileEncoding(File file) throws Exception {
         LOGGER.debug("Converting current file: {} to UTF-8 encoding for further processing", file.getName());
         convertToUTF8Encoding(file, log.getEncoding());
+    }
+
+    private EventsServiceDataManager evaluateEventsServiceConfig() {
+        if ((Boolean) this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService")) {
+            return monitorContextConfiguration.getContext().getEventsServiceDataManager();
+        }
+        return null;
     }
 }

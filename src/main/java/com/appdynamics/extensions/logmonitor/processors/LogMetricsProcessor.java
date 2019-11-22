@@ -48,13 +48,13 @@ public class LogMetricsProcessor implements Runnable {
     private List<SearchPattern> searchPatterns;
     private Map<Pattern, String> replacers;
     private LogMetrics logMetrics;
-    private MonitorContextConfiguration monitorContextConfiguration;
-    private boolean isEventsServiceEnabled;
     private EventsServiceDataManager eventsServiceDataManager;
     private LogEventsProcessor logEventsProcessor;
+    private int offset;
 
     LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
-                        File currentFile, Map<Pattern, String> replacers, MonitorContextConfiguration monitorContextConfiguration) {
+                        File currentFile, Map<Pattern, String> replacers, EventsServiceDataManager eventsServiceDataManager,
+                        int offset) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.latch = latch;
@@ -62,8 +62,8 @@ public class LogMetricsProcessor implements Runnable {
         this.currentFile = currentFile;
         this.replacers = replacers;
         this.searchPatterns = createPattern(this.log.getSearchStrings());
-        this.monitorContextConfiguration = monitorContextConfiguration;
-        isEventsServiceEnabled = (Boolean) this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService");
+        this.eventsServiceDataManager = eventsServiceDataManager;
+        this.offset = offset;
     }
 
     public void run() {
@@ -81,9 +81,7 @@ public class LogMetricsProcessor implements Runnable {
         long currentFilePointer = randomAccessFile.getFilePointer();
         String currentLine;
         setBaseOccurrenceCountForConfiguredPatterns();
-        eventsServiceDataManager = evaluateEventsServiceConfig();
         if (eventsServiceDataManager != null) {
-            int offset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
             logEventsProcessor = new LogEventsProcessor(eventsServiceDataManager, offset, log);
         }
         while ((currentLine = randomAccessFile.readLine()) != null) {
@@ -95,9 +93,6 @@ public class LogMetricsProcessor implements Runnable {
         logMetrics.add(metricName, new Metric(metricName,
                 String.valueOf(randomAccessFile.length()), logMetrics.getMetricPrefix() + METRIC_SEPARATOR
                 + metricName));
-        if(logEventsProcessor != null) {
-            logEventsProcessor.publishEvents(eventsToBePublished);
-        }
         updateCurrentFilePointer(currentFile.getPath(), currentFilePointer, currentFileCreationTime);
         LOGGER.info(String.format("Successfully processed log file [%s]",
                 randomAccessFile));
@@ -147,12 +142,6 @@ public class LogMetricsProcessor implements Runnable {
         }
     }
 
-    private EventsServiceDataManager evaluateEventsServiceConfig() {
-        if (isEventsServiceEnabled) {
-            return monitorContextConfiguration.getContext().getEventsServiceDataManager();
-        }
-        return null;
-    }
 
     private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {
         FilePointer filePointer = new FilePointer();

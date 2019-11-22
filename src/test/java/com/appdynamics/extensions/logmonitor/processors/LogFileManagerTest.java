@@ -10,7 +10,6 @@ package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
-import com.appdynamics.extensions.logmonitor.LogMonitor;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
@@ -19,10 +18,8 @@ import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.powermock.reflect.Whitebox;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -30,7 +27,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -47,7 +43,7 @@ public class LogFileManagerTest {
     private MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Log Monitor",
             "Custom Metrics|Log Monitor|", Mockito.mock(File.class), Mockito.mock(AMonitorJob.class));
 
-    //region <Print Matched String Flag Tests>
+    
     @Test
     public void testProcessorWhenPrintMatchedStringIsFalse() throws Exception {
         Log log = new Log();
@@ -196,9 +192,9 @@ public class LogFileManagerTest {
 
         revertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
     }
-    //endregion
+    
 
-    //region <Regex Tests>
+    
     @Test
     public void testProcessorForRegexPatternMatch() throws Exception {
         Log log = new Log();
@@ -336,9 +332,9 @@ public class LogFileManagerTest {
         assertEquals(getFileSize(log.getLogDirectory(), log.getLogName()),
                 metrics.get("TestLog|File size (Bytes)").getMetricValue());
     }
-    //endregion
+    
 
-    //region <Log Manipulation and Rollover Tests>
+    
     @Test
     public void testLogFileAfterAdditionOfMoreLogs() throws Exception {
         String originalFilePath = this.getClass().getClassLoader().getResource("test-log-1.log").getPath();
@@ -473,8 +469,7 @@ public class LogFileManagerTest {
 
         // simulate a file pointer update
         filePointer.updateLastReadPosition(new Long(filesize));
-        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString()))
-                .thenReturn(filePointer);
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
 
         List<String> logsToAdd = Lists.newArrayList();
         for (int i = 0; i < 100; i++) {
@@ -617,9 +612,9 @@ public class LogFileManagerTest {
                 metrics.get("TestLog|File size (Bytes)").getMetricValue());
     }
 
-    //endregion
+    
 
-    //region <Test Utilities>
+    
     private String getFileSize(String logDir, String logName) throws Exception {
         String fullPath = String.format("%s%s%s", logDir, File.separator, logName);
         RandomAccessFile file = new RandomAccessFile(fullPath, "r");
@@ -675,5 +670,5 @@ public class LogFileManagerTest {
         outputStreamWriter.write(sb.toString());
         outputStreamWriter.close();
     }
-    //endregion
+    
 }

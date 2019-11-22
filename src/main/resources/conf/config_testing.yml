@@ -8,19 +8,15 @@ metricPrefix: "Server|Component:5064|Custom Metrics|LogMonitor|"
 
 logs:
 
-- displayName: "p_aym_ws11 ramp_gateway.log"
-  logDirectory: "/Users/aj89/Documents/LogMonitorTestingUnited"
-  logName: "ramp_gateway.log"
+- displayName: "Manual Testing"
+  logDirectory: "/Users/aj89/Documents/LogMonitorTesting"
+  logName: "server.log"
   searchStrings:
-  #displayName Should be unique across the various patterns.
   - displayName: "Test"
-    pattern: "EWR"
-    matchExactString: true
+    pattern: "info"
+    matchExactString: false
     caseSensitive: true
-  - displayName: "Test2"
-    pattern: "ORD"
-    matchExactString: true
-    caseSensitive: true
+    printMatchedString: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -32,7 +28,20 @@ metricCharacterReplacer:
   replaceWith: "#"
 
 # Number of concurrent threads
-noOfThreads: 6
+numberOfThreads: 10
 
 #Thread timeout in seconds
 threadTimeOut: 60
+
+
+sendDataToEventsService: true
+
+logMatchOffset: 5
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host: "ec2-34-221-206-45.us-west-2.compute.amazonaws.com"
+  port: 9080
+  globalAccountName: "customer1_70a0b3c7-3f29-4b30-afea-f6e173520cd0"
+  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ad"
+  useSSL: false

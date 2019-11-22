@@ -8,6 +8,7 @@
 
 package com.appdynamics.extensions.logmonitor.util;
 
+import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
@@ -18,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.lang.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -226,4 +228,17 @@ public class LogMonitorUtil {
             }
         }
     }*/
+
+    public static CopyOnWriteArrayList<String> prepareEventsForPublishing(List<LogEvent> eventsToBePublished) {
+        CopyOnWriteArrayList<String> events = new CopyOnWriteArrayList<String>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (LogEvent logEvent : eventsToBePublished) {
+            try {
+                events.add(mapper.writeValueAsString(logEvent));
+            } catch (Exception ex) {
+                LOGGER.error("Error encountered while publishing LogEvent {} for log {}", logEvent, logEvent.getLogDisplayName(), ex);
+            }
+        }
+        return events;
+    }
 }

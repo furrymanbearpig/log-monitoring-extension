@@ -99,7 +99,7 @@ LOGGER.getRootLogger().addAppender(fa);*/
 
         LogMonitor monitor = new LogMonitor();
         Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put("config-file", "/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yml");
+        taskArgs.put("config-file", "/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config_testing.yml");
         monitor.execute(taskArgs, null);
     }
 }

@@ -18,7 +18,11 @@ import com.appdynamics.extensions.logmonitor.processors.LogFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.getFinalMetricList;
+import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.prepareEventsForPublishing;
 
 /**
  * @author Aditya Jagtiani
@@ -54,7 +58,20 @@ public class LogMonitorTask implements AMonitorTaskRunnable {
     private void populateAndPrintMetrics() throws Exception {
         LogFileManager logFileManager = new LogFileManager(filePointerProcessor, log, monitorContextConfiguration);
         LogMetrics logMetrics = logFileManager.processLogMetrics();
+        publishEvents(logMetrics);
+        LOGGER.info("Printing {} metrics for Log {}", logMetrics.getMetrics().size(), log.getDisplayName());
         metricWriteHelper.transformAndPrintMetrics(getFinalMetricList(logMetrics.getMetrics()));
         filePointerProcessor.updateFilePointerFile();
+    }
+
+    private void publishEvents(LogMetrics logMetrics) {
+        List<LogEvent> events = logMetrics.getEventsToBePublished();
+        if(events.size() != 0) {
+            List<String> eventsToBePublished = prepareEventsForPublishing(events);
+            monitorContextConfiguration.getContext().getEventsServiceDataManager().publishEvents(SCHEMA_NAME, eventsToBePublished);
+        }
+        else {
+            LOGGER.info("No events to publish for log {}, skipping", log.getDisplayName());
+        }
     }
 }

@@ -6,13 +6,10 @@ import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import org.apache.commons.io.FileUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
 
@@ -59,10 +56,12 @@ public class LogEventsProcessor {
             logEvent.setLogDisplayName(log.getDisplayName());
             logEvent.setSearchPattern(searchPattern.getDisplayName());
             if (offset > 0) {
+                StringBuilder sb = new StringBuilder(currentMatch);
                 long originalFilePointerPosition = randomAccessFile.getFilePointer();
                 for (int i = 0; i < offset; i++) {
-                    currentMatch += randomAccessFile.readLine();
+                    sb.append(randomAccessFile.readLine()).append('\n');
                 }
+                currentMatch = sb.toString();
                 randomAccessFile.seek(originalFilePointerPosition);
             }
             logEvent.setLogMatch(currentMatch);
@@ -73,23 +72,5 @@ public class LogEventsProcessor {
                     log.getDisplayName(), searchPattern.getPattern().pattern(), ex);
         }
         return null;
-    }
-
-    public void publishEvents(List<LogEvent> eventsToBePublished) {
-        List<String> events = prepareEventsForPublishing(eventsToBePublished);
-        eventsServiceDataManager.publishEvents(SCHEMA_NAME, events);
-    }
-
-    private CopyOnWriteArrayList<String> prepareEventsForPublishing(List<LogEvent> eventsToBePublished) {
-        CopyOnWriteArrayList<String> events = new CopyOnWriteArrayList<String>();
-        ObjectMapper mapper = new ObjectMapper();
-        for (LogEvent logEvent : eventsToBePublished) {
-            try {
-                events.add(mapper.writeValueAsString(logEvent));
-            } catch (Exception ex) {
-                LOGGER.error("Error encountered while publishing LogEvent {} for log {}", logEvent, log.getDisplayName(), ex);
-            }
-        }
-        return events;
     }
 }
