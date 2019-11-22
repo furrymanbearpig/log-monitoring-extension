@@ -10,13 +10,18 @@ logs:
 
 - displayName: "Manual Testing"
   logDirectory: "/Users/aj89/Documents/LogMonitorTesting"
-  logName: "server.log"
+  logName: "server*.log"
   searchStrings:
-  - displayName: "Test"
+  - displayName: "INFO Patterns"
     pattern: "info"
     matchExactString: false
     caseSensitive: true
-    printMatchedString: false
+    printMatchedString: true
+  - displayName: "DEBUG Patterns"
+    pattern: "debug"
+    matchExactString: false
+    caseSensitive: false
+    printMatchedString: true
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -34,7 +39,7 @@ numberOfThreads: 10
 threadTimeOut: 60
 
 
-sendDataToEventsService: true
+sendDataToEventsService: falsea
 
 logMatchOffset: 5
 
