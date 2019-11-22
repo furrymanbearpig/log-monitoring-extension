@@ -127,6 +127,7 @@ public class LogFileManager {
         if (!resolvedPath.endsWith(File.separator)) {
             resolvedPath = resolvedPath + File.separator;
         }
+
         return resolvedPath;
     }
 

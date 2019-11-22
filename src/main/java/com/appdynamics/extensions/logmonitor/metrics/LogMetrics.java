@@ -72,4 +72,8 @@ public class LogMetrics {
     public void addLogEvent(LogEvent logEvent) {
         eventsToBePublished.add(logEvent);
     }
+
+    public CopyOnWriteArrayList<LogEvent> getEventsToBePublished() {
+        return eventsToBePublished;
+    }
 }

@@ -617,7 +617,6 @@ public class LogFileManagerTest {
                 metrics.get("TestLog|File size (Bytes)").getMetricValue());
     }
 
-
     //endregion
 
     //region <Test Utilities>

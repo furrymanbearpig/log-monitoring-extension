@@ -52,7 +52,6 @@ public class LogMetricsProcessor implements Runnable {
     private boolean isEventsServiceEnabled;
     private EventsServiceDataManager eventsServiceDataManager;
     private LogEventsProcessor logEventsProcessor;
-    private List<LogEvent> eventsToBePublished;
 
     LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
                         File currentFile, Map<Pattern, String> replacers, MonitorContextConfiguration monitorContextConfiguration) {
@@ -86,7 +85,6 @@ public class LogMetricsProcessor implements Runnable {
         if (eventsServiceDataManager != null) {
             int offset = (Integer) this.monitorContextConfiguration.getConfigYml().get("logMatchOffset");
             logEventsProcessor = new LogEventsProcessor(eventsServiceDataManager, offset, log);
-            eventsToBePublished = new CopyOnWriteArrayList<LogEvent>();
         }
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine);
@@ -141,7 +139,7 @@ public class LogMetricsProcessor implements Runnable {
 
                 //TODO move events service code here.
                 if (logEventsProcessor != null) {
-                    eventsToBePublished.add(logEventsProcessor.processLogEvent(searchPattern, randomAccessFile, stringToCheck));
+                    logMetrics.addLogEvent(logEventsProcessor.processLogEvent(searchPattern, randomAccessFile, stringToCheck));
                 } else {
                     LOGGER.info("This data does not have to be sent to the events service, skipping.");
                 }

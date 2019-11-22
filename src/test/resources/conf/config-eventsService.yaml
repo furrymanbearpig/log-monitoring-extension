@@ -23,13 +23,19 @@ metricPrefix: "Custom Metrics|LogMonitor|"
 
 sendDataToEventsService: true
 
-logMatchOffset: 5
+logMatchOffset: 0
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
-eventsServiceParameters:
-  host: "ec2-34-221-206-45.us-west-2.compute.amazonaws.com"
-  port: 9080
-  globalAccountName: "customer1_70a0b3c7-3f29-4b30-afea-f6e173520cd0"
-  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ad"
-  useSSL: false
+#eventsServiceParameters:
+#  host: "ec2-34-221-206-45.us-west-2.compute.amazonaws.com"
+#  port: 9080
+#  globalAccountName: "customer1_70a0b3c7-3f29-4b30-afea-f6e173520cd0"
+#  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ad"
+#  useSSL: false
 
+eventsServiceParameters:
+  host: "host"
+  port: 1234
+  globalAccountName: "someCustomer"
+  eventsApiKey: "someKey"
+  useSSL: false
