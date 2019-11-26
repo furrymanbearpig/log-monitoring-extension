@@ -83,23 +83,4 @@ public class LogMonitor extends ABaseMonitor {
             taskExecutor.submit(log.getDisplayName(), task);
         }
     }
-
-    public static void main(String[] args) throws TaskExecutionException {
-        ConsoleAppender ca = new ConsoleAppender();
-        ca.setWriter(new OutputStreamWriter(System.out));
-        ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
-        ca.setThreshold(Level
-                .DEBUG);
-        org.apache.log4j.Logger.getRootLogger().addAppender(ca);
-
-
-/*FileAppender fa = new FileAppender(new PatternLayout("%-5p [%t]: %m%n"), "cache.log");
-fa.setThreshold(Level.DEBUG);
-LOGGER.getRootLogger().addAppender(fa);*/
-
-        LogMonitor monitor = new LogMonitor();
-        Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put("config-file", "/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config_testing.yml");
-        monitor.execute(taskArgs, null);
-    }
 }

@@ -22,6 +22,11 @@ logs:
     matchExactString: false
     caseSensitive: false
     printMatchedString: true
+  - displayName: "TRACE Patterns"
+    pattern: "trace"
+    matchExactString: false
+    caseSensitive: false
+    printMatchedString: true
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
@@ -39,7 +44,7 @@ numberOfThreads: 10
 threadTimeOut: 60
 
 
-sendDataToEventsService: falsea
+sendDataToEventsService: false
 
 logMatchOffset: 5
 

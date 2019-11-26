@@ -136,8 +136,7 @@ public class LogFileManager {
     }
 
     private long getCurrentTimeStampFromFilePointer(String dynamicLogPath, String actualLogPath) {
-        FilePointer filePointer =
-                filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
+        FilePointer filePointer = filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath);
         return filePointer.getFileCreationTime();
     }
 
