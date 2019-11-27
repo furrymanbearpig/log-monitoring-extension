@@ -1,6 +1,9 @@
 package com.appdynamics.extensions.logmonitor;
 
 import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
+import com.appdynamics.extensions.util.JsonUtils;
+import org.codehaus.jackson.JsonNode;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,19 +20,18 @@ public class MetricCheckIT {
 
     @Test
     public void testMetricUpload() {
-/*
-        JsonNode jsonNode = null;
-        if (metricAPIService != null) {
-            jsonNode = metricAPIService.getMetricData("",
-                    "Server%20&%20Infrastructure%20Monitoring/metric-data?metric-path=Application%20" +
-                            "Infrastructure%20Performance%7CRoot%7CCustom%20Metrics%7CCassandra%7CLocal%20Cassandra%20" +
-                            "Server%201%7CHeart%20Beat&time-range-type=BEFORE_NOW&duration-in-mins=60&output=JSON");
+        if(metricAPIService != null) {
+            JsonNode jsonNode = metricAPIService.getMetricData("","Server%20&%20Infrastructure%20Monitoring/" +
+                    "metric-data?metric-path=Application%20Infrastructure%20Performance%7CRoot%7CCustom%20Metrics%7C" +
+                    "Custom%20Metrics%7CLog%20Monitor%7CMachine%20Agent%20Logs%7CSearch%20String%7CLog%20Monitor%20Task%7COccurrences&time-range-type=BEFORE_NOW&duration-in-mins=60");
+            if (jsonNode != null) {
+                JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
+                int occurrences = (valueNode == null) ? 0 : valueNode.get(0).asInt();
+                Assert.assertTrue(occurrences > 0);
+            }
         }
-        Assert.assertNotNull("Cannot connect to controller API", jsonNode);
-        if (jsonNode != null) {
-            JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
-            int heartBeat = (valueNode == null) ? 0 : valueNode.get(0).asInt();
-            Assert.assertEquals("heartbeat is 0", heartBeat, 1);
-        }*/
+        else {
+            Assert.fail("Failed to connect to the Controller API");
+        }
     }
 }

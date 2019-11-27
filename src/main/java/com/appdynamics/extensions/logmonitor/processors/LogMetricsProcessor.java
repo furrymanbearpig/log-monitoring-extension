@@ -111,9 +111,8 @@ public class LogMetricsProcessor implements Runnable {
             while (matcher.find()) {
                 BigInteger occurrences = new BigInteger(logMetrics.getMetrics().get(currentKey + OCCURRENCES)
                         .getMetricValue());
-                LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
-                        log.getDisplayName(), stringToCheck, currentKey);
                 String metricName = currentKey + OCCURRENCES;
+                LOGGER.info("Match found for pattern: {} in log: {}", searchPattern.getDisplayName(), log.getDisplayName());
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(occurrences.add(BigInteger.ONE)),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
 
