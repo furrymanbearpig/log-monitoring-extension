@@ -2,7 +2,7 @@ metricPrefix: "Custom Metrics|Log Monitor|"
 
 logs:
 - displayName: "Machine Agent Logs"
-  logDirectory: "/opt/appdynamics/machine-agent"
+  logDirectory: "/opt/appdynamics/machine-agent/logs"
   logName: "machine-agent.log"
   searchStrings:
   - displayName: "Log Monitor Task"

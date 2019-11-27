@@ -17,7 +17,6 @@ object Project : Project({
     vcsRoot(AE_LogMonitoringExtension)
     buildType(AE_LogMonitoringExtension_Build)
     buildType(AE_LogMonitoringExtension_IntegrationTests)
-    buildType(AE_LogMonitoringExtension_WorkbenchTest)
 
     features {
         versionedSettings {
