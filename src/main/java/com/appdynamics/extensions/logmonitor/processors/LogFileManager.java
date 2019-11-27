@@ -234,7 +234,7 @@ public class LogFileManager {
     }
 
     private EventsServiceDataManager evaluateEventsServiceConfig() {
-        if (this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService").equals("true")) {
+        if (this.monitorContextConfiguration.getConfigYml().get("sendDataToEventsService").equals(true)) {
             return monitorContextConfiguration.getContext().getEventsServiceDataManager();
         }
         return null;

@@ -24,12 +24,16 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.DEFAULT_METRIC_PREFIX;
 import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;
@@ -82,5 +86,28 @@ public class LogMonitor extends ABaseMonitor {
                     log, filePointerProcessor);
             taskExecutor.submit(log.getDisplayName(), task);
         }
+    }
+
+    public static void main(String[] args) throws TaskExecutionException, IOException {
+
+        ConsoleAppender ca = new ConsoleAppender();
+        ca.setWriter(new OutputStreamWriter(System.out));
+        ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
+        ca.setThreshold(Level.DEBUG);
+        //LOGGER.getRootLogger().addAppender(ca);
+
+        final LogMonitor monitor = new LogMonitor();
+        final Map<String, String> taskArgs = Maps.newHashMap();
+        taskArgs.put("config-file", "/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/main/resources/conf/config.yml");
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                try {
+                    monitor.execute(taskArgs, null);
+                } catch (Exception e) {
+                    LOGGER.error("Error while running the task", e);
+                }
+            }
+        }, 2, 60, TimeUnit.SECONDS);
     }
 }

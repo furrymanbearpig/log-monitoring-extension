@@ -8,15 +8,12 @@
 
 package com.appdynamics.extensions.logmonitor.processors;
 
-import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
-import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.metrics.Metric;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
@@ -27,7 +24,6 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -132,7 +128,6 @@ public class LogMetricsProcessor implements Runnable {
                     logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
                 }
 
-                //TODO move events service code here.
                 if (logEventsProcessor != null) {
                     logMetrics.addLogEvent(logEventsProcessor.processLogEvent(searchPattern, randomAccessFile, stringToCheck));
                 } else {
@@ -141,7 +136,6 @@ public class LogMetricsProcessor implements Runnable {
             }
         }
     }
-
 
     private void updateCurrentFilePointer(String filePath, long lastReadPosition, long creationTimestamp) {
         FilePointer filePointer = new FilePointer();

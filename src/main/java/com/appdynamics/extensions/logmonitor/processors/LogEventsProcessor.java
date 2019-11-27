@@ -13,20 +13,20 @@ import java.io.File;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
 
-public class LogEventsProcessor {
+class LogEventsProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogEventsProcessor.class);
     private EventsServiceDataManager eventsServiceDataManager;
     private int offset;
     private Log log;
 
-    public LogEventsProcessor(EventsServiceDataManager eventsServiceDataManager, int offset, Log log) {
+    LogEventsProcessor(EventsServiceDataManager eventsServiceDataManager, int offset, Log log) {
         this.eventsServiceDataManager = eventsServiceDataManager;
         this.offset = offset;
         this.log = log;
         createLogSchema();
     }
 
-    public LogEvent processLogEvent(SearchPattern searchPattern, OptimizedRandomAccessFile currentFile, String currentMatch) {
+    LogEvent processLogEvent(SearchPattern searchPattern, OptimizedRandomAccessFile currentFile, String currentMatch) {
         try {
             return createLogEvent(searchPattern, currentFile, currentMatch, offset);
         } catch (Exception ex) {

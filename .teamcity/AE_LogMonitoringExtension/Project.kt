@@ -32,7 +32,6 @@ object Project : Project({
 
     buildTypesOrder = arrayListOf(
             AE_LogMonitoringExtension_Build,
-            AE_LogMonitoringExtension_IntegrationTests,
-            AE_LogMonitoringExtension_WorkbenchTest
+            AE_LogMonitoringExtension_IntegrationTests
     )
 })
