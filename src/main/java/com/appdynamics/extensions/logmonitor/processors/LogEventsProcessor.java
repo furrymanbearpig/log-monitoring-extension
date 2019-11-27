@@ -1,3 +1,11 @@
+/*
+ *  Copyright 2019. AppDynamics LLC and its affiliates.
+ *  All Rights Reserved.
+ *  This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ *  The copyright notice above does not evidence any actual or intended publication of such source code.
+ *
+ */
+
 package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
@@ -12,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
+
+/**
+ * @author Aditya Jagtiani
+ */
 
 class LogEventsProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogEventsProcessor.class);
@@ -43,8 +55,7 @@ class LogEventsProcessor {
                 eventsServiceDataManager.createSchema(SCHEMA_NAME, FileUtils.readFileToString(new File("src/main/" +
                         "resources/eventsService/logSchema.json")));
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LOGGER.error("Error encountered while creating schema for log {}", log.getDisplayName(), ex);
         }
     }

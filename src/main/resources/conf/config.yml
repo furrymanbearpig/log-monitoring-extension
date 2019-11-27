@@ -4,36 +4,31 @@
 # metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
 # Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
 
-metricPrefix: "Server|Component:66|Custom Metrics|Log Monitor Testing|"
+metricPrefix: "Custom Metrics|Log Monitor|"
 
 logs:
-  - displayName: "Machine Agent Logs"
-    logDirectory: "/Users/aj89/machine-agent/logs"
-    logName: "machine-agent.log*"
-    encoding: ""      #Not mandatory. Supported types: UTF8, UTF16, UTF16-LE, UTF16-BE, UTF32, UTF-32LE, UTF32-BE
-    searchStrings:
-        #displayName Should be unique across the various patterns.
-       - displayName: "INFO Statements"
-         pattern: "INFO"
-         matchExactString: true
-         caseSensitive: true
-         printMatchedString: false
-       - displayName: "DEBUG Statements"
-         pattern: "DEBUG"
-         matchExactString: true
-         caseSensitive: true
-         printMatchedString: true
+- displayName: ""
+  logDirectory: ""
+  logName: ""
+  encoding: ""      #Not mandatory. Supported types: UTF8, UTF16, UTF16-LE, UTF16-BE, UTF32, UTF-32LE, UTF32-BE
+  searchStrings:
+  #displayName Should be unique across the various patterns.
+  - displayName: ""
+    pattern: ""
+    matchExactString: false
+    caseSensitive: false
+    printMatchedString: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
 # "replaceWith" takes the string to replace the matched characters
 metricCharacterReplacer:
-    - replace: ":"
-      replaceWith: ";"
-    - replace: "\\|"
-      replaceWith: "#"
-    - replace: "\\,"
-      replaceWith: "#"
+- replace: ":"
+  replaceWith: ";"
+- replace: "\\|"
+  replaceWith: "#"
+- replace: "\\,"
+  replaceWith: "#"
 
 # Number of concurrent threads
 numberOfThreads: 20
@@ -41,14 +36,14 @@ numberOfThreads: 20
 #Thread timeout in seconds
 threadTimeOut: 60
 
-sendDataToEventsService: true
+sendDataToEventsService: false
 
 logMatchOffset: 2
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
-  host: "ec2-34-221-206-45.us-west-2.compute.amazonaws.com"
-  port: 9080
-  globalAccountName: "customer1_70a0b3c7-3f29-4b30-afea-f6e173520cd0"
-  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ad"
+  host: ""
+  port:
+  globalAccountName: ""
+  eventsApiKey: ""
   useSSL: false
