@@ -45,8 +45,7 @@ public class LogFileManagerTest {
 
     @Test
     public void testLogFileProcessingAfterRollover() throws Exception {
-        String dynamicLog1 = this.getClass().getClassLoader().getResource("dynamic-log-1.log").getPath();
-
+        String dynamicLog1 = "src/test/resources/dynamic-log-1.log";
         String testFilename = "active-dynamic-log-1.log";
         String testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
         copyFile(dynamicLog1, testFilepath);
@@ -501,7 +500,7 @@ public class LogFileManagerTest {
 
     @Test
     public void testFilePointerHasLatestTimeStampAfterRollover() throws Exception {
-        String dynamicLog1 = this.getClass().getClassLoader().getResource("dynamic-log-1.log").getPath();
+        String dynamicLog1 = "src/test/resources/dynamic-log-1.log";
 
         String testFilename = "active-dynamic-log-1.log";
         String testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);

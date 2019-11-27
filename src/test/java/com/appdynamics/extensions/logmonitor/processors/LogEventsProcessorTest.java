@@ -32,7 +32,7 @@ public class LogEventsProcessorTest {
         FilePointer filePointer = new FilePointer();
         filePointer.setFilename(log.getLogDirectory() + log.getLogName());
 
-        OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(new File("/Users/aj89/repos/appdynamics/extensions/log-monitoring-extension/src/test/resources/test-log-4-events-service.log"), "r");
+        OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(new File("src/test/resources/test-log-4-events-service.log"), "r");
 
         int offset = 5;
 
