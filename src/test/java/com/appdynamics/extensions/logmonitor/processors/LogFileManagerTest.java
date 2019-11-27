@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -49,82 +49,6 @@ public class LogFileManagerTest {
     private FilePointerProcessor mockFilePointerProcessor = Mockito.mock(FilePointerProcessor.class);
     private MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Log Monitor",
             "Custom Metrics|Log Monitor|", Mockito.mock(File.class), Mockito.mock(AMonitorJob.class));
-
-    @Test
-    public void testLogFileProcessingAfterRollover() throws Exception {
-        String dynamicLog1 = "src/test/resources/dynamic-log-1.log";
-        String testFilename = "active-dynamic-log-1.log";
-        String testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
-        copyFile(dynamicLog1, testFilepath);
-
-        Log log = new Log();
-        log.setLogDirectory(getTargetDir().getPath());
-        log.setLogName("active-dynamic-*");
-
-        SearchString searchString = new SearchString();
-        searchString.setCaseSensitive(false);
-        searchString.setMatchExactString(true);
-        searchString.setPattern("debug");
-        searchString.setDisplayName("Debug");
-        searchString.setPrintMatchedString(false);
-
-        SearchString searchString1 = new SearchString();
-        searchString1.setCaseSensitive(false);
-        searchString1.setMatchExactString(true);
-        searchString1.setPattern("error");
-        searchString1.setDisplayName("Error");
-        searchString1.setPrintMatchedString(false);
-
-        log.setSearchStrings(Lists.newArrayList(searchString, searchString1));
-
-        FilePointer filePointer = new FilePointer();
-        filePointer.setFilename(log.getLogDirectory() + File.separator + testFilename);
-        monitorContextConfiguration.setConfigYml("src/test/resources/conf/config.yaml");
-        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
-
-        classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
-        LogMetrics logMetrics = classUnderTest.processLogMetrics();
-        Map<String, Metric> metrics = logMetrics.getMetrics();
-
-        assertEquals("3", metrics.get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
-        assertEquals("0", metrics.get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
-
-        String filesize = getFileSize(log.getLogDirectory(), testFilename);
-        assertEquals(filesize, metrics.get("active-dynamic-*|File size (Bytes)").getMetricValue());
-
-        // simulate a file pointer update
-        filePointer.updateLastReadPosition(new Long(filesize));
-        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
-
-        List<String> logsToAdd = Lists.newArrayList();
-        for (int i = 0; i < 100; i++) {
-            logsToAdd.add(new Date() + "	DEBUG	Statement " + i + "\n");
-        }
-        updateLogFile(testFilepath, logsToAdd);
-
-        // simulate new file created with different name
-        Thread.sleep(1000);
-        String dynamicLog2 = this.getClass().getClassLoader().getResource("dynamic-log-2.log").getPath();
-
-        testFilename = "active-dynamic-log-2.log";
-        testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
-        copyFile(dynamicLog2, testFilepath);
-
-        // simulate another file created with different name
-        Thread.sleep(1000);
-        String dynamicLog3 = this.getClass().getClassLoader().getResource("dynamic-log-3.log").getPath();
-        testFilename = "active-dynamic-log-3.log";
-        testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
-        copyFile(dynamicLog3, testFilepath);
-        logsToAdd.clear();
-
-        logMetrics = classUnderTest.processLogMetrics();
-        metrics = logMetrics.getMetrics();
-
-        assertEquals("103", metrics.get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
-    }
-
-
 
     @Test
     public void testProcessorWhenPrintMatchedStringIsFalse() throws Exception {
@@ -581,6 +505,80 @@ public class LogFileManagerTest {
         latestFilePointer = LogMonitorUtil.getLatestFilePointer(logMetrics.getFilePointers());
         Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer("./target/active-dynamic-*",
                 latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
+    }
+
+    @Test
+    public void testLogFileProcessingAfterRollover() throws Exception {
+        String dynamicLog1 = "src/test/resources/dynamic-log-1.log";
+        String testFilename = "active-dynamic-log-1.log";
+        String testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
+        copyFile(dynamicLog1, testFilepath);
+
+        Log log = new Log();
+        log.setLogDirectory(getTargetDir().getPath());
+        log.setLogName("active-dynamic-*");
+
+        SearchString searchString = new SearchString();
+        searchString.setCaseSensitive(false);
+        searchString.setMatchExactString(true);
+        searchString.setPattern("debug");
+        searchString.setDisplayName("Debug");
+        searchString.setPrintMatchedString(false);
+
+        SearchString searchString1 = new SearchString();
+        searchString1.setCaseSensitive(false);
+        searchString1.setMatchExactString(true);
+        searchString1.setPattern("error");
+        searchString1.setDisplayName("Error");
+        searchString1.setPrintMatchedString(false);
+
+        log.setSearchStrings(Lists.newArrayList(searchString, searchString1));
+
+        FilePointer filePointer = new FilePointer();
+        filePointer.setFilename(log.getLogDirectory() + File.separator + testFilename);
+        monitorContextConfiguration.setConfigYml("src/test/resources/conf/config.yaml");
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
+
+        classUnderTest = new LogFileManager(mockFilePointerProcessor, log, monitorContextConfiguration);
+        LogMetrics logMetrics = classUnderTest.processLogMetrics();
+        Map<String, Metric> metrics = logMetrics.getMetrics();
+
+        assertEquals("3", metrics.get("active-dynamic-*|Search String|Debug|Occurrences").getMetricValue());
+        assertEquals("0", metrics.get("active-dynamic-*|Search String|Error|Occurrences").getMetricValue());
+
+        String filesize = getFileSize(log.getLogDirectory(), testFilename);
+        assertEquals(filesize, metrics.get("active-dynamic-*|File size (Bytes)").getMetricValue());
+
+        // simulate a file pointer update
+        filePointer.updateLastReadPosition(new Long(filesize));
+        when(mockFilePointerProcessor.getFilePointer(anyString(), anyString())).thenReturn(filePointer);
+
+        List<String> logsToAdd = Lists.newArrayList();
+        for (int i = 0; i < 100; i++) {
+            logsToAdd.add(new Date() + "	DEBUG	Statement " + i + "\n");
+        }
+        updateLogFile(testFilepath, logsToAdd);
+
+        // simulate new file created with different name
+        Thread.sleep(1000);
+        String dynamicLog2 = this.getClass().getClassLoader().getResource("dynamic-log-2.log").getPath();
+
+        testFilename = "active-dynamic-log-2.log";
+        testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
+        copyFile(dynamicLog2, testFilepath);
+
+        // simulate another file created with different name
+        Thread.sleep(1000);
+        String dynamicLog3 = this.getClass().getClassLoader().getResource("dynamic-log-3.log").getPath();
+        testFilename = "active-dynamic-log-3.log";
+        testFilepath = String.format("%s%s%s", getTargetDir().getPath(), File.separator, testFilename);
+        copyFile(dynamicLog3, testFilepath);
+        logsToAdd.clear();
+
+        logMetrics = classUnderTest.processLogMetrics();
+        metrics = logMetrics.getMetrics();
+
+        assertNotSame(3, metrics.get("active-dynamic-*|Search String|Debug|Occurrences"));
     }
 
     @Test
