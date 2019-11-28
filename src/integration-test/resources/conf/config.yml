@@ -22,7 +22,7 @@ metricCharacterReplacer:
   replaceWith: "#"
 
 # Number of concurrent threads
-numberOfThreads: 10
+numberOfThreads: 20
 
 #Thread timeout in seconds
 threadTimeOut: 60
@@ -33,8 +33,26 @@ logMatchOffset: 3
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
-  host: "localhost"
+  host: "controller"
   port: 9080
   globalAccountName: "customer1_90fb295d-a73f-4bd8-bd4a-1b73f7b6b742"
   eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ae"
   useSSL: false
+
+controllerInfo:
+  controllerHost: "${APPDYNAMICS_CONTROLLER_HOST_NAME}"
+  controllerPort: 8080
+  account: "customer1"
+  username: "user1"
+  password: "welcome"
+  encryptedPassword: ""
+  encryptionKey: ""
+  controllerSslEnabled: false
+  enableOrchestration: false
+  uniqueHostId: ""
+  accountAccessKey: "${APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY}"
+  machinePath: ""
+  simEnabled: true
+  applicationName: ""
+  tierName: ""
+  nodeName: ""

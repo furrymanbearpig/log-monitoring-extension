@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_BODY;
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
 
 /**
@@ -52,8 +53,8 @@ class LogEventsProcessor {
             if (com.appdynamics.extensions.util.StringUtils.hasText(eventsServiceDataManager.retrieveSchema(SCHEMA_NAME))) {
                 LOGGER.info("Schema: {} already exists", SCHEMA_NAME);
             } else {
-                eventsServiceDataManager.createSchema(SCHEMA_NAME, FileUtils.readFileToString(new File("src/main/" +
-                        "resources/eventsService/logSchema.json")));
+                eventsServiceDataManager.createSchema(SCHEMA_NAME,
+                        org.apache.commons.io.FileUtils.readFileToString(new File("monitors/LogMonitor/logSchema.json")));
             }
         } catch (Exception ex) {
             LOGGER.error("Error encountered while creating schema for log {}", log.getDisplayName(), ex);

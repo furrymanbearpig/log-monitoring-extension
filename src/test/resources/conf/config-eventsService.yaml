@@ -27,10 +27,10 @@ logMatchOffset: 5
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
-  host: "ec2-34-221-206-45.us-west-2.compute.amazonaws.com"
+  host: "XYZ"
   port: 9080
-  globalAccountName: "customer1_70a0b3c7-3f29-4b30-afea-f6e173520cd0"
-  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ad"
+  globalAccountName: "someAccount"
+  eventsApiKey: "abc"
   useSSL: false
 
 

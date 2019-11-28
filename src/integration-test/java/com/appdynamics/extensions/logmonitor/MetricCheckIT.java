@@ -21,9 +21,10 @@ public class MetricCheckIT {
     @Test
     public void testMetricUpload() {
         if(metricAPIService != null) {
-            JsonNode jsonNode = metricAPIService.getMetricData("","Server%20&%20Infrastructure%20Monitoring/" +
-                    "metric-data?metric-path=Application%20Infrastructure%20Performance%7CRoot%7CCustom%20Metrics%7C" +
-                    "Custom%20Metrics%7CLog%20Monitor%7CMachine%20Agent%20Logs%7CSearch%20String%7CLog%20Monitor%20Task%7COccurrences&time-range-type=BEFORE_NOW&duration-in-mins=60");
+            JsonNode jsonNode = metricAPIService.getMetricData("","Server%20&%20Infrastructure%" +
+                    "20Monitoring/metric-data?metric-path=Application%20Infrastructure%20Performance%7CRoot%7CCustom%20Metrics" +
+                    "%7CLog%20Monitor%7CMachine%20Agent%20Logs%7CSearch%20String%7CLog%20Monitor%20Task%7COccurrences&time-range-" +
+                    "type=BEFORE_NOW&duration-in-mins=5");
             if (jsonNode != null) {
                 JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
                 int occurrences = (valueNode == null) ? 0 : valueNode.get(0).asInt();

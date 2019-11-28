@@ -11,6 +11,7 @@ dockerRun: ##Spin up docker containers for MA with extension, controller and oth
 #restart ES to make the changes reflect
 	docker exec controller /bin/bash -c "pa/platform-admin/bin/platform-admin.sh submit-job --platform-name AppDynamicsPlatform --service events-service --job restart-cluster"
 	sleep 60
+	/bin/sh src/integration-test/resources/conf/apikeys.sh
 
 #start machine agent
 	@echo ------- Starting machine agent -------
