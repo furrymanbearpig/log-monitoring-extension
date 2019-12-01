@@ -1,3 +1,4 @@
+/*
 package com.appdynamics.extensions.logmonitor;
 
 
@@ -52,3 +53,4 @@ public class EventsServiceIT {
         Assert.assertTrue(eventsManager.querySchema("select logDisplayName from logSchema").contains("results"));
     }
 }
+*/
