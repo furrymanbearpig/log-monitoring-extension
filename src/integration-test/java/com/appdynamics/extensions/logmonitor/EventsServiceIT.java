@@ -1,40 +1,62 @@
-
 package com.appdynamics.extensions.logmonitor;
 
 
-import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
-import com.appdynamics.extensions.yml.YmlReader;
+import org.apache.http.HttpHost;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import static com.appdynamics.extensions.eventsservice.utils.Constants.*;
 
 public class EventsServiceIT {
 
-    private EventsServiceDataManager eventsServiceDataManager;
+    private HttpHost httpHost;
+    private CloseableHttpClient httpClient;
+    private String globalAccountName;
+    private String eventsApiKey;
 
     @Before
-    public void setup() {
-        File configFile = new File("src/integration-test/resources/conf/config.yml");
-        Map<String, ?> config = YmlReader.readFromFileAsMap(configFile);
-        Map<String, ? super Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
-        eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
+    public void setup() throws Exception {
+        Runtime.getRuntime().exec("chmod 755 src/integration-test/resources/conf/apikeys.sh");
+        ProcessBuilder pb = new ProcessBuilder("src/integration-test/resources/conf/apikeys.sh");
+        Process process = pb.start();
+        InputStream is = process.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        globalAccountName = reader.readLine();
+        eventsApiKey = reader.readLine();
+        httpHost = new HttpHost("controller", 9080);
+        httpClient = HttpClientBuilder.create().build();
     }
 
     @Test
-    public void testWhetherSchemaIsCreated() {
-        String schemaBody = eventsServiceDataManager.retrieveSchema("logSchema");
+    public void testWhetherSchemaIsCreated() throws Exception {
+        HttpGet httpGet = new HttpGet(httpHost.toURI() + SCHEMA_PATH + "logschema");
+        httpGet.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
+        httpGet.setHeader(API_KEY_HEADER, eventsApiKey);
+        httpGet.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
+        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+        Assert.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
+        String schemaBody = EntityUtils.toString(httpResponse.getEntity());
         Assert.assertTrue(schemaBody.contains("logDisplayName"));
         Assert.assertTrue(schemaBody.contains("searchPattern"));
         Assert.assertTrue(schemaBody.contains("searchPatternDisplayName"));
         Assert.assertTrue(schemaBody.contains("logMatch"));
+        httpResponse.close();
     }
 
     @Test
     public void testWhetherEventsArePublished() {
-        Assert.assertTrue(eventsServiceDataManager.querySchema("select logDisplayName from logSchema").contains("results"));
+
     }
+
 }
 

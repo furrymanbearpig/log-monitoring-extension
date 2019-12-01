@@ -13,7 +13,6 @@ import com.appdynamics.extensions.conf.processor.ConfigProcessor;
 import com.appdynamics.extensions.controller.*;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
-import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.yml.YmlReader;
@@ -46,18 +45,6 @@ public class IntegrationTestUtils {
             return null;
         }
     }
-
-    static CustomDashboardAPIService initializeCustomDashboardAPIService() {
-        ControllerAPIService controllerAPIService = initializeControllerAPIService();
-        if (controllerAPIService != null) {
-            logger.info("Attempting to setup Dashboard API Service");
-            return controllerAPIService.getCustomDashboardAPIService();
-        } else {
-            logger.error("Failed to setup Dashboard API Service");
-            return null;
-        }
-    }
-
 
     private static ControllerAPIService initializeControllerAPIService() {
         Map<String, ?> config = YmlReader.readFromFileAsMap(configFile);
