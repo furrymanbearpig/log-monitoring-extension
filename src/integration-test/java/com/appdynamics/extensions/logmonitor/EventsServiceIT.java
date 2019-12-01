@@ -33,7 +33,7 @@ public class EventsServiceIT {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         globalAccountName = reader.readLine();
         eventsApiKey = reader.readLine();
-        httpHost = new HttpHost("controller", 9080);
+        httpHost = new HttpHost("localhost", 9080);
         httpClient = HttpClientBuilder.create().build();
     }
 
