@@ -50,14 +50,15 @@ class LogEventsProcessor {
 
     private void createLogSchema() {
         try {
-            if (com.appdynamics.extensions.util.StringUtils.hasText(eventsServiceDataManager.retrieveSchema(SCHEMA_NAME))) {
+            if (eventsServiceDataManager.retrieveSchema(SCHEMA_NAME).contains("logDisplayName")) {
                 LOGGER.info("Schema: {} already exists", SCHEMA_NAME);
             } else {
+                LOGGER.info("Creating Schema {}", SCHEMA_NAME);
                 eventsServiceDataManager.createSchema(SCHEMA_NAME,
                         org.apache.commons.io.FileUtils.readFileToString(new File("monitors/LogMonitor/logSchema.json")));
             }
         } catch (Exception ex) {
-            LOGGER.error("Error encountered while creating schema for log {}", log.getDisplayName(), ex);
+            LOGGER.error("Error encountered while creating schema for log {}", log.getDisplayName(), ex.getStackTrace());
         }
     }
 
