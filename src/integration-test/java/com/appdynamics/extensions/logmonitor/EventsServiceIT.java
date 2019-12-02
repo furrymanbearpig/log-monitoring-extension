@@ -25,23 +25,13 @@ public class EventsServiceIT {
     private EventsServiceDataManager eventsServiceDataManager;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         File configFile = new File("src/integration-test/resources/conf/config.yml");
         Map<String, ?> config = YmlReader.readFromFileAsMap(configFile);
         config = ConfigProcessor.process(config);
         Map<String, Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
         String eventsServiceHost = (String) eventsServiceParameters.get("host");
         int eventsServicePort = (Integer) eventsServiceParameters.get("port");
-/*        Runtime.getRuntime().exec("chmod 755 src/integration-test/resources" +
-                "/conf/apikeys.sh");
-        ProcessBuilder pb = new ProcessBuilder("src/integration-test/resources/conf/apikeys.sh");
-        Process process = pb.start();
-        InputStream is = process.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        globalAccountName = reader.readLine();
-        eventsApiKey = reader.readLine();
-        eventsServiceParameters.put("globalAccountName", globalAccountName);
-        eventsServiceParameters.put("eventsApiKey", eventsApiKey);*/
         boolean useSSL = (Boolean) eventsServiceParameters.get("useSSL");
         httpClient = Http4ClientBuilder.getBuilder(eventsServiceParameters).build();
         httpHost = new HttpHost(eventsServiceHost, eventsServicePort, useSSL ? "https" : "http");
