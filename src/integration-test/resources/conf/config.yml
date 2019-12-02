@@ -35,8 +35,8 @@ logMatchOffset: 3
 eventsServiceParameters:
   host: "localhost"
   port: 9080
-  globalAccountName: ""
-  eventsApiKey: ""
+  globalAccountName: "customer1_90fb295d-a73f-4bd8-bd4a-1b73f7b6b742"
+  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08aex"
   useSSL: false
 
 controllerInfo:
