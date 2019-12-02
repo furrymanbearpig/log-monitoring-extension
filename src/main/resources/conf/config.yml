@@ -6,14 +6,14 @@
 metricPrefix: "Custom Metrics|Log Monitor|"
 
 logs:
-- displayName: "test"
-  logDirectory: "/Users/aj89/machine-agent/logs"
-  logName: "machine-agent.log"
+- displayName: ""
+  logDirectory: ""
+  logName: ""
   encoding: ""      #Not mandatory. Supported types: UTF8, UTF16, UTF16-LE, UTF16-BE, UTF32, UTF-32LE, UTF32-BE
   searchStrings:
   #displayName Should be unique across the various patterns.
-  - displayName: "Log Monitor Task"
-    pattern: "LogMonitorTask"
+  - displayName: ""
+    pattern: ""
     matchExactString: false
     caseSensitive: false
     printMatchedString: false
@@ -35,14 +35,14 @@ numberOfThreads: 20
 #Thread timeout in seconds
 threadTimeOut: 60
 
-sendDataToEventsService: true
+sendDataToEventsService: false
 
 logMatchOffset: 2
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
-  host: "controller"
-  port: 9080
-  globalAccountName: "customer1_90fb295d-a73f-4bd8-bd4a-1b73f7b6b742"
-  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ae"
+  host: ""
+  port:
+  globalAccountName: ""
+  eventsApiKey: ""
   useSSL: false
