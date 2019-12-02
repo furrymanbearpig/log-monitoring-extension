@@ -17,7 +17,7 @@ public class EventsServiceIT {
 
     @Before
     public void setup() {
-        Map<String, ?> config = YmlReader.readFromFileAsMap(new File("monitors/LogMonitor/config.yml"));
+        Map<String, ?> config = YmlReader.readFromFileAsMap(new File("src/integration-test/resources/conf/config.yml"));
         Map<String, ? super Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
         eventsServiceParameters.put("host", "localhost");
         eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
