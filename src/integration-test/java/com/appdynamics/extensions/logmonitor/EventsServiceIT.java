@@ -1,4 +1,3 @@
-/*
 package com.appdynamics.extensions.logmonitor;
 
 
@@ -14,10 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 
 import static com.appdynamics.extensions.eventsservice.utils.Constants.*;
@@ -36,7 +32,7 @@ public class EventsServiceIT {
         Map<String, Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
         String eventsServiceHost = (String) eventsServiceParameters.get("host");
         int eventsServicePort = (Integer) eventsServiceParameters.get("port");
-        Runtime.getRuntime().exec("chmod 755 src/integration-test/resources" +
+/*        Runtime.getRuntime().exec("chmod 755 src/integration-test/resources" +
                 "/conf/apikeys.sh");
         ProcessBuilder pb = new ProcessBuilder("src/integration-test/resources/conf/apikeys.sh");
         Process process = pb.start();
@@ -45,7 +41,7 @@ public class EventsServiceIT {
         globalAccountName = reader.readLine();
         eventsApiKey = reader.readLine();
         eventsServiceParameters.put("globalAccountName", globalAccountName);
-        eventsServiceParameters.put("eventsApiKey", eventsApiKey);
+        eventsServiceParameters.put("eventsApiKey", eventsApiKey);*/
         boolean useSSL = (Boolean) eventsServiceParameters.get("useSSL");
         httpClient = Http4ClientBuilder.getBuilder(eventsServiceParameters).build();
         httpHost = new HttpHost(eventsServiceHost, eventsServicePort, useSSL ? "https" : "http");
@@ -53,14 +49,8 @@ public class EventsServiceIT {
     }
 
     @Test
-    public void testWhetherSchemaIsCreated() throws Exception {
-        HttpGet httpGet = new HttpGet(httpHost.toURI() + SCHEMA_PATH + "logschema");
-        httpGet.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
-        httpGet.setHeader(API_KEY_HEADER, eventsApiKey);
-        httpGet.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
-        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
-        Assert.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
-        httpResponse.close();
+    public void testWhetherSchemaIsCreated() {
+        Assert.assertTrue(eventsServiceDataManager.retrieveSchema("logSchema").contains("logDisplayName"));
     }
 
     @Test
@@ -68,5 +58,3 @@ public class EventsServiceIT {
         Assert.assertTrue(eventsServiceDataManager.querySchema("select * from logschema").contains("results"));
     }
 }
-
-*/

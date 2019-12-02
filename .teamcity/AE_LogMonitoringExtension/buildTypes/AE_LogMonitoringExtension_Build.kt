@@ -19,6 +19,9 @@ object AE_LogMonitoringExtension_Build : BuildType({
             mavenVersion = defaultProvidedVersion()
             jdkHome = "%env.JDK_18%"
         }
+        script {
+            scriptContent = "source src/integration-test/resources/conf/apikeys.sh"
+        }
     }
 
     triggers {
