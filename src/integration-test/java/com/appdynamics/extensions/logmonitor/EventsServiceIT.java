@@ -1,3 +1,4 @@
+/*
 package com.appdynamics.extensions.logmonitor;
 
 
@@ -53,7 +54,7 @@ public class EventsServiceIT {
 
     @Test
     public void testWhetherSchemaIsCreated() throws Exception {
-        HttpGet httpGet = new HttpGet(httpHost.toURI() + SCHEMA_PATH + "BTDSchema");
+        HttpGet httpGet = new HttpGet(httpHost.toURI() + SCHEMA_PATH + "logschema");
         httpGet.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
         httpGet.setHeader(API_KEY_HEADER, eventsApiKey);
         httpGet.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
@@ -64,7 +65,8 @@ public class EventsServiceIT {
 
     @Test
     public void testWhetherEventsArePublished() {
-        Assert.assertTrue(!eventsServiceDataManager.querySchema("select * from logschema").equals(""));
+        Assert.assertTrue(eventsServiceDataManager.querySchema("select * from logschema").contains("results"));
     }
 }
 
+*/
