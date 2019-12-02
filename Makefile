@@ -11,7 +11,8 @@ dockerRun: ##Spin up docker containers for MA with extension, controller and oth
 #restart ES to make the changes reflect
 	docker exec controller /bin/bash -c "pa/platform-admin/bin/platform-admin.sh submit-job --platform-name AppDynamicsPlatform --service events-service --job restart-cluster"
 	sleep 60
-	/bin/sh src/integration-test/resources/conf/apikeys.sh
+	#/bin/sh src/integration-test/resources/conf/apikeys.sh
+	#@echo $$(curl -s localhost:9200/appdynamics_accounts___search/_search?pretty=true -d '{ "query": {  "wildcard" : { "accountName": "customer1_*" } } }' | grep "_id")
 
 #start machine agent
 	@echo ------- Starting machine agent -------
