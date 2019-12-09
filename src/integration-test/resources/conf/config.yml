@@ -35,7 +35,7 @@ logMatchOffset: 3
 eventsServiceParameters:
   host: "localhost"
   port: 9080
-  globalAccountName: "${GAN}"
+  globalAccountName:  
   eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08aex"
   useSSL: false
 
