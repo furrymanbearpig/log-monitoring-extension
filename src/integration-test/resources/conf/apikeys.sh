@@ -9,7 +9,6 @@ echo $GAN
 ACCESS_KEY=SJ5b2m7d1\$354
 API_KEY=4a5c3998-8914-4a57-a2f2-920cd76c08ae
 echo $API_KEY
-export $GAN
 
 # create EVENTS SERVICE API KEY
 curl -v -X POST -u $GAN:$ACCESS_KEY -H 'Content-Type: application/json' http://localhost:9080/v1/apiKey/$GAN -d '{
