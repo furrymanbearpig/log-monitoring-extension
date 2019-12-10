@@ -16,7 +16,7 @@ dockerRun: ##Spin up docker containers for MA with extension, controller and oth
     GAN=`echo $$GAN | cut -d, -f1` \
     GAN=`echo $$GAN | cut -d: -f2` \
     GAN=`echo $$GAN | cut -d '"' -f2` \
-	sed -i '' "s/globalAccountName:/globalAccountName: $$GAN/" src/integration-test/resources/conf/config.yml
+	sed -i "s/globalAccountName:/globalAccountName: $$GAN/" src/integration-test/resources/conf/config.yml
 	@echo $$(curl -s localhost:9200/appdynamics_accounts___search/_search?pretty=true -d '{ "query": {  "wildcard" : { "accountName": "customer1_*" } } }' | grep "_id")
 
 #start machine agent
