@@ -20,6 +20,7 @@ public class EventsServiceIT {
         Map<String, ?> config = YmlReader.readFromFileAsMap(configFile);
         config = ConfigProcessor.process(config);
         Map<String, Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
+        eventsServiceParameters.put("globalAccountName", System.getenv("GLOBAL_ACCOUNT_NAME"));
         eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
     }
 

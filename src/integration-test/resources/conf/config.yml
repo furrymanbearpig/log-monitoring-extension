@@ -29,7 +29,7 @@ threadTimeOut: 60
 
 sendDataToEventsService: true
 
-logMatchOffset: 3
+logMatchOffset: 2
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
