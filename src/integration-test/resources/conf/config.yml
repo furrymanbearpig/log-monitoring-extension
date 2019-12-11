@@ -33,9 +33,9 @@ logMatchOffset: 3
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
-  host: "${APPDYNAMICS_CONTROLLER_HOST_NAME}"
+  host: "localhost"
   port: 9080
-  globalAccountName: "${GLOBAL_ACCOUNT_NAME}"
+  globalAccountName:
   eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ae"
   useSSL: false
 
