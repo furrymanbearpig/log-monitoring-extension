@@ -13,11 +13,11 @@ dockerRun: ##Spin up docker containers for MA with extension, controller and oth
 	sleep 120
 	./src/integration-test/resources/conf/apikeys.sh
 	@GAN=$$(curl -s localhost:9200/appdynamics_accounts___search/_search?pretty=true -d '{ "query": {  "wildcard" : { "accountName": "customer1_*" } } }' | grep "_id"); \
-    GAN=`echo $$GAN | cut -d, -f1`; \
-    GAN=`echo $$GAN | cut -d: -f2`; \
-    GAN=`echo $$GAN | cut -d '"' -f2`; \
-    #echo "##teamcity[setParameter name='env.GLOBAL_ACCOUNT_NAME' value='`echo $$GAN`']"
-    sed -i "/globalAccountName:/globalAccountName: $$GAN/" src/integration-test/resources/conf/config.yml
+	GAN=`echo $$GAN | cut -d, -f1`; \
+	GAN=`echo $$GAN | cut -d: -f2`; \
+	GAN=`echo $$GAN | cut -d '"' -f2`; \
+	#echo "##teamcity[setParameter name='env.GLOBAL_ACCOUNT_NAME' value='`echo $$GAN`']"
+	sed -i "``/globalAccountName:/globalAccountName: $$GAN/" src/integration-test/resources/conf/config.yml
 
 #start machine agent
 	@echo ------- Starting machine agent -------
