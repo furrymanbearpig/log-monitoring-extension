@@ -28,7 +28,6 @@ import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
  * @author: {Aditya Jagtiani}
  */
 
-
 public class IntegrationTestUtils {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(IntegrationTestUtils.class);

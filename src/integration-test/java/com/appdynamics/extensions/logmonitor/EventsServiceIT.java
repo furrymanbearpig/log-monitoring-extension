@@ -1,3 +1,11 @@
+/*
+ *  Copyright 2019. AppDynamics LLC and its affiliates.
+ *  All Rights Reserved.
+ *  This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ *  The copyright notice above does not evidence any actual or intended publication of such source code.
+ *
+ */
+
 package com.appdynamics.extensions.logmonitor;
 
 
@@ -10,6 +18,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Map;
+
+/**
+ * @author: Aditya Jagtiani
+ */
 
 public class EventsServiceIT {
     private EventsServiceDataManager eventsServiceDataManager;
