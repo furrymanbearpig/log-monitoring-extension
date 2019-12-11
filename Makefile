@@ -16,7 +16,7 @@ dockerRun: ##Spin up docker containers for MA with extension, controller and oth
     GAN=`echo $$GAN | cut -d, -f1`; \
     GAN=`echo $$GAN | cut -d: -f2`; \
     GAN=`echo $$GAN | cut -d '"' -f2`; \
-    @echo "##teamcity[setParameter name='env.GLOBAL_ACCOUNT_NAME' value='`echo $$GAN`']"
+    echo "##teamcity[setParameter name='env.GLOBAL_ACCOUNT_NAME' value='`echo $$GAN`']"
 #sed "``/globalAccountName:/globalAccountName: $$GAN/" src/integration-test/resources/conf/config.yml
 
 #start machine agent
