@@ -198,9 +198,7 @@ public class LogFileManagerTest {
 
         revertToUTF16Encoding(new File(log.getLogDirectory() + log.getLogName()));
     }
-    
 
-    
     @Test
     public void testProcessorForRegexPatternMatch() throws Exception {
         Log log = new Log();

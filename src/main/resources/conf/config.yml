@@ -37,7 +37,9 @@ threadTimeOut: 60
 
 sendDataToEventsService: false
 
-logMatchOffset: 2
+# This adds the specified number of lines after the line in which a log match is found to the event body
+# while sending data to the events service
+logMatchOffset: 0
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:
