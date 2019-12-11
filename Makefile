@@ -1,22 +1,22 @@
 dockerRun: ##Spin up docker containers for MA with extension, controller and other apps
 	@echo "------- Starting controller -------"
-	#docker-compose up -d --force-recreate controller
+	docker-compose up -d --force-recreate controller
 
 #wait until controller and ES installation completes
-	#sleep 600
+	sleep 600
 	@echo "------- Controller started -------"
 
 #bash into the controller, change props to enable port 9200
-	#docker exec controller /bin/bash -c "sed -i s/ad.es.node.http.enabled=false/ad.es.node.http.enabled=true/g events-service/processor/conf/events-service-api-store.properties"
+	docker exec controller /bin/bash -c "sed -i s/ad.es.node.http.enabled=false/ad.es.node.http.enabled=true/g events-service/processor/conf/events-service-api-store.properties"
 #restart ES to make the changes reflect
-	#docker exec controller /bin/bash -c "pa/platform-admin/bin/platform-admin.sh submit-job --platform-name AppDynamicsPlatform --service events-service --job restart-cluster"
-	#sleep 120
+	docker exec controller /bin/bash -c "pa/platform-admin/bin/platform-admin.sh submit-job --platform-name AppDynamicsPlatform --service events-service --job restart-cluster"
+	sleep 120
 	./src/integration-test/resources/conf/apikeys.sh
 	@GAN=$$(curl -s localhost:9200/appdynamics_accounts___search/_search?pretty=true -d '{ "query": {  "wildcard" : { "accountName": "customer1_*" } } }' | grep "_id"); \
 	GAN=`echo $$GAN | cut -d, -f1`; \
 	GAN=`echo $$GAN | cut -d: -f2`; \
 	GAN=`echo $$GAN | cut -d '"' -f2`; \
-	sed -i '' "s/globalAccountName:/globalAccountName: "$$GAN"/" src/integration-test/resources/conf/config.yml
+	sed -i "s/globalAccountName:/globalAccountName: "$$GAN"/" src/integration-test/resources/conf/config.yml
 
 #start machine agent
 	@echo ------- Starting machine agent -------

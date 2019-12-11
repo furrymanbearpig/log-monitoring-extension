@@ -2,7 +2,7 @@ metricPrefix: "Custom Metrics|Log Monitor|"
 
 logs:
 - displayName: "Machine Agent Logs"
-  logDirectory: "/opt/appdynamics/machine-agent/logs" #"/Users/aj89/machine-agent/logs"
+  logDirectory: "/opt/appdynamics/machine-agent/logs"
   logName: "machine-agent.log"
   searchStrings:
   - displayName: "Log Monitor Task"
@@ -35,7 +35,7 @@ logMatchOffset: 2
 eventsServiceParameters:
   host: "controller"
   port: 9080
-  globalAccountName: customer1_f4523559-346d-4137-8679-962c0a4c2751
+  globalAccountName:
   eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ae"
   useSSL: false
 
