@@ -11,12 +11,12 @@ package com.appdynamics.extensions.logmonitor;
 import com.appdynamics.extensions.AMonitorTaskRunnable;
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.processors.LogFileManager;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.prepareE
  */
 
 public class LogMonitorTask implements AMonitorTaskRunnable {
-    private static Logger LOGGER = LoggerFactory.getLogger(LogMonitorTask.class);
+    private static Logger LOGGER = ExtensionsLoggerFactory.getLogger(LogMonitorTask.class);
     private MetricWriteHelper metricWriteHelper;
     private MonitorContextConfiguration monitorContextConfiguration;
     private Log log;

@@ -184,18 +184,6 @@ public class LogMonitorUtil {
         return false;
     }
 
-    public static Map<Pattern, String> initializeMetricCharacterReplacers(List<Map<String, String>> metricCharacterReplacers) {
-        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
-        if (metricCharacterReplacers != null) {
-            for (Map<String, String> metricCharacterReplacer : metricCharacterReplacers) {
-                String replace = metricCharacterReplacer.get("replace");
-                String replaceWith = metricCharacterReplacer.get("replaceWith");
-                Pattern pattern = Pattern.compile(replace);
-                replacers.put(pattern, replaceWith);
-            }
-        }
-        return replacers;
-    }
 
     public static void convertToUTF8Encoding(File file, String charset) throws Exception {
         BufferedReader in = new BufferedReader(
@@ -219,15 +207,6 @@ public class LogMonitorUtil {
         }
         return metrics;
     }
-
-/*    public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
-        for (Map.Entry<String, Metric> entry : metrics.entrySet()) {
-            if(!entry.getKey().contains(FILESIZE_METRIC_NAME) && (entry.getKey().contains(OCCURRENCES) ||
-                    entry.getKey().contains(MATCHES))) {
-                entry.getValue().setMetricValue("0");
-            }
-        }
-    }*/
 
     public static CopyOnWriteArrayList<String> prepareEventsForPublishing(List<LogEvent> eventsToBePublished) {
         CopyOnWriteArrayList<String> events = new CopyOnWriteArrayList<String>();

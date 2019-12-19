@@ -11,6 +11,7 @@ package com.appdynamics.extensions.logmonitor.processors;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.executorservice.MonitorExecutorService;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
@@ -20,7 +21,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -39,7 +39,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
  */
 
 public class LogFileManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileManager.class);
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(LogFileManager.class);
     private Log log;
     private FilePointerProcessor filePointerProcessor;
     private MonitorContextConfiguration monitorContextConfiguration;
@@ -101,7 +101,7 @@ public class LogFileManager {
                 randomAccessFile.seek(0);
             }
             executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch,
-                    logMetrics, currentFile, getMetricCharacterReplacers(), eventsServiceDataManager, offset));
+                    logMetrics, currentFile, eventsServiceDataManager, offset));
         }
     }
 
@@ -113,7 +113,7 @@ public class LogFileManager {
         OptimizedRandomAccessFile randomAccessFile = new OptimizedRandomAccessFile(file, "r");
         randomAccessFile.seek(currentFilePointerPosition);
         executorService.execute("LogMetricsProcessor", new LogMetricsProcessor(randomAccessFile, log, latch, logMetrics,
-                file, getMetricCharacterReplacers(), eventsServiceDataManager, offset));
+                file, eventsServiceDataManager, offset));
     }
 
     private void setNewFilePointer(String dynamicLogPath, CopyOnWriteArrayList<FilePointer> filePointers) {
@@ -220,12 +220,6 @@ public class LogFileManager {
 
     private long getCurrentFilePointerOffset(String dynamicLogPath, String actualLogPath) {
         return filePointerProcessor.getFilePointer(dynamicLogPath, actualLogPath).getLastReadPosition().get();
-    }
-
-    private Map<Pattern, String> getMetricCharacterReplacers() {
-        List<Map<String, String>> metricCharReplacersFromCfg = (List) monitorContextConfiguration.getConfigYml()
-                .get("metricCharacterReplacers");
-        return initializeMetricCharacterReplacers(metricCharReplacersFromCfg);
     }
 
     private void handleFileEncoding(File file) throws Exception {

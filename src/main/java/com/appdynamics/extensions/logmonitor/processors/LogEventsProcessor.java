@@ -9,17 +9,15 @@
 package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
-import org.apache.commons.io.FileUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_BODY;
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
 
 /**
@@ -27,7 +25,7 @@ import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
  */
 
 class LogEventsProcessor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogEventsProcessor.class);
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(LogEventsProcessor.class);
     private EventsServiceDataManager eventsServiceDataManager;
     private int offset;
     private Log log;

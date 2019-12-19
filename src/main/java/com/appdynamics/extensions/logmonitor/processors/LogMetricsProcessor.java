@@ -9,6 +9,7 @@
 package com.appdynamics.extensions.logmonitor.processors;
 
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
@@ -18,7 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -36,7 +36,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
  */
 
 public class LogMetricsProcessor implements Runnable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogMetricsProcessor.class);
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(LogMetricsProcessor.class);
     private OptimizedRandomAccessFile randomAccessFile;
     private Log log;
     private CountDownLatch latch;
@@ -49,14 +49,13 @@ public class LogMetricsProcessor implements Runnable {
     private int offset;
 
     LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
-                        File currentFile, Map<Pattern, String> replacers, EventsServiceDataManager eventsServiceDataManager,
+                        File currentFile, EventsServiceDataManager eventsServiceDataManager,
                         int offset) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.latch = latch;
         this.logMetrics = logMetrics;
         this.currentFile = currentFile;
-        this.replacers = replacers;
         this.searchPatterns = createPattern(this.log.getSearchStrings());
         this.eventsServiceDataManager = eventsServiceDataManager;
         this.offset = offset;
@@ -118,7 +117,7 @@ public class LogMetricsProcessor implements Runnable {
 
                 if (searchPattern.getPrintMatchedString()) {
                     LOGGER.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
-                    String replacedWord = applyReplacers(matcher.group().trim());
+                    String replacedWord = matcher.group().trim();
                     if (searchPattern.getCaseSensitive()) {
                         metricName = currentKey + MATCHES + replacedWord;
                     } else {
@@ -147,18 +146,6 @@ public class LogMetricsProcessor implements Runnable {
     private String getSearchStringPrefix() {
         return String.format("%s%s%s", getLogNamePrefix(),
                 SEARCH_STRING, METRIC_SEPARATOR);
-    }
-
-    private String applyReplacers(String name) {
-        if (name == null || name.length() == 0 || replacers == null) {
-            return name;
-        }
-        for (Map.Entry<Pattern, String> replacerEntry : replacers.entrySet()) {
-            Pattern pattern = replacerEntry.getKey();
-            Matcher matcher = pattern.matcher(name);
-            name = matcher.replaceAll(replacerEntry.getValue());
-        }
-        return name;
     }
 
     private String getLogNamePrefix() {
