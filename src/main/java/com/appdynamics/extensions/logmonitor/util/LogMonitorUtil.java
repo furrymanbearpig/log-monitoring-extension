@@ -8,6 +8,7 @@
 
 package com.appdynamics.extensions.logmonitor.util;
 
+import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
@@ -18,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.lang.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,18 +184,6 @@ public class LogMonitorUtil {
         return false;
     }
 
-    public static Map<Pattern, String> initializeMetricCharacterReplacers(List<Map<String, String>> metricCharacterReplacers) {
-        Map<Pattern, String> replacers = new HashMap<Pattern, String>();
-        if (metricCharacterReplacers != null) {
-            for (Map<String, String> metricCharacterReplacer : metricCharacterReplacers) {
-                String replace = metricCharacterReplacer.get("replace");
-                String replaceWith = metricCharacterReplacer.get("replaceWith");
-                Pattern pattern = Pattern.compile(replace);
-                replacers.put(pattern, replaceWith);
-            }
-        }
-        return replacers;
-    }
 
     public static void convertToUTF8Encoding(File file, String charset) throws Exception {
         BufferedReader in = new BufferedReader(
@@ -218,12 +208,16 @@ public class LogMonitorUtil {
         return metrics;
     }
 
-    public static void resetRegisteredMetricOccurrences(Map<String, Metric> metrics) {
-        for (Map.Entry<String, Metric> entry : metrics.entrySet()) {
-            if(!entry.getKey().contains(FILESIZE_METRIC_NAME) && (entry.getKey().contains(OCCURRENCES) ||
-                    entry.getKey().contains(MATCHES))) {
-                entry.getValue().setMetricValue("0");
+    public static CopyOnWriteArrayList<String> prepareEventsForPublishing(List<LogEvent> eventsToBePublished) {
+        CopyOnWriteArrayList<String> events = new CopyOnWriteArrayList<String>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (LogEvent logEvent : eventsToBePublished) {
+            try {
+                events.add(mapper.writeValueAsString(logEvent));
+            } catch (Exception ex) {
+                LOGGER.error("Error encountered while publishing LogEvent {} for log {}", logEvent, logEvent.getLogDisplayName(), ex);
             }
         }
+        return events;
     }
 }

@@ -171,6 +171,33 @@ Configure the path to the config.yml by editing the ```<task-arguments>``` in th
 
 Restart the machine agent once this is done. 
 
+### 6. Events Service
+
+Before proceeding with this step, please ensure that all the prerequisites and steps to install the AppDynamics Events Service have been met. Refer to the sub-pages under 
+https://docs.appdynamics.com/display/PRO45/Events+Service+Deployment for detailed information. 
+
+The extension can now publish log matches to the Events Service. Use the following section in the config.yml for this feature: 
+
+```
+sendDataToEventsService: true
+
+logMatchOffset: 5
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host: 
+  port: 
+  globalAccountName:
+  eventsApiKey: 
+  useSSL: 
+```
+
+The logMatchOffset section appends the specified number of lines with the line containing the actual log match and all 
+of this makes the body of an event. This can be particularly useful while trying to search for exceptions and also retrieving the stack trace that follows. 
+
+Note that enabling this feature will not impact the regular delivery of metrics to the metric browser. 
+
+
 ## Metrics
 
 The extension publishes the following metrics: 
@@ -252,7 +279,7 @@ Always feel free to fork and contribute any changes directly via [GitHub](https:
 ## Version
 |          Name            |  Version   |
 |--------------------------|------------|
-|Extension Version         |3.0.0       |
+|Extension Version         |4.0.0       |
 |Controller Compatibility  |4.0 or Later|
-|Last Update               |08/22/2018 |
+|Last Update               |12/11/2019 |
 |List of Changes           |[Change log](https://github.com/Appdynamics/log-monitoring-extension/blob/master/CHANGELOG.md) |

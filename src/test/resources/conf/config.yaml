@@ -72,3 +72,17 @@ threadTimeOut: 60
 
 #prefix used to show up metrics in AppDynamics 
 metricPrefix: "Custom Metrics|LogMonitor|"
+
+
+sendDataToEventsService: false
+
+logMatchOffset: 0
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host: ""
+  port:
+  globalAccountName: ""
+  eventsApiKey: ""
+  useSSL: false
+

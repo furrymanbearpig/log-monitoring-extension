@@ -6,7 +6,7 @@
 
     <groupId>log-monitoring-extension</groupId>
     <artifactId>log-monitoring-extension</artifactId>
-    <version>3.0.1</version>
+    <version>4.0.0</version>
     <name>Log Monitor</name>
     <description>Inspects logs and counts the number of occurrences of specified search terms</description>
 
@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         <target.dir>${project.build.directory}/LogMonitor</target.dir>
+        <skipITs>true</skipITs>
     </properties>
 
     <dependencies>
@@ -26,7 +27,7 @@
         <dependency>
             <groupId>com.appdynamics</groupId>
             <artifactId>appd-exts-commons</artifactId>
-            <version>2.1.0</version>
+            <version>2.2.1</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -72,6 +73,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -82,8 +88,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -137,6 +143,7 @@
                                 <copy todir="${target.dir}">
                                     <fileset dir="src/main/resources/conf" includes="monitor.xml" />
                                     <fileset dir="src/main/resources/conf" includes="config.yml" />
+                                    <fileset dir="src/main/resources/conf" includes="logSchema.json" />
                                 </copy>
                                 <copy todir="${target.dir}">
                                     <fileset dir="${build.directory}"
@@ -172,6 +179,40 @@
                 <configuration>
                     <tag>${project.artifactId}-${project.version}</tag>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-integration-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/integration-test/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.0</version>
+                <configuration>
+                    <skipITs>${skipITs}</skipITs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

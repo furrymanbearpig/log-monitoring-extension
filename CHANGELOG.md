@@ -1,5 +1,11 @@
 Changes
 =======
+## 4.0.0 (December 2019)
+* Added functionality to send log matches to the events server
+* Added an offset mechanism to cover data directly following the log match to be included in the event body
+* Fixed a bug around redundant metrics 
+* Added scripts and integration tests for BTD
+* General improvements and tweaks
 
 ## 3.0.0 (August 2018)
 * Complete revamp using Commons 2.1.0. Support for character sets that are not UTF-8 encoded. General bug fixes, performance improvements and detailed documentation

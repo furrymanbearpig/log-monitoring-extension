@@ -8,28 +8,25 @@
 
 package com.appdynamics.extensions.logmonitor.processors;
 
-import static com.appdynamics.extensions.logmonitor.util.Constants.FILEPOINTER_FILENAME;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.logmonitor.LogMonitor;
+import com.appdynamics.extensions.logmonitor.config.FilePointer;
+import com.appdynamics.extensions.util.PathResolver;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.appdynamics.extensions.logmonitor.config.FilePointer;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-
-import com.appdynamics.extensions.logmonitor.LogMonitor;
+import static com.appdynamics.extensions.logmonitor.util.Constants.FILEPOINTER_FILENAME;
 
 /**
  * @author Aditya Jagtiani
  */
 public class FilePointerProcessor {
-    private static final Logger LOGGER = Logger.getLogger(FilePointerProcessor.class);
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(FilePointerProcessor.class);
     private volatile ConcurrentHashMap<String, FilePointer> filePointers = new ConcurrentHashMap<String, FilePointer>();
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -87,44 +84,6 @@ public class FilePointerProcessor {
     }
 
     private String getFilePointerPath() {
-        String path = null;
-        try {
-            URL classUrl = LogMonitor.class.getResource(
-                    LogMonitor.class.getSimpleName() + ".class");
-            String jarPath = classUrl.toURI().toString();
-
-            // workaround for jar file
-            jarPath = jarPath.replace("jar:", "").replace("file:", "");
-            if (jarPath.contains("!")) {
-                jarPath = jarPath.substring(0, jarPath.indexOf("!"));
-            }
-            File file = new File(jarPath);
-            String jarDir = file.getParentFile().toURI().getPath();
-
-            if (jarDir.endsWith(File.separator)) {
-                path = jarDir + FILEPOINTER_FILENAME;
-
-            } else {
-                path = String.format("%s%s%s", jarDir,
-                        File.separator, FILEPOINTER_FILENAME);
-            }
-        } catch (Exception ex) {
-            LOGGER.warn("Unable to resolve installation dir, finding an alternative.");
-        }
-
-        if (StringUtils.isBlank(path)) {
-            path = String.format("%s%s%s", new File(".").getAbsolutePath(),
-                    File.separator, FILEPOINTER_FILENAME);
-        }
-        try {
-            path = URLDecoder.decode(path, "UTF-8");
-
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.warn(String.format("Unable to decode file path [%s] using UTF-8", path));
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Filepointer path: " + path);
-        }
-        return path;
+        return PathResolver.resolveDirectory(LogMonitor.class).getPath() + File.separator + FILEPOINTER_FILENAME;
     }
 }

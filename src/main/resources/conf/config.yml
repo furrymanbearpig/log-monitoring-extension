@@ -1,42 +1,50 @@
-#prefix used to show metrics in all tiers (NOT RECOMMENDED)
-#metricPrefix: "Custom Metrics|LogMonitor|"
-
-# metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
+# Metric prefix to show metrics in one tier (HIGHLY RECOMMENDED)
 # Please follow the Metric Path section of https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java for instructions on retrieving the tier ID
+#metricPrefix: "Server|Component:<TIER_ID>|Log Monitor|"
 
-metricPrefix: "Server|Component:<TIER_ID>|Custom Metrics|Log Monitor|"
+#Metric Prefix when SIM is enabled"
+metricPrefix: "Custom Metrics|Log Monitor|"
 
 logs:
+- displayName: ""
+  logDirectory: ""
+  logName: ""
+  encoding: ""      #Not mandatory. Supported types: UTF8, UTF16, UTF16-LE, UTF16-BE, UTF32, UTF-32LE, UTF32-BE
+  searchStrings:
+  #displayName Should be unique across the various patterns.
   - displayName: ""
-    logDirectory: ""
-    logName: ""
-    encoding: ""      #Not mandatory. Supported types: UTF8, UTF16, UTF16-LE, UTF16-BE, UTF32, UTF-32LE, UTF32-BE
-    searchStrings:
-        #displayName Should be unique across the various patterns.
-       - displayName: ""
-         pattern: ""
-         matchExactString: true
-         caseSensitive: true
-         printMatchedString: false
-       - displayName: ""
-         pattern: ""
-         matchExactString: true
-         caseSensitive: true
-         printMatchedString: true
+    pattern: ""
+    matchExactString: false
+    caseSensitive: false
+    printMatchedString: false
 
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
 # "replaceWith" takes the string to replace the matched characters
 metricCharacterReplacer:
-    - replace: ":"
-      replaceWith: ";"
-    - replace: "\\|"
-      replaceWith: "#"
-    - replace: "\\,"
-      replaceWith: "#"
+- replace: ":"
+  replaceWith: ";"
+- replace: "\\|"
+  replaceWith: "#"
+- replace: "\\,"
+  replaceWith: "#"
 
 # Number of concurrent threads
 numberOfThreads: 20
 
 #Thread timeout in seconds
 threadTimeOut: 60
+
+sendDataToEventsService: false
+
+# This adds the specified number of lines after the line in which a log match is found to the event body
+# while sending data to the events service
+logMatchOffset: 0
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host: ""
+  port:
+  globalAccountName: ""
+  eventsApiKey: ""
+  useSSL: false

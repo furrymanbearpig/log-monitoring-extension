@@ -9,15 +9,15 @@
 
 package com.appdynamics.extensions.logmonitor.metrics;
 
+import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.math.BigInteger;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 
 /**
  * @author Aditya Jagtiani
@@ -26,6 +26,8 @@ import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 public class LogMetrics {
     private String metricPrefix;
     private CopyOnWriteArrayList<FilePointer> filePointers = new CopyOnWriteArrayList<FilePointer>();
+    private CopyOnWriteArrayList<LogEvent> eventsToBePublished = new CopyOnWriteArrayList<LogEvent>();
+    private ConcurrentHashMap<String, Metric> metrics = new ConcurrentHashMap<String, Metric>();
 
     public String getMetricPrefix() {
         return metricPrefix;
@@ -57,9 +59,21 @@ public class LogMetrics {
         filePointers.add(filePointer);
     }
 
+    public ConcurrentHashMap<String, Metric> getMetrics() {
+        return metrics;
+    }
+
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this,
                 ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    public void addLogEvent(LogEvent logEvent) {
+        eventsToBePublished.add(logEvent);
+    }
+
+    public CopyOnWriteArrayList<LogEvent> getEventsToBePublished() {
+        return eventsToBePublished;
     }
 }

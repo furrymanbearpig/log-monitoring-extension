@@ -8,6 +8,8 @@
 
 package com.appdynamics.extensions.logmonitor.processors;
 
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
@@ -17,7 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -27,7 +28,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.appdynamics.extensions.logmonitor.LogMonitor.metrics;
 import static com.appdynamics.extensions.logmonitor.util.Constants.*;
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
 
@@ -36,7 +36,7 @@ import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
  */
 
 public class LogMetricsProcessor implements Runnable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogMetricsProcessor.class);
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(LogMetricsProcessor.class);
     private OptimizedRandomAccessFile randomAccessFile;
     private Log log;
     private CountDownLatch latch;
@@ -44,16 +44,21 @@ public class LogMetricsProcessor implements Runnable {
     private List<SearchPattern> searchPatterns;
     private Map<Pattern, String> replacers;
     private LogMetrics logMetrics;
+    private EventsServiceDataManager eventsServiceDataManager;
+    private LogEventsProcessor logEventsProcessor;
+    private int offset;
 
     LogMetricsProcessor(OptimizedRandomAccessFile randomAccessFile, Log log, CountDownLatch latch, LogMetrics logMetrics,
-                        File currentFile, Map<Pattern, String> replacers) {
+                        File currentFile, EventsServiceDataManager eventsServiceDataManager,
+                        int offset) {
         this.randomAccessFile = randomAccessFile;
         this.log = log;
         this.latch = latch;
         this.logMetrics = logMetrics;
         this.currentFile = currentFile;
-        this.replacers = replacers;
         this.searchPatterns = createPattern(this.log.getSearchStrings());
+        this.eventsServiceDataManager = eventsServiceDataManager;
+        this.offset = offset;
     }
 
     public void run() {
@@ -71,6 +76,9 @@ public class LogMetricsProcessor implements Runnable {
         long currentFilePointer = randomAccessFile.getFilePointer();
         String currentLine;
         setBaseOccurrenceCountForConfiguredPatterns();
+        if (eventsServiceDataManager != null) {
+            logEventsProcessor = new LogEventsProcessor(eventsServiceDataManager, offset, log);
+        }
         while ((currentLine = randomAccessFile.readLine()) != null) {
             incrementWordCountIfSearchStringMatched(searchPatterns, currentLine);
             currentFilePointer = randomAccessFile.getFilePointer();
@@ -88,11 +96,9 @@ public class LogMetricsProcessor implements Runnable {
     private void setBaseOccurrenceCountForConfiguredPatterns() {
         for (SearchPattern searchPattern : searchPatterns) {
             String currentKey = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_SEPARATOR;
-            if (!metrics.containsKey(currentKey + OCCURRENCES)) {
-                String metricName = currentKey + OCCURRENCES;
-                logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
-                        logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
-            }
+            String metricName = currentKey + OCCURRENCES;
+            logMetrics.add(metricName, new Metric(metricName, String.valueOf(BigInteger.ZERO),
+                    logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
         }
     }
 
@@ -102,23 +108,28 @@ public class LogMetricsProcessor implements Runnable {
             String currentKey = getSearchStringPrefix() + searchPattern.getDisplayName() + METRIC_SEPARATOR;
 
             while (matcher.find()) {
-                BigInteger occurrences = new BigInteger(metrics.get(currentKey + OCCURRENCES)
+                BigInteger occurrences = new BigInteger(logMetrics.getMetrics().get(currentKey + OCCURRENCES)
                         .getMetricValue());
-                LOGGER.info("Match found for pattern: {} in log: {}. Incrementing occurrence count for metric: {}",
-                        log.getDisplayName(), stringToCheck, currentKey);
                 String metricName = currentKey + OCCURRENCES;
+                LOGGER.info("Match found for pattern: {} in log: {}", searchPattern.getDisplayName(), log.getDisplayName());
                 logMetrics.add(metricName, new Metric(metricName, String.valueOf(occurrences.add(BigInteger.ONE)),
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
 
                 if (searchPattern.getPrintMatchedString()) {
                     LOGGER.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
-                    String replacedWord = applyReplacers(matcher.group().trim());
+                    String replacedWord = matcher.group().trim();
                     if (searchPattern.getCaseSensitive()) {
                         metricName = currentKey + MATCHES + replacedWord;
                     } else {
                         metricName = currentKey + MATCHES + WordUtils.capitalizeFully(replacedWord);
                     }
                     logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
+                }
+
+                if (logEventsProcessor != null) {
+                    logMetrics.addLogEvent(logEventsProcessor.processLogEvent(searchPattern, randomAccessFile, stringToCheck));
+                } else {
+                    LOGGER.info("This data does not have to be sent to the events service, skipping.");
                 }
             }
         }
@@ -135,18 +146,6 @@ public class LogMetricsProcessor implements Runnable {
     private String getSearchStringPrefix() {
         return String.format("%s%s%s", getLogNamePrefix(),
                 SEARCH_STRING, METRIC_SEPARATOR);
-    }
-
-    private String applyReplacers(String name) {
-        if (name == null || name.length() == 0 || replacers == null) {
-            return name;
-        }
-        for (Map.Entry<Pattern, String> replacerEntry : replacers.entrySet()) {
-            Pattern pattern = replacerEntry.getKey();
-            Matcher matcher = pattern.matcher(name);
-            name = matcher.replaceAll(replacerEntry.getValue());
-        }
-        return name;
     }
 
     private String getLogNamePrefix() {

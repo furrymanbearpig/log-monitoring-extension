@@ -3,7 +3,6 @@ target
 .settings
 .classpath
 .project
-*.log
 *.ipr
 *.iws
 .idea
@@ -11,3 +10,4 @@ target
 src/lib/*.jar
 lib/*
 lib_7503/*.jar
+out

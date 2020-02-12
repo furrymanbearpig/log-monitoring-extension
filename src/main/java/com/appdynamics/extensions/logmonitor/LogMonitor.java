@@ -11,18 +11,15 @@ package com.appdynamics.extensions.logmonitor;
 import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.TasksExecutionServiceProvider;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
-import com.appdynamics.extensions.metrics.Metric;
-import com.appdynamics.extensions.util.AssertUtils;
 import com.google.common.collect.Maps;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.DEFAULT_METRIC_PREFIX;
 import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;
@@ -32,15 +29,9 @@ import static com.appdynamics.extensions.logmonitor.util.Constants.MONITOR_NAME;
  */
 
 public class LogMonitor extends ABaseMonitor {
-    private static Logger LOGGER = Logger.getLogger(LogMonitor.class);
+    private static Logger LOGGER = ExtensionsLoggerFactory.getLogger(LogMonitor.class);
     private MonitorContextConfiguration monitorContextConfiguration;
     private Map<String, ?> configYml = Maps.newHashMap();
-    public static Map<String, Metric> metrics;
-
-    @Override
-    public void onConfigReload(File file) {
-        metrics = new ConcurrentHashMap<String, Metric>();
-    }
 
     @Override
     public String getDefaultMetricPrefix() {
@@ -59,10 +50,8 @@ public class LogMonitor extends ABaseMonitor {
     }
 
     @Override
-    protected int getTaskCount() {
-        List<Map<String, ?>> logsFromConfig = (List<Map<String, ?>>) configYml.get("logs");
-        AssertUtils.assertNotNull(logsFromConfig, "Please populate the 'logs' section in the config.yml.");
-        return logsFromConfig.size();
+    protected List<Map<String, ?>> getServers() {
+        return (List<Map<String, ?>>) configYml.get("logs");
     }
 
     @Override

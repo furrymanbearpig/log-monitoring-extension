@@ -1,0 +1,58 @@
+metricPrefix: "Custom Metrics|Log Monitor|"
+
+logs:
+- displayName: "Machine Agent Logs"
+  logDirectory: "/opt/appdynamics/machine-agent/logs"
+  logName: "machine-agent.log"
+  searchStrings:
+  - displayName: "Log Monitor Task"
+    pattern: "LogMonitorTask"
+    matchExactString: false
+    caseSensitive: true
+    printMatchedString: true
+
+
+#Replaces characters in metric name with the specified characters.
+# "replace" takes any regular expression
+# "replaceWith" takes the string to replace the matched characters
+metricCharacterReplacer:
+- replace: ":"
+  replaceWith: ";"
+- replace: "\\|"
+  replaceWith: "#"
+
+# Number of concurrent threads
+numberOfThreads: 20
+
+#Thread timeout in seconds
+threadTimeOut: 60
+
+sendDataToEventsService: true
+
+logMatchOffset: 2
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host: "controller"
+  port: 9080
+  globalAccountName:
+  eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ae"
+  useSSL: false
+
+controllerInfo:
+  controllerHost: "${APPDYNAMICS_CONTROLLER_HOST_NAME}"
+  controllerPort: 8080
+  account: "customer1"
+  username: "user1"
+  password: "welcome"
+  encryptedPassword: ""
+  encryptionKey: ""
+  controllerSslEnabled: false
+  enableOrchestration: false
+  uniqueHostId: ""
+  accountAccessKey: "${APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY}"
+  machinePath: ""
+  simEnabled: true
+  applicationName: ""
+  tierName: ""
+  nodeName: ""
