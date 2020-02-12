@@ -18,6 +18,7 @@ object AE_LogMonitoringExtension_Build : BuildType({
             goals = "clean install"
             mavenVersion = defaultProvidedVersion()
             jdkHome = "%env.JDK_18%"
+            userSettingsSelection = "teamcity-settings"
         }
     }
 
