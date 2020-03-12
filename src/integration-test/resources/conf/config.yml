@@ -56,3 +56,12 @@ controllerInfo:
   applicationName: ""
   tierName: ""
   nodeName: ""
+
+# Generate a custom dashboard based on the provided template
+customDashboard:
+  enabled: false
+  dashboardName: "Dashboard"
+  #  sslCertCheckEnabled: true
+  # Update the path to the dashboard file.
+  pathToSIMDashboard: ""
+  periodicDashboardCheckInSeconds:
