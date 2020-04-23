@@ -2,7 +2,7 @@ version: '2.2'
 
 services:
   controller:
-    image: dtr.corp.appdynamics.com/appdynamics/enterprise-console:20.4.0-22135
+    image: dtr.corp.appdynamics.com/appdynamics/enterprise-console:latest
     container_name: controller
     ports:
     - "8080:8080"
