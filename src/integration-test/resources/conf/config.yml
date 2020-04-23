@@ -59,9 +59,12 @@ controllerInfo:
 
 # Generate a custom dashboard based on the provided template
 customDashboard:
-  enabled: false
-  dashboardName: "Dashboard"
+  enabled: true
+  dashboardName: "Log Monitor Dashboard"
   #  sslCertCheckEnabled: true
   # Update the path to the dashboard file.
-  pathToSIMDashboard: ""
-  periodicDashboardCheckInSeconds:
+  pathToSIMDashboard: "monitors/LogMonitor/SIMDashboard.json"
+  pathToNormalDashboard: "monitors/LogMonitor/APMDashboard.json"
+  periodicDashboardCheckInSeconds: 60
+
+enableHealthChecks: true # If not set, will be retrieved from "-Dappdynamics.agent.monitors.healthchecks.enable=true". Defaults to true.

@@ -8,6 +8,7 @@
 
 package com.appdynamics.extensions.logmonitor;
 
+import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import com.appdynamics.extensions.util.JsonUtils;
 import org.codehaus.jackson.JsonNode;
@@ -15,7 +16,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.appdynamics.extensions.logmonitor.IntegrationTestUtils.initializeCustomDashboardAPIService;
 import static com.appdynamics.extensions.logmonitor.IntegrationTestUtils.initializeMetricAPIService;
+import static com.appdynamics.extensions.logmonitor.IntegrationTestUtils.isDashboardPresent;
 
 /**
  * @author: Aditya Jagtiani
@@ -24,10 +27,12 @@ import static com.appdynamics.extensions.logmonitor.IntegrationTestUtils.initial
 public class MetricCheckIT {
 
     private MetricAPIService metricAPIService;
+    private CustomDashboardAPIService customDashboardAPIService;
 
     @Before
     public void setup() {
         metricAPIService = initializeMetricAPIService();
+        customDashboardAPIService = initializeCustomDashboardAPIService();
     }
 
     @Test
@@ -45,6 +50,18 @@ public class MetricCheckIT {
         }
         else {
             Assert.fail("Failed to connect to the Controller API");
+        }
+    }
+
+    @Test
+    public void checkDashboardsUploaded() {
+        boolean isDashboardPresent = false;
+        if (customDashboardAPIService != null) {
+            JsonNode allDashboardsNode = customDashboardAPIService.getAllDashboards();
+            isDashboardPresent = isDashboardPresent("Log Monitor Dashboard", allDashboardsNode);
+            Assert.assertTrue(isDashboardPresent);
+        } else {
+            Assert.assertFalse(isDashboardPresent);
         }
     }
 }

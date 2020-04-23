@@ -144,6 +144,8 @@
                                     <fileset dir="src/main/resources/conf" includes="monitor.xml" />
                                     <fileset dir="src/main/resources/conf" includes="config.yml" />
                                     <fileset dir="src/main/resources/conf" includes="logSchema.json" />
+                                    <fileset dir="src/main/resources/conf" includes="APMDashboard.json"/>
+                                    <fileset dir="src/main/resources/conf" includes="SIMDashboard.json"/>
                                 </copy>
                                 <copy todir="${target.dir}">
                                     <fileset dir="${build.directory}"
