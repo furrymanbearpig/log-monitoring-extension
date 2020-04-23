@@ -42,6 +42,10 @@ object AE_LogMonitoringExtension_IntegrationTests : BuildType({
         }
     }
 
+    artifactRules = """
+ /opt/buildAgent/work/machine-agent-logs => target/
+""".trimIndent()
+
     dependencies {
         dependency(AE_LogMonitoringExtension_Build) {
             snapshot {

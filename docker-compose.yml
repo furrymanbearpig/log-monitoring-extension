@@ -2,7 +2,7 @@ version: '2.2'
 
 services:
   controller:
-    image: dtr.corp.appdynamics.com/appdynamics/enterprise-console:latest
+    image: dtr.corp.appdynamics.com/appdynamics/enterprise-console:20.4.0-22135
     container_name: controller
     ports:
     - "8080:8080"
@@ -24,3 +24,4 @@ services:
     volumes:
     - /:/hostroot:ro
     - /var/run/docker.sock:/var/run/docker.sock
+    - /opt/buildAgent/work/machine-agent-logs:/opt/appdynamics/machine-agent/logs

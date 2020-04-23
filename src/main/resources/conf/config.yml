@@ -52,11 +52,11 @@ eventsServiceParameters:
 # The sections [customDashboard] and [controllerInfo] need to be enabled for uploading dashboard to the controller UI
 customDashboard:
   enabled: false
-  dashboardName: "File Watcher Dashboard"
+  dashboardName: "Log Monitor Dashboard"
   sslCertCheckEnabled: false
   # Update the path to the dashboard file.
-  pathToSIMDashboard: "monitors/FileWatcher/File+Watcher+Dashboard.json"
-  pathToNormalDashboard:
+  pathToSIMDashboard: "monitors/LogMonitor/SIMDashboard.json"
+  pathToNormalDashboard: "monitors/LogMonitor/APMDashboard.json"
   periodicDashboardCheckInSeconds: 300
 
 # If any of the following fields are not set, the values of the specific fields are set from the system properties of the corresponding fields as specified in the comments.
