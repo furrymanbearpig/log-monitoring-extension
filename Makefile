@@ -26,7 +26,7 @@ dockerRun: ##Spin up docker containers for MA with extension, controller and oth
 dockerStop: ##Stop and remove all containers
 	@echo ------- Stop and remove containers, images, networks and volumes -------
 	docker-compose down --rmi all -v --remove-orphans
-	docker rmi dtr.corp.appdynamics.com/appdynamics/machine-agent:latest
+	docker rmi dtr.corp.appdynamics.com/appdynamics/machine-agent:4.5.18.2430
 	docker rmi alpine
 	@echo ------- Done -------
 
