@@ -15,11 +15,11 @@ import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.PathResolver;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +32,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
-
-import static com.appdynamics.extensions.logmonitor.util.Constants.FILESIZE_METRIC_NAME;
-import static com.appdynamics.extensions.logmonitor.util.Constants.MATCHES;
-import static com.appdynamics.extensions.logmonitor.util.Constants.OCCURRENCES;
 
 /**
  * @author Aditya Jagtiani

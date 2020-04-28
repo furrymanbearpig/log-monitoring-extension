@@ -17,7 +17,6 @@ import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.processors.LogFileManager;
 import org.slf4j.Logger;
-
 import java.util.List;
 
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;

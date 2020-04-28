@@ -17,7 +17,6 @@ import com.appdynamics.extensions.logmonitor.processors.FilePointerProcessor;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
-
 import java.util.List;
 import java.util.Map;
 
