@@ -40,7 +40,7 @@ eventsServiceParameters:
   useSSL: false
 
 controllerInfo:
-  controllerHost: "${APPDYNAMICS_CONTROLLER_HOST_NAME}"
+  controllerHost: "controller"
   controllerPort: 8080
   account: "customer1"
   username: "user1"
@@ -64,7 +64,7 @@ customDashboard:
   #  sslCertCheckEnabled: true
   # Update the path to the dashboard file.
   pathToSIMDashboard: "monitors/LogMonitor/SIMDashboard.json"
-  pathToNormalDashboard: "monitors/LogMonitor/APMDashboard.json"
+  pathToNormalDashboard:
   periodicDashboardCheckInSeconds: 60
 
 enableHealthChecks: true # If not set, will be retrieved from "-Dappdynamics.agent.monitors.healthchecks.enable=true". Defaults to true.

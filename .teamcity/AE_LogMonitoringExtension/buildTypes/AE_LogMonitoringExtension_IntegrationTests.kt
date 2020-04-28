@@ -9,6 +9,7 @@ import jetbrains.buildServer.configs.kotlin.v2018_2.FailureAction
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.exec
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
+import AE_LogMonitoringExtension.triggerAfter
 
 object AE_LogMonitoringExtension_IntegrationTests : BuildType({
     uuid = "292f528a-c76d-4653-a09a-e2bf161098dc"
@@ -60,4 +61,5 @@ object AE_LogMonitoringExtension_IntegrationTests : BuildType({
     }
 
     publishCommitStatus()
+    triggerAfter(AE_LogMonitoringExtension_Build)
 })
