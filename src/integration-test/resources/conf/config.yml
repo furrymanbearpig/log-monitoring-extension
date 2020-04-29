@@ -41,7 +41,7 @@ eventsServiceParameters:
 
 controllerInfo:
   controllerHost: "controller"
-  controllerPort: 8080
+  controllerPort: "8080"
   account: "customer1"
   username: "user1"
   password: "welcome"
