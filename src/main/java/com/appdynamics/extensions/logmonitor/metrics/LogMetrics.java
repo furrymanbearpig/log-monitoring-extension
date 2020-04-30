@@ -12,8 +12,8 @@ package com.appdynamics.extensions.logmonitor.metrics;
 import com.appdynamics.extensions.logmonitor.LogEvent;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.metrics.Metric;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.math.BigInteger;
 import java.util.concurrent.ConcurrentHashMap;

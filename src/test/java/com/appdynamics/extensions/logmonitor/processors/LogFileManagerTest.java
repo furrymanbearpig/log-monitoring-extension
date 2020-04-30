@@ -20,7 +20,7 @@ import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.junit.Assert;
 import org.junit.Test;

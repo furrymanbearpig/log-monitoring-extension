@@ -6,7 +6,7 @@
 
     <groupId>log-monitoring-extension</groupId>
     <artifactId>log-monitoring-extension</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <name>Log Monitor</name>
     <description>Inspects logs and counts the number of occurrences of specified search terms</description>
 
@@ -27,28 +27,7 @@
         <dependency>
             <groupId>com.appdynamics</groupId>
             <artifactId>appd-exts-commons</artifactId>
-            <version>2.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>r09</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-            <scope>provided</scope>
+            <version>2.2.2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -68,16 +47,6 @@
             <version>1.5.6</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5</version>
-        </dependency>
-         <dependency>
-                  <groupId>com.fasterxml.jackson.core</groupId>
-                  <artifactId>jackson-databind</artifactId>
-                  <version>[2.9.10.1,)</version>
-         </dependency>
     </dependencies>
 
     <build>
@@ -144,6 +113,8 @@
                                     <fileset dir="src/main/resources/conf" includes="monitor.xml" />
                                     <fileset dir="src/main/resources/conf" includes="config.yml" />
                                     <fileset dir="src/main/resources/conf" includes="logSchema.json" />
+                                    <fileset dir="src/main/resources/conf" includes="APMDashboard.json"/>
+                                    <fileset dir="src/main/resources/conf" includes="SIMDashboard.json"/>
                                 </copy>
                                 <copy todir="${target.dir}">
                                     <fileset dir="${build.directory}"

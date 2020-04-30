@@ -21,6 +21,4 @@ public final class Constants {
     public static final String OCCURRENCES = "Occurrences";
     public static final String MATCHES = "Matches|";
     public static final String SCHEMA_NAME = "LogSchema";
-    public static final String SCHEMA_BODY = "{\"eventType\":\"logschema\",\"schema\":{\"logDisplayName\":\"string\",\"searchPattern\":\"string\",\"searchPatternDisplayName\":\"string\",\"logMatch\":\"string\",\"eventTimestamp\":\"date\",\"pickupTimestamp\":\"date\"}}";
-
 }

@@ -8,10 +8,10 @@
 
 package com.appdynamics.extensions.logmonitor.config;
 
-import java.util.concurrent.atomic.AtomicLong;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Aditya Jagtiani

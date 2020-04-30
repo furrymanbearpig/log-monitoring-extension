@@ -18,7 +18,7 @@ import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.slf4j.Logger;
 
@@ -27,10 +27,8 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.regex.Pattern;
 
 import static com.appdynamics.extensions.logmonitor.util.LogMonitorUtil.*;
 

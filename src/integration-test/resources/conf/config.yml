@@ -39,8 +39,20 @@ eventsServiceParameters:
   eventsApiKey: "4a5c3998-8914-4a57-a2f2-920cd76c08ae"
   useSSL: false
 
+# Generate a custom dashboard based on the provided template
+customDashboard:
+  enabled: true
+  dashboardName: "Log Monitor Dashboard"
+  #  sslCertCheckEnabled: true
+  # Update the path to the dashboard file.
+  pathToSIMDashboard: "monitors/LogMonitor/SIMDashboard.json"
+  pathToNormalDashboard:
+  periodicDashboardCheckInSeconds: 60
+
+# If any of the following fields are not set, the values of the specific fields are set from the system properties of the corresponding fields as specified in the comments.
+# If the system properties are not set for the field, then the data is retrieved from machine agent configFile. Please refer to ControllerInfoFactory for more details.
 controllerInfo:
-  controllerHost: "${APPDYNAMICS_CONTROLLER_HOST_NAME}"
+  controllerHost: "controller"
   controllerPort: 8080
   account: "customer1"
   username: "user1"
@@ -56,3 +68,5 @@ controllerInfo:
   applicationName: ""
   tierName: ""
   nodeName: ""
+
+enableHealthChecks: true # If not set, will be retrieved from "-Dappdynamics.agent.monitors.healthchecks.enable=true". Defaults to true.

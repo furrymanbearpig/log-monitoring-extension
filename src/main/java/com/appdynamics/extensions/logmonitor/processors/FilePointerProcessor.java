@@ -12,8 +12,8 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.logmonitor.LogMonitor;
 import com.appdynamics.extensions.logmonitor.config.FilePointer;
 import com.appdynamics.extensions.util.PathResolver;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 
 import java.io.File;
