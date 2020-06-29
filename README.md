@@ -279,7 +279,7 @@ Always feel free to fork and contribute any changes directly via [GitHub](https:
 ## Version
 |          Name            |  Version   |
 |--------------------------|------------|
-|Extension Version         |4.0.0       |
+|Extension Version         |4.0.2       |
 |Controller Compatibility  |4.0 or Later|
-|Last Update               |12/11/2019 |
+|Last Update               |28/06/2020 |
 |List of Changes           |[Change log](https://github.com/Appdynamics/log-monitoring-extension/blob/master/CHANGELOG.md) |

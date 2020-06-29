@@ -9,9 +9,9 @@ logs:
          caseSensitive: false
          printMatchedString: false
 
-metricCharacterReplacer:
-    - replace: ","
-      replaceWith: " "
+metricPathReplacements:
+  - replace: ","
+    replaceWith: " "
 # Number of concurrent threads
 numberOfThreads: 10
 

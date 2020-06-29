@@ -15,6 +15,8 @@ import com.appdynamics.extensions.logmonitor.config.Log;
 import com.appdynamics.extensions.logmonitor.config.SearchPattern;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.util.MetricPathUtils;
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
@@ -115,14 +117,17 @@ public class LogMetricsProcessor implements Runnable {
                         logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName));
 
                 if (searchPattern.getPrintMatchedString()) {
+                    String path;
                     LOGGER.info("Adding actual matches to the queue for printing for log: {}", log.getDisplayName());
                     String replacedWord = matcher.group().trim();
                     if (searchPattern.getCaseSensitive()) {
-                        metricName = currentKey + MATCHES + replacedWord;
+                        metricName = currentKey+MATCHES+METRIC_SEPARATOR+replacedWord;
+                        path = MetricPathUtils.buildMetricPath(currentKey,MATCHES,replacedWord);
                     } else {
-                        metricName = currentKey + MATCHES + WordUtils.capitalizeFully(replacedWord);
+                        metricName = currentKey+MATCHES+METRIC_SEPARATOR+WordUtils.capitalizeFully(replacedWord);
+                        path = MetricPathUtils.buildMetricPath(currentKey,MATCHES,WordUtils.capitalizeFully(replacedWord));
                     }
-                    logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + metricName);
+                    logMetrics.add(metricName, logMetrics.getMetricPrefix() + METRIC_SEPARATOR + path);
                 }
 
                 if (logEventsProcessor != null) {
