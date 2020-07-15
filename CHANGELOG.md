@@ -1,5 +1,8 @@
 Changes
 =======
+## 4.0.2 (June 2020)
+* Fixed metric printing when printMatchedString is enabled
+
 ## 4.0.1 (April 2020)
 * Upgraded to Extensions SDK v2.2.2 to resolve log4j & slf4j discrepancies
 * Extension compatible with MA 4.5.x and 20.3.x+. 

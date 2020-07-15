@@ -19,12 +19,18 @@ import com.appdynamics.extensions.logmonitor.config.SearchString;
 import com.appdynamics.extensions.logmonitor.metrics.LogMetrics;
 import com.appdynamics.extensions.logmonitor.util.LogMonitorUtil;
 import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.util.MetricPathUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.bitbucket.kienerj.OptimizedRandomAccessFile;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -37,18 +43,21 @@ import java.util.regex.Pattern;
 import static com.appdynamics.extensions.logmonitor.util.Constants.SCHEMA_NAME;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Aditya Jagtiani
  */
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(MetricPathUtils.class)
+@PowerMockIgnore({ "javax.net.ssl.*" })
 public class LogFileManagerTest {
     private LogFileManager classUnderTest;
     private FilePointerProcessor mockFilePointerProcessor = Mockito.mock(FilePointerProcessor.class);
     private MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Log Monitor",
             "Custom Metrics|Log Monitor|", Mockito.mock(File.class), Mockito.mock(AMonitorJob.class));
+
 
     @Test
     public void testProcessorWhenPrintMatchedStringIsFalse() throws Exception {
@@ -101,6 +110,7 @@ public class LogFileManagerTest {
 
     @Test
     public void testProcessorWhenPrintMatchedStringIsTrue() throws Exception {
+        PowerMockito.mockStatic(MetricPathUtils.class);
         Log log = new Log();
         log.setDisplayName("TestLog");
         log.setLogDirectory("src/test/resources/");
@@ -201,6 +211,7 @@ public class LogFileManagerTest {
 
     @Test
     public void testProcessorForRegexPatternMatch() throws Exception {
+        PowerMockito.mockStatic(MetricPathUtils.class);
         Log log = new Log();
         log.setDisplayName("TestLog");
         log.setLogDirectory("src/test/resources/");
@@ -279,6 +290,7 @@ public class LogFileManagerTest {
 
     @Test
     public void testProcessorForRegexWordMatch() throws Exception {
+        PowerMockito.mockStatic(MetricPathUtils.class);
         Log log = new Log();
         log.setDisplayName("TestLog");
         log.setLogDirectory("src/test/resources/");
@@ -341,6 +353,7 @@ public class LogFileManagerTest {
     
     @Test
     public void testLogFileAfterAdditionOfMoreLogs() throws Exception {
+        PowerMockito.mockStatic(MetricPathUtils.class);
         String originalFilePath = this.getClass().getClassLoader().getResource("test-log-1.log").getPath();
 
         String testFilename = "active-test-log.log";

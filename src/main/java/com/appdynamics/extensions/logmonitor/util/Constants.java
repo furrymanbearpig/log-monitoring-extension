@@ -19,6 +19,6 @@ public final class Constants {
     public static final String DEFAULT_METRIC_PREFIX = "Custom Metrics|Log Monitor|";
     public static final String MONITOR_NAME = "Log Monitor";
     public static final String OCCURRENCES = "Occurrences";
-    public static final String MATCHES = "Matches|";
+    public static final String MATCHES = "Matches";
     public static final String SCHEMA_NAME = "LogSchema";
 }

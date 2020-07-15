@@ -21,13 +21,21 @@ logs:
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
 # "replaceWith" takes the string to replace the matched characters
-metricCharacterReplacer:
+metricPathReplacements:
 - replace: ":"
   replaceWith: ";"
-- replace: "\\|"
+- replace: "|"
+  replaceWith: "="
+- replace: ","
   replaceWith: "#"
-- replace: "\\,"
-  replaceWith: "#"
+
+#metricCharacterReplacer:
+#  - replace: ":"
+#    replaceWith: ";"
+#  - replace: "\\|"
+#    replaceWith: "#"
+#  - replace: "\\,"
+#    replaceWith: "#"
 
 # Number of concurrent threads
 numberOfThreads: 20
@@ -78,4 +86,4 @@ controllerInfo:
   tierName: "" # -Dappdynamics.agent.tierName
   nodeName: "" # -Dappdynamics.agent.nodeName
 
-enableHealthChecks: true # If not set, will be retrieved from "-Dappdynamics.agent.monitors.healthchecks.enable=true". Defaults to true.
+enableHealthChecks: false # If not set, will be retrieved from "-Dappdynamics.agent.monitors.healthchecks.enable=true". Defaults to true.
