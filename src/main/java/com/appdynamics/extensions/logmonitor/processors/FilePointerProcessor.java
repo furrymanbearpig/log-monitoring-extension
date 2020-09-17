@@ -84,6 +84,6 @@ public class FilePointerProcessor {
     }
 
     private String getFilePointerPath() {
-        return PathResolver.resolveDirectory(LogMonitor.class).getPath() + File.separator + FILEPOINTER_FILENAME;
+        return PathResolver.resolveDirectory(LogMonitor.class).getAbsolutePath() + File.separator + FILEPOINTER_FILENAME;
     }
 }
