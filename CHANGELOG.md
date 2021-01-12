@@ -1,5 +1,12 @@
 Changes
 =======
+## 4.0.2 (June 2020)
+* Fixed metric printing when printMatchedString is enabled
+
+## 4.0.1 (April 2020)
+* Upgraded to Extensions SDK v2.2.2 to resolve log4j & slf4j discrepancies
+* Extension compatible with MA 4.5.x and 20.3.x+. 
+
 ## 4.0.0 (December 2019)
 * Added functionality to send log matches to the events server
 * Added an offset mechanism to cover data directly following the log match to be included in the event body
