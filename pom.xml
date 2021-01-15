@@ -6,7 +6,7 @@
 
     <groupId>log-monitoring-extension</groupId>
     <artifactId>log-monitoring-extension</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
     <name>Log Monitor</name>
     <description>Inspects logs and counts the number of occurrences of specified search terms</description>
 
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.appdynamics</groupId>
             <artifactId>appd-exts-commons</artifactId>
-            <version>2.2.2</version>
+            <version>2.2.4</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

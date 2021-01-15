@@ -1,5 +1,9 @@
 Changes
 =======
+
+## 4.0.3 (Jan 2021)
+* Updating to Commons 2.2.4
+
 ## 4.0.2 (June 2020)
 * Fixed metric printing when printMatchedString is enabled
 
