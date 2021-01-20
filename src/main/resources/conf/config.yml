@@ -85,3 +85,5 @@ controllerInfo:
   applicationName: "" # -Dappdynamics.agent.applicationName
   tierName: "" # -Dappdynamics.agent.tierName
   nodeName: "" # -Dappdynamics.agent.nodeName
+
+encryptionKey: "abcd"
