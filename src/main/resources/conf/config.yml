@@ -86,4 +86,4 @@ controllerInfo:
   tierName: "" # -Dappdynamics.agent.tierName
   nodeName: "" # -Dappdynamics.agent.nodeName
 
-enableHealthChecks: false # If not set, will be retrieved from "-Dappdynamics.agent.monitors.healthchecks.enable=true". Defaults to true.
+encryptionKey: "abcd"
