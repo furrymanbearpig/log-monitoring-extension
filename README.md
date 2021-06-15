@@ -116,7 +116,7 @@ The ```encoding``` field is not mandatory and can be disregarded in the config.y
 3. To get only the occurrences of a configured pattern and not the exact pattern match, simply set the ```printMatchedString``` field to false. 
 By default, an Occurrences metric is initialized with 0 for each configured pattern, and can be used to create alerts and health rules. 
 
-### 3. Metric Character Replacers
+### 3. Metric Path Replacements
 
 This section can be used to replace any characters in a match with the specified characters. They come into effect only a match is found for the 
 original pattern. We have pre-configured three metric character replacers for characters considered invalid by the AppDynamics Metric Browser. 
@@ -125,12 +125,12 @@ original pattern. We have pre-configured three metric character replacers for ch
 #Replaces characters in metric name with the specified characters.
 # "replace" takes any regular expression
 # "replaceWith" takes the string to replace the matched characters
-metricCharacterReplacer:
+metricPathReplacements:
     - replace: ":"
       replaceWith: ";"
-    - replace: "\\|"
+    - replace: "|"
       replaceWith: "#"
-    - replace: "\\,"
+    - replace: ","
       replaceWith: "#"
 ```
 
@@ -279,7 +279,8 @@ Always feel free to fork and contribute any changes directly via [GitHub](https:
 ## Version
 |          Name            |  Version   |
 |--------------------------|------------|
-|Extension Version         |4.0.3       |
-|Controller Compatibility  |4.0 or Later|
-|Last Update               |1/15/2021 |
+|Extension Version         |4.0.5       |
+|Controller Compatibility  |4.5 or Later|
+|Agent Compatibility  |4.5.13 or Later|
+|Last Update               |14/06/2021 |
 |List of Changes           |[Change log](https://github.com/Appdynamics/log-monitoring-extension/blob/master/CHANGELOG.md) |
