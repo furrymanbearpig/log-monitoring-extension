@@ -4,14 +4,12 @@
 The AppDynamics Log Monitoring Extension monitors the occurrences of configured text or regular expressions in a set of log files, and the sizes of these files. The extension works seamlessly with logs that are constantly generated and rotating from time to time. 
 
 ## Prerequisites
-In order to use this extension, you need a [Standalone JAVA Machine Agent](https://docs.appdynamics.com/display/PRO44/Java+Agent) or a [SIM Agent](https://docs.appdynamics.com/display/PRO44/Server+Visibility).
-For more details on downloading these products, please visit https://download.appdynamics.com/.
+Before the extension is installed, the prerequisites mentioned [here](https://community.appdynamics.com/t5/Knowledge-Base/Extensions-Prerequisites-Guide/ta-p/35213) need to be met. Please do not proceed with the extension installation if the specified prerequisites are not met.
 
 The extension must be deployed on the same box as the one with the log files you wish to monitor.
 
 ## Installation
 1. To build from source, clone this repository and run 'mvn clean install'. This will produce a LogMonitor-VERSION.zip in the target directory
-Alternatively, download the latest release archive from [GitHub](https://github.com/Appdynamics/log-monitoring-extension/releases)
 2. Unzip the file LogMonitor-[version].zip into `<MACHINE_AGENT_HOME>/monitors/`
 3. In the newly created directory "LogMonitor", edit the config.yml to configure the parameters (See Configuration section below)
 4. Restart the Machine Agent
@@ -174,7 +172,7 @@ Restart the machine agent once this is done.
 ### 6. Events Service
 
 Before proceeding with this step, please ensure that all the prerequisites and steps to install the AppDynamics Events Service have been met. Refer to the sub-pages under 
-https://docs.appdynamics.com/display/PRO45/Events+Service+Deployment for detailed information. 
+https://docs.appdynamics.com/display/latest/Events+Service+Deployment for detailed information. 
 
 The extension can now publish log matches to the Events Service. Use the following section in the config.yml for this feature: 
 
@@ -262,7 +260,7 @@ Always feel free to fork and contribute any changes directly via [GitHub](https:
 |          Name            |  Version   |
 |--------------------------|------------|
 |Extension Version         |4.0.5       |
-|Controller Compatibility  |4.5 or Later|
-|Agent Compatibility  |4.5.13 or Later|
 |Last Update               |14/06/2021 |
 |List of Changes           |[Change log](https://github.com/Appdynamics/log-monitoring-extension/blob/master/CHANGELOG.md) |
+
+**Note**: While extensions are maintained and supported by customers under the open-source licensing model, they interact with agents and Controllers that are subject to [AppDynamics’ maintenance and support policy](https://docs.appdynamics.com/latest/en/product-and-release-announcements/maintenance-support-for-software-versions). Some extensions have been tested with AppDynamics 4.5.13+ artifacts, but you are strongly recommended against using versions that are no longer supported.
