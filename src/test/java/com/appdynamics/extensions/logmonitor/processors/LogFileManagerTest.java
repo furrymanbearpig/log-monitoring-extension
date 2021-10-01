@@ -552,8 +552,12 @@ public class LogFileManagerTest {
 
         String filesize = getFileSize(log.getLogDirectory(), testFilename);
         FilePointer latestFilePointer = LogMonitorUtil.getLatestFilePointer(logMetrics.getFilePointers());
+        String logFilesWildcard = "./target/active-dynamic-*";
+        if  (System.getProperty("os.name").startsWith("Win")){
+            logFilesWildcard = ".\\target\\active-dynamic-*";
+        }
         Mockito.verify(mockFilePointerProcessor, times(1))
-                .updateFilePointer("./target/active-dynamic-*",
+                .updateFilePointer(logFilesWildcard,
                         latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
 
         // simulate our filepointer was updated
@@ -588,7 +592,7 @@ public class LogFileManagerTest {
         updateLogFile(testFilepath, logsToAdd);
         logMetrics = classUnderTest.processLogMetrics();
         latestFilePointer = LogMonitorUtil.getLatestFilePointer(logMetrics.getFilePointers());
-        Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer("./target/active-dynamic-*",
+        Mockito.verify(mockFilePointerProcessor, times(1)).updateFilePointer(logFilesWildcard,
                 latestFilePointer.getFilename(), latestFilePointer.getLastReadPosition(), latestFilePointer.getFileCreationTime());
     }
 
